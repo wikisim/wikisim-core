@@ -1,0 +1,12 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+    },
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "[plaintext]": {
+        "editor.suggest.showWords": false
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
+}
