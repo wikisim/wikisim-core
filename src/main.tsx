@@ -188,7 +188,7 @@ function App()
                         <br/>
                         {item.description}
                         <br/>
-                        {item.version_created_at.toLocaleString()}
+                        {item.created_at.toLocaleString()}
                         <br/>
                     </span>
                 </div>
