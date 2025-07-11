@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  <script src="https://unpkg.com/mocha/mocha.js"></script>
+  <script src="https://unpkg.com/chai/chai.js"></script>
+  <script>
+    mocha.setup('bdd');
+  </script>
+  <!-- Include your test files and source files here -->
+  <script type="module" src="../src/data/modify.browser.test.ts"></script>
+  <script type="module" src="../src/data/modify.test.ts"></script>
+  <script type="module" src="../src/utils/state_machine.test.ts"></script>
+  <!-- Add more test files as needed -->
+  <script>
+    mocha.run();
+  </script>
+</body>
+</html>
