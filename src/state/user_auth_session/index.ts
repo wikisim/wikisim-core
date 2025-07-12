@@ -3,7 +3,7 @@ import { AuthError, Session } from "@supabase/supabase-js"
 import { supabase } from "../../supabase"
 import { StateMachine } from "../../utils/state_machine"
 import { GetType, SetType } from "../root_core_state"
-import type { Store } from "../store"
+import type { CoreStore } from "../store"
 import { UserAuthSessionState, UserAuthStatus } from "./interface"
 
 
@@ -181,7 +181,7 @@ function supabase_set_user_name(set: SetType, get: GetType, user_name: string)
 }
 
 
-export function subscriptions (store: Store)
+export function subscriptions (store: CoreStore)
 {
     store.subscribe((state, previous_state) =>
     {
@@ -197,7 +197,7 @@ export function subscriptions (store: Store)
 }
 
 
-async function load_user_info(store: Store, user_id: string)
+async function load_user_info(store: CoreStore, user_id: string)
 {
     // console .log("Loading user info for user...", state.user_auth_session.session?.user.id)
     const response = await supabase.from("users")
