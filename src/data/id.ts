@@ -23,11 +23,12 @@ export class DataComponentIdMaybeVersion
         public version?: number
     ) {}
 
-    to_str(): string
+    to_str(allow_no_version?: boolean): string
     {
         if (this.version === undefined)
         {
-            throw new Error(`Version is not defined for DataComponentId "${this.id}"`)
+            if (allow_no_version) return `${this.id}`
+            else throw new Error(`Version is not defined for DataComponentId "${this.id}"`)
         }
         return `${this.id}v${this.version}`
     }

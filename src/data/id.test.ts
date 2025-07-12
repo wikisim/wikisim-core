@@ -67,4 +67,10 @@ describe("DataComponentId", () =>
         const id = new DataComponentIdMaybeVersion(123)
         expect(() => id.to_str()).to.throw("Version is not defined for DataComponentId \"123\"")
     })
+
+    it("should not error when converting to string without version if flag set", () =>
+    {
+        const id = new DataComponentIdMaybeVersion(123)
+        expect(id.to_str(true)).equals("123")
+    })
 })
