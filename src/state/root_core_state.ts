@@ -1,4 +1,4 @@
-import { UserAuthSessionState } from "./user_auth_session/state";
+import { UserAuthSessionState } from "./user_auth_session/interface"
 
 
 export interface RootCoreState
@@ -10,7 +10,7 @@ export type SetType = {
     (
         partial: RootCoreState | Partial<RootCoreState> | ((state: RootCoreState) => RootCoreState | Partial<RootCoreState>),
         replace?: false
-    ): void;
+    ): void
     (
         state: RootCoreState | ((state: RootCoreState) => RootCoreState),
         replace: true

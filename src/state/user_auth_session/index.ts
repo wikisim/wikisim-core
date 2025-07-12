@@ -4,7 +4,7 @@ import { supabase } from "../../supabase"
 import { StateMachine } from "../../utils/state_machine"
 import { GetType, SetType } from "../root_core_state"
 import type { Store } from "../store"
-import { UserAuthSessionState, UserAuthStatus } from "./state"
+import { UserAuthSessionState, UserAuthStatus } from "./interface"
 
 
 const status_allowed_transitions: Record<UserAuthStatus, UserAuthStatus[]> = {

@@ -5,7 +5,7 @@ import { DataComponent } from "./data/interface"
 import "./monkey_patch"
 import { core_store } from "./state/store"
 import { get_can_request_sign_in_with_OTP } from "./state/user_auth_session/accessor"
-import { UserAuthStatus } from "./state/user_auth_session/state"
+import { UserAuthStatus } from "./state/user_auth_session/interface"
 
 
 console.log("current location:", window.location.href)

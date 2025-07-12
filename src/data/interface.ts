@@ -44,7 +44,7 @@ export interface DataComponent
 
     // Derived properties for managing versions
     version_is_current: boolean
-    // meta data
+    // Meta data
     version_requires_save: boolean
 
     // // Not implementing yet until we get more use cases to check it against.
