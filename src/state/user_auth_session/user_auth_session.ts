@@ -2,7 +2,7 @@ import { AuthError, Session } from "@supabase/supabase-js"
 
 import { supabase } from "../../supabase"
 import { StateMachine } from "../../utils/state_machine"
-import { GetType, SetType } from "../root_state"
+import { GetType, SetType } from "../root_core_state"
 import type { Store } from "../store"
 import { UserAuthSessionState, UserAuthStatus } from "./state"
 

@@ -1,7 +1,7 @@
-import { RootState } from "../root_state"
+import { RootCoreState } from "../root_core_state"
 
 
-export function get_can_request_sign_in_with_OTP(store: RootState): { allowed: boolean, reason: string }
+export function get_can_request_sign_in_with_OTP(store: RootCoreState): { allowed: boolean, reason: string }
 {
     if (store.user_auth_session.status === "logged_out")
     {
