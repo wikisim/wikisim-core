@@ -32,8 +32,13 @@ export class DataComponentIdMaybeVersion
         return `${this.id}v${this.version}`
     }
 
-    static from_str(str: string): DataComponentIdMaybeVersion
+    static from_str(str: string | DataComponentIdMaybeVersion): DataComponentIdMaybeVersion
     {
+        if (str instanceof DataComponentIdMaybeVersion)
+        {
+            return str
+        }
+
         const [id, version] = str.includes("v")
             ? str.split("v").map(Number)
             : [Number(str), undefined]

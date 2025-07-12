@@ -48,6 +48,13 @@ describe("DataComponentId", () =>
         expect(() => DataComponentIdMaybeVersion.from_str("123vabc")).to.throw("Invalid version in DataComponentId string: 123vabc")
     })
 
+    it("should return itself when DataComponentIdMaybeVersion passed to from_str function", () =>
+    {
+        const id = new DataComponentIdMaybeVersion(123, 2)
+        const id2 = DataComponentIdMaybeVersion.from_str(id)
+        expect(id2).equals(id)
+    })
+
 
     it("should convert to string with version", () =>
     {
