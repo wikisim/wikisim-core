@@ -22,7 +22,7 @@ export function prepare_data_component_for_db (data_component: DataComponent): D
             ? data_component.datetime_range_end.toISOString()
             : null,
         dimension_ids: data_component.dimension_ids
-            ? data_component.dimension_ids.map(d => `${d.id}#${d.version}`)
+            ? data_component.dimension_ids.map(d => d.to_str())
             : null,
 
         // Will leave plain_title and plain_description as they are, because we
