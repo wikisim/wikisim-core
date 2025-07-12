@@ -7,9 +7,9 @@ import * as user_auth_session from "./user_auth_session/user_auth_session"
 
 export type Store = UseBoundStore<StoreApi<RootCoreState>>
 
-export const get_store = create<RootCoreState>()(immer((set, get) => ({
+export const core_store = create<RootCoreState>()(immer((set, get) => ({
     user_auth_session: user_auth_session.initial_state(set, get),
 })))
 
 
-user_auth_session.subscriptions(get_store)
+user_auth_session.subscriptions(core_store)

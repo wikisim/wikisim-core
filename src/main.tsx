@@ -3,7 +3,7 @@ import { useRef, useState } from "preact/hooks"
 
 import { DataComponent } from "./data/interface"
 import "./monkey_patch"
-import { get_store } from "./state/store"
+import { core_store } from "./state/store"
 import { get_can_request_sign_in_with_OTP } from "./state/user_auth_session/accessor"
 import { UserAuthStatus } from "./state/user_auth_session/state"
 
@@ -12,22 +12,22 @@ console.log("current location:", window.location.href)
 
 function App()
 {
-    const store = get_store()
+    const state = core_store()
 
-    const can_request_registration = get_can_request_sign_in_with_OTP(store)
+    const can_request_registration = get_can_request_sign_in_with_OTP(state)
 
     // History of authentication status changes
     const potential_new_status_history = {
-        status: store.user_auth_session.status,
+        status: state.user_auth_session.status,
         datetime: new Date(),
-        error: store.user_auth_session.error,
+        error: state.user_auth_session.error,
     }
     const authentication_status_history = useRef<{ status: UserAuthStatus, datetime: Date, error?: any }[]>([
         potential_new_status_history
     ])
     if (
-        (authentication_status_history.current.last()?.status !== store.user_auth_session.status)
-        || store.user_auth_session.error
+        (authentication_status_history.current.last()?.status !== state.user_auth_session.status)
+        || state.user_auth_session.error
     )
     {
         authentication_status_history.current.push(potential_new_status_history)
@@ -39,7 +39,7 @@ function App()
     const [account_email_address, set_account_email_address] = useState(default_account_email_address)
     localStorage.setItem("_testing.account_email_address", account_email_address)
 
-    const [data, set_data] = useState<DataComponent[]>([])
+    const [data, _set_data] = useState<DataComponent[]>([])
 
     return <div style={{ fontFamily: "sans-serif", padding: "16px" }}>
         Demo of WikiSim core library in a Preact app.  Demonstrates user authentication data / methods:
@@ -66,11 +66,11 @@ function App()
         </ol>
 
         <p>
-            Any error: <Highlight>{JSON.stringify(store.user_auth_session.error)}</Highlight>
+            Any error: <Highlight>{JSON.stringify(state.user_auth_session.error)}</Highlight>
         </p>
 
         <p>
-            1. current state of the user's authentication state is: <Highlight>{store.user_auth_session.status}</Highlight>
+            1. current state of the user's authentication state is: <Highlight>{state.user_auth_session.status}</Highlight>
             <br />
             <div style={{ marginLeft: "50px" }}>
                 History:
@@ -94,20 +94,20 @@ function App()
             <br/>
             <Highlight>
                 {
-                    store.user_auth_session.session?.user.email === undefined
+                    state.user_auth_session.session?.user.email === undefined
                         ? "No user email info available yet."
-                        : store.user_auth_session.session?.user.email
+                        : state.user_auth_session.session?.user.email
                 }
             </Highlight>
             <br/>
             <br/>
             <Highlight>
                 {
-                    store.user_auth_session.user_name === undefined
+                    state.user_auth_session.user_name === undefined
                         ? "No user name info available yet."
-                    : store.user_auth_session.user_name === null
+                    : state.user_auth_session.user_name === null
                         ? "No user name set yet."
-                        : store.user_auth_session.user_name
+                        : state.user_auth_session.user_name
                 }
             </Highlight>
         </p>
@@ -122,34 +122,34 @@ function App()
                     <br style={{ margin: 10 }}/>
                     Register a new user or login an existing with email: "{account_email_address}"
                     <br style={{ margin: 10 }}/>
-                    <button onClick={() => store.user_auth_session.request_OTP_sign_in(account_email_address)}>
+                    <button onClick={() => state.user_auth_session.request_OTP_sign_in(account_email_address)}>
                         Register / Login
                     </button>
                 </>}
             </>)
             : (
-                store.user_auth_session.status === "logged_out__requesting_OTP_sign_in"
+                state.user_auth_session.status === "logged_out__requesting_OTP_sign_in"
                     ? <span style={{ color: "orange" }}>Requesting registration / sign in is in progress...</span>
-                : store.user_auth_session.status === "logged_out__OTP_sign_in_request_made"
+                : state.user_auth_session.status === "logged_out__OTP_sign_in_request_made"
                     ? <span style={{ color: "green" }}>Registration / sign in request has been made, please check your email and click the link the sign in to WikiSim.</span>
                     : <span style={{ color: "red" }}>Cannot request registration / sign in: {can_request_registration.reason}</span>)
             }
         </p>
 
         <p>
-            4. {store.user_auth_session.status === "logged_in"
-                    ? <button onClick={() => store.user_auth_session.logout()}>Sign out</button>
-                    : <span style={{ color: "red" }}>Cannot sign out, user auth status is currently: {store.user_auth_session.status}</span>
+            4. {state.user_auth_session.status === "logged_in"
+                    ? <button onClick={() => state.user_auth_session.logout()}>Sign out</button>
+                    : <span style={{ color: "red" }}>Cannot sign out, user auth status is currently: {state.user_auth_session.status}</span>
                 }
         </p>
 
         <p>
-            5. {store.user_auth_session.status !== "logged_in"
+            5. {state.user_auth_session.status !== "logged_in"
                 ? <span style={{ color: "red" }}>Please sign in to see how your user will be displayed as.</span>
-                : (store.user_auth_session.user_name !== undefined
+                : (state.user_auth_session.user_name !== undefined
                     ? <span>
                         Your user will appear as: <Highlight>
-                            {store.user_auth_session.user_name || `User id ${store.user_auth_session.session?.user.id}`}
+                            {state.user_auth_session.user_name || `User id ${state.user_auth_session.session?.user.id}`}
                         </Highlight>
                     </span>
                     : <span style={{ color: "orange" }}>Loading user info...</span>
@@ -158,20 +158,20 @@ function App()
         </p>
 
         <p>
-            6. {store.user_auth_session.status !== "logged_in"
+            6. {state.user_auth_session.status !== "logged_in"
                 ? <span style={{ color: "red" }}>Please sign in to set your user name.</span>
-                : (store.user_auth_session.user_name === null
+                : (state.user_auth_session.user_name === null
                     ? <span>
                         Your user name is not set yet, please set it now:
                         <br/>
                         <input type="text" placeholder="Enter your user name"
-                            value={store.user_auth_session.user_name || ""}
-                            onBlur={e => store.user_auth_session.set_user_name((e.target as HTMLInputElement).value)}
+                            value={state.user_auth_session.user_name || ""}
+                            onBlur={e => state.user_auth_session.set_user_name((e.target as HTMLInputElement).value)}
                         />
                     </span>
-                    : (store.user_auth_session.user_name === undefined
+                    : (state.user_auth_session.user_name === undefined
                     ? <span style={{ color: "orange" }}>Loading user info...</span>
-                    : <span>User name set to: {store.user_auth_session.user_name}</span>)
+                    : <span>User name set to: {state.user_auth_session.user_name}</span>)
                 )
             }
         </p>
