@@ -8,8 +8,6 @@ import { get_can_request_sign_in_with_OTP } from "./state/user_auth_session/acce
 import { UserAuthStatus } from "./state/user_auth_session/interface"
 
 
-console.log("current location:", window.location.href)
-
 function App()
 {
     const state = core_store()

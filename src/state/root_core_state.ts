@@ -6,7 +6,7 @@ export interface RootCoreState
     user_auth_session: UserAuthSessionState
 }
 
-export type SetType = {
+export type SetCoreState = {
     (
         partial: RootCoreState | Partial<RootCoreState> | ((state: RootCoreState) => RootCoreState | Partial<RootCoreState>),
         replace?: false
@@ -16,4 +16,4 @@ export type SetType = {
         replace: true
     ): void
 }
-export type GetType = () => RootCoreState
+export type GetCoreState = () => RootCoreState

@@ -1,8 +1,8 @@
-import { AuthError, Session } from "@supabase/supabase-js"
+import { AuthError, Session, SupabaseClient } from "@supabase/supabase-js"
 
-import { supabase } from "../../supabase"
+import type { Database } from "../../supabase/interface"
 import { StateMachine } from "../../utils/state_machine"
-import { GetType, SetType } from "../root_core_state"
+import { GetCoreState, SetCoreState } from "../root_core_state"
 import type { CoreStore } from "../store"
 import { UserAuthSessionState, UserAuthStatus } from "./interface"
 
@@ -37,7 +37,7 @@ function transition_status(current: UserAuthSessionState, next: UserAuthStatus)
 
 
 
-export function initial_state(set: SetType, get: GetType): UserAuthSessionState
+export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase: () => SupabaseClient<Database>): UserAuthSessionState
 {
     const initialized = (session: Session | null) => set(root_state =>
     {
@@ -48,7 +48,7 @@ export function initial_state(set: SetType, get: GetType): UserAuthSessionState
     })
 
     // Get logged in state from supabase
-    supabase.auth.getSession().then(response =>
+    get_supabase().auth.getSession().then(response =>
     {
         // To handle DataCurator registration we could add some metadata to that
         // registration call and then if we detect that here then we either:
@@ -71,7 +71,7 @@ export function initial_state(set: SetType, get: GetType): UserAuthSessionState
             transition_status(root_state.user_auth_session, "logged_out")
             root_state.user_auth_session.session = null
 
-            supabase.auth.signOut().then(() =>
+            get_supabase().auth.signOut().then(() =>
             {
                 console.log("Supabase sign out succeeded")
             }).catch(error =>
@@ -89,18 +89,18 @@ export function initial_state(set: SetType, get: GetType): UserAuthSessionState
 
         request_OTP_sign_in: (account_email_address: string) =>
         {
-            supabase_OTP_sign_in(set, account_email_address)
+            supabase_OTP_sign_in(set, account_email_address, get_supabase)
         },
 
         set_user_name: (user_name: string) =>
         {
-            supabase_set_user_name(set, get, user_name)
+            supabase_set_user_name(set, get, user_name, get_supabase)
         }
     }
 }
 
 
-function supabase_OTP_sign_in(set: SetType, account_email_address: string)
+function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, get_supabase: () => SupabaseClient<Database>)
 {
     set(root_state =>
     {
@@ -127,7 +127,7 @@ function supabase_OTP_sign_in(set: SetType, account_email_address: string)
 
 
     // Sign in with email OTP
-    supabase.auth.signInWithOtp({
+    get_supabase().auth.signInWithOtp({
         email: account_email_address,
         options:
         {
@@ -149,13 +149,13 @@ function supabase_OTP_sign_in(set: SetType, account_email_address: string)
 }
 
 
-function supabase_set_user_name(set: SetType, get: GetType, user_name: string)
+function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name: string, get_supabase: () => SupabaseClient<Database>)
 {
     const user_id = get().user_auth_session.session?.user.id
     if (!user_id) throw new Error("Cannot set user name, user is not logged in.")
 
     // Update user name in supabase users table
-    supabase.from("users").upsert({
+    get_supabase().from("users").upsert({
         id: user_id,
         name: user_name,
     }).eq("id", user_id).select("*")
@@ -181,7 +181,7 @@ function supabase_set_user_name(set: SetType, get: GetType, user_name: string)
 }
 
 
-export function subscriptions (store: CoreStore)
+export function subscriptions (store: CoreStore, get_supabase: () => SupabaseClient<Database>)
 {
     store.subscribe((state, previous_state) =>
     {
@@ -192,16 +192,16 @@ export function subscriptions (store: CoreStore)
             && user_id !== undefined
         )
 
-        if (should_load_user_info) load_user_info(store, user_id)
+        if (should_load_user_info) load_user_info(store, user_id, get_supabase)
     })
 }
 
 
-async function load_user_info(store: CoreStore, user_id: string)
+async function load_user_info(store: CoreStore, user_id: string, get_supabase: () => SupabaseClient<Database>)
 {
     // console .log("Loading user info for user...", state.user_auth_session.session?.user.id)
-    const response = await supabase.from("users")
-        .select("*")
+    const response = await get_supabase().from("users")
+        .select("id, name")
         .eq("id", user_id)
     const entry = (response.data || [])[0]
 
