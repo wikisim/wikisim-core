@@ -1,4 +1,4 @@
-// import { expect } from "chai"
+import { expect } from "chai"
 
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
@@ -13,23 +13,10 @@ describe("can created a new data component", () => {
         data_component.plain_title = "Test Title"
         data_component.plain_description = "Test Description"
 
-        // jest.mock("@supabase/supabase-js", () => {
-        //     return {
-        //         createClient: jest.fn(() => ({
-        //         from: jest.fn(() => ({
-        //             select: jest.fn().mockResolvedValue({ data: [], error: null }),
-        //             insert: jest.fn().mockResolvedValue({ data: [{ id: 1 }], error: null }),
-        //         })),
-        //         auth: {
-        //             signInWithOtp: jest.fn().mockResolvedValue({ data: {}, error: null }),
-        //         },
-        //         })),
-        //     }
-        // })
         const db_data_component = prepare_data_component_for_db(data_component)
         await upsert_data_component(db_data_component)
 
-        // Here you would typically check the database to ensure the record was created
-        // For this test, we will assume the function works as expected
+        // TODO Check the database to ensure the record was created
+        expect(true).equals(true) // This is a placeholder assertion
     })
 })

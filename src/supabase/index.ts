@@ -6,7 +6,9 @@ const supabase_url = "https://sfkgqscbwofiphfxhnxg.supabase.co"
 const supabase_anon_key = "sb_publishable_XWsGRSpmju8qjodw4gIU8A_O_mHUR1H"
 
 
-let supabase: ReturnType<typeof createClient<Database>> | undefined = undefined
+export type GetSupabase = () => SupabaseClient<Database>
+
+let supabase: SupabaseClient<Database> | undefined = undefined
 
 export function get_supabase (): SupabaseClient<Database>
 {
@@ -23,3 +25,5 @@ export function get_supabase (): SupabaseClient<Database>
 
     return supabase
 }
+
+export type DBDataComponentsRow = Database["public"]["Tables"]["data_components"]["Row"]

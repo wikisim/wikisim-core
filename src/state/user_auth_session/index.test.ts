@@ -4,7 +4,7 @@ import { create_mock_session, create_mocked_supabase } from "../../test/mock_ses
 import { get_new_core_store } from "../store"
 
 
-describe("user_auth_session and supabase.getSession", () =>
+describe("store.user_auth_session and supabase.getSession", () =>
 {
     it("should transition status from initializing to logged_out when no session", async () =>
     {
@@ -16,7 +16,7 @@ describe("user_auth_session and supabase.getSession", () =>
         expect(user_auth_session.session).equals(undefined, "session should initialised as undefined")
         expect(user_auth_session.status).equals("initializing")
 
-        expect(mocked_supabase.auth.getSession.calledOnce).to.be.true
+        expect(mocked_supabase.auth.getSession.calledOnce).equals(true, "getSession should be called once")
 
         // Wait for the async getSession to resolve and state to update
         await mocked_supabase.auth.getSession.returnValues[0]
@@ -60,7 +60,9 @@ describe("user_auth_session and supabase.getSession", () =>
             await new Promise(resolve => setTimeout(resolve, 0))
 
             expect(mocked_supabase.from.args).to.deep.equal([["users"]], `from() called with "users"`)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             expect(mocked_supabase.from().select.args).to.deep.equal([["id, name"]], `select() called with "id, name"`)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             expect(mocked_supabase.from().select().eq.args).to.deep.equal([["id", user_id]], `eq() called with "id", "${user_id}"`)
 
             const { user_auth_session } = core_store.getState()

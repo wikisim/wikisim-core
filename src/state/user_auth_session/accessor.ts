@@ -1,4 +1,4 @@
-import { RootCoreState } from "../root_core_state"
+import { RootCoreState } from "../interface"
 
 
 export function get_can_request_sign_in_with_OTP(store: RootCoreState): { allowed: boolean, reason: string }

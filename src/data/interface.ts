@@ -1,5 +1,5 @@
 import { Database } from "../supabase/interface"
-import { DataComponentIdAndVersion } from "./id"
+import { IdAndVersion } from "./id"
 
 
 type DBEnums = Database["public"]["Enums"]
@@ -23,14 +23,13 @@ export interface DataComponent
     label_ids?: number[]
 
     value?: string
-    // Default to "number" if not set in DB
     value_type?: DBEnums["data_component_value_type"]
     datetime_range_start?: Date
     datetime_range_end?: Date
     datetime_repeat_every?: DBEnums["data_component_datetime_repeat_every"]
     units?: string
     // Dimension IDs & version numbers parsed from format: `5678v2`
-    dimension_ids?: DataComponentIdAndVersion[]
+    dimension_ids?: IdAndVersion[]
     // // Not implementing yet until we get more use cases to check it against.
     // // For now we'll add these to the bottom of the description and when it's
     // // clearer what format of display, functionality (queries to make regarding

@@ -1,8 +1,9 @@
-import { AuthError, Session, SupabaseClient } from "@supabase/supabase-js"
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+import { AuthError, Session } from "@supabase/supabase-js"
 
-import type { Database } from "../../supabase/interface"
+import { GetSupabase } from "../../supabase"
 import { StateMachine } from "../../utils/state_machine"
-import { GetCoreState, SetCoreState } from "../root_core_state"
+import { GetCoreState, SetCoreState } from "../interface"
 import type { CoreStore } from "../store"
 import { UserAuthSessionState, UserAuthStatus } from "./interface"
 
@@ -37,7 +38,7 @@ function transition_status(current: UserAuthSessionState, next: UserAuthStatus)
 
 
 
-export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase: () => SupabaseClient<Database>): UserAuthSessionState
+export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase: GetSupabase): UserAuthSessionState
 {
     const initialized = (session: Session | null) => set(root_state =>
     {
@@ -79,6 +80,7 @@ export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase
                 console.error("Supabase sign out error:", error)
                 set(root_state =>
                 {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     root_state.user_auth_session.error = error
                     return root_state
                 })
@@ -100,7 +102,7 @@ export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase
 }
 
 
-function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, get_supabase: () => SupabaseClient<Database>)
+function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, get_supabase: GetSupabase)
 {
     set(root_state =>
     {
@@ -121,6 +123,7 @@ function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, 
     {
         console.log("Supabase OTP_sign_in request (signInWithOtp) error:", error)
         transition_status(root_state.user_auth_session, "logged_out__OTP_sign_in_request_errored")
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         root_state.user_auth_session.error = error
         return root_state
     })
@@ -149,7 +152,7 @@ function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, 
 }
 
 
-function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name: string, get_supabase: () => SupabaseClient<Database>)
+function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name: string, get_supabase: GetSupabase)
 {
     const user_id = get().user_auth_session.session?.user.id
     if (!user_id) throw new Error("Cannot set user name, user is not logged in.")
@@ -181,7 +184,7 @@ function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name:
 }
 
 
-export function subscriptions (store: CoreStore, get_supabase: () => SupabaseClient<Database>)
+export function subscriptions (store: CoreStore, get_supabase: GetSupabase)
 {
     store.subscribe((state, previous_state) =>
     {
@@ -197,7 +200,7 @@ export function subscriptions (store: CoreStore, get_supabase: () => SupabaseCli
 }
 
 
-async function load_user_info(store: CoreStore, user_id: string, get_supabase: () => SupabaseClient<Database>)
+async function load_user_info(store: CoreStore, user_id: string, get_supabase: GetSupabase)
 {
     // console .log("Loading user info for user...", state.user_auth_session.session?.user.id)
     const response = await get_supabase().from("users")

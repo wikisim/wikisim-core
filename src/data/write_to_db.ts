@@ -1,12 +1,12 @@
-import { supabase } from "../supabase";
-import { DataComponent, DBDataComponentInsert, DBDataComponentRow } from "./interface";
+import { get_supabase } from "../supabase"
+import { DataComponent, DBDataComponentInsert, DBDataComponentRow } from "./interface"
 
 
 export function prepare_data_component_for_db (data_component: DataComponent): DBDataComponentInsert
 {
     const {
-        version_is_current,
-        version_requires_save,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        version_is_current, version_requires_save,
         ...rest
     } = data_component
 
@@ -42,7 +42,7 @@ export function prepare_data_component_for_db (data_component: DataComponent): D
 export function upsert_data_component (data_component: DBDataComponentInsert): Promise<DBDataComponentRow[]>
 {
     return new Promise((resolve, reject) => {
-        supabase
+        get_supabase()
             .from("data_components")
             .upsert(data_component)
             .select("*")
