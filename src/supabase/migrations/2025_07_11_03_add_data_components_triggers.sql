@@ -78,7 +78,9 @@ BEGIN
         dimension_ids,
 
         plain_title,
-        plain_description
+        plain_description,
+
+        test_run_id
     ) VALUES (
         NEW.id,
 
@@ -103,7 +105,9 @@ BEGIN
         NEW.dimension_ids,
 
         NEW.plain_title,
-        NEW.plain_description
+        NEW.plain_description,
+
+        NEW.test_run_id
     );
     RETURN NEW;
 END;

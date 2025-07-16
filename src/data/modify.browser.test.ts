@@ -1,22 +1,228 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from "chai"
 
-import { DataComponent } from "./interface"
+import { get_supabase } from "../supabase"
+import { DataComponent, DBDataComponentRow } from "./interface"
 import { new_data_component } from "./modify"
-import { prepare_data_component_for_db, upsert_data_component } from "./write_to_db"
+import { insert_data_component, prepare_data_component_for_db } from "./write_to_db"
 
 
-describe("can created a new data component", () => {
-    it("should write the data component to the database", async () => {
-        const data_component: DataComponent = new_data_component()
-        data_component.title = "<p>Test Title</p>"
-        data_component.description = "<p>Test Description</p>"
-        data_component.plain_title = "Test Title"
-        data_component.plain_description = "Test Description"
+type TABLE_NAME = "data_components_archive" | "data_components"
+
+describe("can created a new data component", () =>
+{
+    const data_component_fixture: DataComponent = Object.freeze(new_data_component())
+    let user_id: string
+
+    it("should be logged in", async () =>
+    {
+        const { data: { user }, error } = await get_supabase().auth.getUser()
+        if (error || !user) {
+            expect.fail("User is not logged in.  Please log in to run this test.")
+        } else {
+            expect(user).to.have.property("id")
+            user_id = user.id
+        }
+    })
+
+
+    it("should not have any test data components in the database", async () =>
+    {
+        const supabase = get_supabase()
+
+        const table_names: TABLE_NAME[] = ["data_components_archive", "data_components"]
+        let rows_found = 0
+        for (const table_name of table_names)
+        {
+            const response = await supabase.from(table_name)
+                .select("*")
+                .lte("id", -1) // Test data components have id < 0
+
+            if (response.error)
+            {
+                expect.fail(`Failed to query for test rows in "${table_name}": ${response.error.message}`)
+            }
+
+            if (response.data.length > 0)
+            {
+                console .warn(`Deleting test rows from "${table_name}": `, response.data)
+                await delete_test_data_in_db(table_name, response.data.length)
+            }
+
+            rows_found += response.data.length
+        }
+
+        expect(rows_found).equals(0, `There are ${rows_found} test data components in the database, they should have been deleted immediately after being created.`)
+    })
+
+
+    it("should disallowed inserting new data component when user different to that of user logged in", async function ()
+    {
+        const data_component = {
+            ...data_component_fixture,
+            // AJPtest2 user id:
+            editor_id: "c3b9d96b-dc5c-4f5f-9698-32eaf601b7f2",
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
 
         const db_data_component = prepare_data_component_for_db(data_component)
-        await upsert_data_component(db_data_component)
+        let response: DBDataComponentRow
+        try
+        {
+            response = await insert_data_component(db_data_component)
+            expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
+        }
+        catch (error)
+        {
+            expect(error).to.have.property("message").that.equals("editor_id must match your user id" )
+            return
+        }
+    })
 
-        // TODO Check the database to ensure the record was created
-        expect(true).equals(true) // This is a placeholder assertion
+
+    it("should disallowed inserting new data component when version != 1", async function ()
+    {
+        const data_component = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            version_number: 0,
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        const db_data_component = prepare_data_component_for_db(data_component)
+        let response: DBDataComponentRow
+        try
+        {
+            response = await insert_data_component(db_data_component)
+            expect.fail(`Should have failed to insert data component with version 0, but got response: ${JSON.stringify(response)}`)
+        }
+        catch (error)
+        {
+            expect(error).to.have.property("message").that.equals("Inserts into data_components are only allowed when version_number = 1. Attempted value: 0")
+            return
+        }
+    })
+
+
+    it("should disallowed inserting test data component when id > 0", async function ()
+    {
+        const data_component = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            id: 1,
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+        expect(data_component.test_run_id).to.exist
+
+        const db_data_component = prepare_data_component_for_db(data_component)
+        let response: DBDataComponentRow
+        try
+        {
+            response = await insert_data_component(db_data_component)
+            expect.fail(`Production data likely corrupted!! Should have failed to insert data component with id > 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
+        }
+        catch (error)
+        {
+            expect(error).to.have.property("message").that.equals(`p_id must be negative for test runs, got 1`)
+            // This error would be produced but we raise our own error in the function.
+            // Belt and braces approach.
+            // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
+            return
+        }
+    })
+
+
+    it("should disallowed inserting test data component when id < 0 and test_run_id not set", async () =>
+    {
+        const data_component = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            id: -1,
+            test_run_id: undefined, // Explicitly set to undefined
+        }
+
+        const db_data_component = prepare_data_component_for_db(data_component)
+        let response: DBDataComponentRow
+        try
+        {
+            response = await insert_data_component(db_data_component)
+            expect.fail(`Should have failed to insert data component with id < 0 and test_run_id not set, but got response: ${JSON.stringify(response)}`)
+        }
+        catch (error)
+        {
+            expect(error).to.have.property("message").that.equals(`p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
+            // This error would be produced but we raise our own error in the function.
+            // Belt and braces approach.
+            // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
+            return
+        }
+    })
+
+
+    it("should write the data component to the database", async function ()
+    {
+        const data_component = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            title: "<p>Test Title</p>",
+            description: "<p>Test Description</p>",
+            plain_title: "Test Title",
+            plain_description: "Test Description",
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        const db_data_component = prepare_data_component_for_db(data_component)
+        let response: DBDataComponentRow
+        try
+        {
+            console.log("Inserting data component:", db_data_component)
+            response = await insert_data_component(db_data_component)
+            // await delete_test_data_in_db("data_components_archive")
+            // await delete_test_data_in_db("data_components")
+        }
+        catch (error)
+        {
+            expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
+            return
+        }
+
+        const { created_at, ...response_without_created_at } = response
+        expect(response_without_created_at).to.deep.equals({
+            id: -1,
+            version_number: 1,
+            editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
+            // created_at: "2025-07-15T21:06:20.283898+00:00",
+            comment: null,
+            bytes_changed: 0,
+            version_type: null,
+            version_rolled_back_to: null,
+            title: "<p>Test Title</p>",
+            description: "<p>Test Description</p>",
+            label_ids: null,
+            value: null,
+            value_type: null,
+            datetime_range_start: null,
+            datetime_range_end: null,
+            datetime_repeat_every: null,
+            units: null,
+            dimension_ids: null,
+            plain_title: "Test Title",
+            plain_description: "Test Description",
+            test_run_id: data_component.test_run_id,
+        })
     })
 })
+
+
+async function delete_test_data_in_db(table_name: TABLE_NAME, data_count?: number): Promise<void>
+{
+    const supabase = get_supabase()
+    console .log(`Deleting ${data_count || ""} test rows from table "${table_name}" where id < 0`)
+    const response = await supabase.from(table_name)
+        .delete()
+        .lte("id", -1) // Test data components have id < 0
+
+    if (response.error) {
+        expect.fail(`Failed to delete test rows from "${table_name}": ${response.error.message}`)
+    }
+}

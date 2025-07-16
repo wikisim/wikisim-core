@@ -41,6 +41,8 @@ export interface DataComponent
     plain_title: string
     plain_description: string
 
+    test_run_id?: string
+
     // Derived properties for managing versions
     version_is_current: boolean
     // Meta data

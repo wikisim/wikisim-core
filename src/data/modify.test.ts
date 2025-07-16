@@ -7,7 +7,8 @@ import { new_data_component, set_fields } from "./modify"
 describe("can created a new data component", () => {
     it("should create a new data component with default values", () => {
         const data_component: DataComponent = new_data_component()
-        expect(data_component.id).equals(0)
+        expect(data_component.id).equals(-1)
+        expect(data_component.version_number).equals(1)
         expect(data_component.title).equals("")
         expect(data_component.description).equals("")
         expect(data_component.value_type).equals(undefined)

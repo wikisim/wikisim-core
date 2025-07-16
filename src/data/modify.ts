@@ -4,9 +4,16 @@ import { DataComponent } from "./interface"
 export function new_data_component(): DataComponent
 {
     return {
-        id: 0,
+        id: -1, // Use a negative ID for test data
+
+        version_number: 1,
+        editor_id: "",
+        created_at: new Date(),
+        bytes_changed: 0,
+
         title: "",
         description: "",
+
         // value: "",
         // value_type: "number",
         // datetime_range_start: new Date(),
@@ -14,12 +21,12 @@ export function new_data_component(): DataComponent
         // datetime_repeat_every: "day",
         // units: "",
         // dimension_ids: [],
+
         plain_title: "",
         plain_description: "",
-        version_number: 0,
-        editor_id: "",
-        created_at: new Date(),
-        bytes_changed: 0,
+
+        test_run_id: new Date().toISOString(), // Default to current time for test runs
+
         version_is_current: true,
         version_requires_save: true,
     }

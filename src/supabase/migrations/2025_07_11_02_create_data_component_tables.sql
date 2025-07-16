@@ -31,7 +31,15 @@ CREATE TABLE data_components
     plain_title TEXT NOT NULL,
     plain_description TEXT NOT NULL,
 
-    CONSTRAINT data_components_editor_id_fk FOREIGN KEY (editor_id) REFERENCES auth.users(id)
+    test_run_id TEXT, -- Optional field for test runs
+
+    CONSTRAINT data_components_editor_id_fk FOREIGN KEY (editor_id) REFERENCES auth.users(id),
+    CONSTRAINT data_components_test_data_id_and_run_id_consistency
+    CHECK (
+        (id < 0 AND test_run_id IS NOT NULL AND test_run_id <> '')
+        OR
+        (id > 0 AND test_run_id IS NULL)
+    )
 );
 
 
@@ -63,7 +71,15 @@ CREATE TABLE data_components_archive
     plain_title TEXT NOT NULL,
     plain_description TEXT NOT NULL,
 
+    test_run_id TEXT, -- Optional field for test runs
+
     CONSTRAINT data_components_archive_pkey PRIMARY KEY (id, version_number),
     CONSTRAINT data_components_archive_id_fkey FOREIGN KEY (id) REFERENCES data_components(id),
-    CONSTRAINT data_components_archive_editor_id_fk FOREIGN KEY (editor_id) REFERENCES auth.users(id)
+    CONSTRAINT data_components_archive_editor_id_fk FOREIGN KEY (editor_id) REFERENCES auth.users(id),
+    CONSTRAINT data_components_archive_test_data_id_and_run_id_consistency
+    CHECK (
+        (id < 0 AND test_run_id IS NOT NULL AND test_run_id <> '')
+        OR
+        (id > 0 AND test_run_id IS NULL)
+    )
 );
