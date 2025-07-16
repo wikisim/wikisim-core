@@ -25,7 +25,11 @@ export default tseslint.config(
             "@typescript-eslint/no-floating-promises": "off",
             "@typescript-eslint/no-misused-promises": "off",
             "@typescript-eslint/no-unnecessary-condition": "error",
-            "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_$" }],
+            "@typescript-eslint/no-unused-vars": ["warn", {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_",
+                "caughtErrorsIgnorePattern": "^_"
+            }],
             "@typescript-eslint/restrict-template-expressions": "off",
             "@typescript-eslint/switch-exhaustiveness-check": "warn",
             "no-constant-condition": "off",
