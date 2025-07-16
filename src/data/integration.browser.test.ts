@@ -8,7 +8,7 @@ import {
     request_data_components_history,
     RequestDataComponentsHistoryReturn,
     RequestDataComponentsReturn,
-} from "./fetch"
+} from "./fetch_from_db"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
 import { insert_data_component, update_data_component } from "./write_to_db"

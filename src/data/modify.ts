@@ -1,3 +1,5 @@
+// TODO: rename this file
+
 import { DataComponent } from "./interface"
 
 
@@ -27,7 +29,7 @@ export function new_data_component(partial: Partial<DataComponent> = {}): DataCo
 
         test_run_id: new Date().toISOString(), // Default to current time for test runs
 
-        version_is_current: true,
+        version_is_current: "yes",
         version_requires_save: true,
         ...partial,
     }

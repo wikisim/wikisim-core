@@ -1,4 +1,4 @@
-import { request_data_components } from "../../data/fetch"
+import { request_data_components } from "../../data/fetch_from_db"
 import { IdAndMaybeVersion } from "../../data/id"
 import { DataComponent } from "../../data/interface"
 import { GetSupabase } from "../../supabase"
