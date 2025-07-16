@@ -3,7 +3,7 @@ import { expect } from "chai"
 
 import { DBDataComponentRow, get_supabase } from "../supabase"
 import { deep_diff } from "../utils/deep_diff"
-import { request_data_components, request_data_components_history } from "./fetch"
+import { request_data_components, request_data_components_history, RequestDataComponentsHistoryReturn, RequestDataComponentsReturn } from "./fetch"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
 import { insert_data_component, update_data_component } from "./write_to_db"
@@ -180,11 +180,8 @@ describe("can created a new data component", () =>
         let response: DBDataComponentRow
         try
         {
-            // console .log("Inserting data component:", data_component)
             inserted_data_component = data_component
             response = await insert_data_component(data_component)
-            // await delete_test_data_in_db("data_components_archive")
-            // await delete_test_data_in_db("data_components")
         }
         catch (error)
         {
@@ -240,7 +237,6 @@ describe("can created a new data component", () =>
         let response: DBDataComponentRow
         try
         {
-            console .log("Updating data component:", data_component)
             response = await update_data_component(data_component)
         }
         catch (error)
@@ -284,8 +280,72 @@ describe("can created a new data component", () =>
         const row_from_data_components = await request_data_components(get_supabase, [-1])
         const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
         compare_db_rows(row_from_data_components.data!, [expected_response])
-        expect(row_from_data_components_archive.data!.length).equals(2)
+        expect(row_from_data_components_archive.data!.length).equals(2, "Should now have 2 rows in the archive table")
         compare_db_row(row_from_data_components_archive.data![0]!, expected_response)
+    })
+
+
+    it("should paginate over the test data components in the database", async function ()
+    {
+        expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        const data_component_2 = {
+            ...inserted_data_component,
+            id: -2,
+            editor_id: user_id,
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`
+        }
+
+        const id_1 = inserted_data_component.id
+        let id_2: number
+        let data_components_page_1: RequestDataComponentsReturn
+        let data_components_page_2: RequestDataComponentsReturn
+        let archived_data_components_page_1: RequestDataComponentsHistoryReturn
+        let archived_data_components_page_2: RequestDataComponentsHistoryReturn
+        try
+        {
+            ;({ id: id_2 } = await insert_data_component(data_component_2))
+            await update_data_component({ ...data_component_2, id: id_2, title: "<p>Test Title3</p>" })
+
+            data_components_page_1 = await request_data_components(get_supabase, [id_1, id_2], { page: 0, size: 1 })
+            data_components_page_2 = await request_data_components(get_supabase, [id_1, id_2], { page: 1, size: 1 })
+            archived_data_components_page_1 = await request_data_components_history(get_supabase, [id_1, id_2], { page: 0, size: 2 })
+            archived_data_components_page_2 = await request_data_components_history(get_supabase, [id_1, id_2], { page: 1, size: 2 })
+        }
+        catch (error)
+        {
+            expect.fail(`Error whilst insert, update, request_data_components or request_data_components_history: ${JSON.stringify(error)}`)
+        }
+
+        const get_ids_and_versions = (data: DBDataComponentRow[]) => data.map(row => ({ id: row.id, version_number: row.version_number }))
+
+        expect(data_components_page_1.data, "Expected data to be an array").to.be.an("array")
+        deep_diff(
+            get_ids_and_versions(data_components_page_1.data!),
+            // Note that we expect the smallest id to be returned first which would
+            // normally be the smallest _positive_ id, i.e. the oldest data component
+            // but as we use negative ids for the tests then it returns the largest
+            // negative id first, which is also the most recent data component
+            // rather than the oldest.
+            [{ id: id_2, version_number: 2 }],
+            "Expected first page of data"
+        )
+        deep_diff(
+            get_ids_and_versions(data_components_page_2.data!),
+            [{ id: id_1, version_number: 2 }],
+            "Expected second page of data"
+        )
+
+        expect(archived_data_components_page_1.data, "Expected archived data to be an array").to.be.an("array")
+        deep_diff(
+            get_ids_and_versions(archived_data_components_page_1.data!),
+            [{ id: id_2, version_number: 2 }, { id: id_1, version_number: 2 }],
+            "Expected first page of archived data"
+        )
+        deep_diff(
+            get_ids_and_versions(archived_data_components_page_2.data!),
+            [{ id: id_2, version_number: 1 }, { id: id_1, version_number: 1 }],
+            "Expected second page of archived data"
+        )
     })
 })
 

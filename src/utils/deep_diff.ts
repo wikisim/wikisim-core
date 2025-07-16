@@ -1,5 +1,5 @@
 
-export function deep_diff(actual: unknown, expected: unknown)
+export function deep_diff(actual: unknown, expected: unknown, message: string = ""): void
 {
     const diffs = get_deep_diffs(actual, expected, "")
 
@@ -8,7 +8,7 @@ export function deep_diff(actual: unknown, expected: unknown)
     // expect(diffs.join("\n")).equals("")
     if (diffs.length > 0)
     {
-        throw new Error(`Deep diff failed:\n${diffs.join("\n")}`)
+        throw new Error(`${message} Deep diff failed:\n${diffs.join("\n")}`)
     }
 }
 

@@ -1,7 +1,7 @@
 import { DataComponent } from "./interface"
 
 
-export function new_data_component(): DataComponent
+export function new_data_component(partial: Partial<DataComponent> = {}): DataComponent
 {
     return {
         id: -1, // Use a negative ID for test data
@@ -29,6 +29,7 @@ export function new_data_component(): DataComponent
 
         version_is_current: true,
         version_requires_save: true,
+        ...partial,
     }
 }
 
