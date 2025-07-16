@@ -2,9 +2,10 @@
 import { expect } from "chai"
 
 import { get_supabase } from "../supabase"
+import { deep_diff } from "../utils/deep_diff"
 import { DataComponent, DBDataComponentRow } from "./interface"
 import { new_data_component } from "./modify"
-import { insert_data_component, prepare_data_component_for_db } from "./write_to_db"
+import { insert_data_component, update_data_component } from "./write_to_db"
 
 
 type TABLE_NAME = "data_components_archive" | "data_components"
@@ -13,6 +14,13 @@ describe("can created a new data component", () =>
 {
     const data_component_fixture: DataComponent = Object.freeze(new_data_component())
     let user_id: string
+
+    after(async () =>
+    {
+        // Clean up test data after all tests have run
+        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components")
+    })
 
     it("should be logged in", async () =>
     {
@@ -65,11 +73,10 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        const db_data_component = prepare_data_component_for_db(data_component)
         let response: DBDataComponentRow
         try
         {
-            response = await insert_data_component(db_data_component)
+            response = await insert_data_component(data_component)
             expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -89,16 +96,15 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        const db_data_component = prepare_data_component_for_db(data_component)
         let response: DBDataComponentRow
         try
         {
-            response = await insert_data_component(db_data_component)
+            response = await insert_data_component(data_component)
             expect.fail(`Should have failed to insert data component with version 0, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
         {
-            expect(error).to.have.property("message").that.equals("Inserts into data_components are only allowed when version_number = 1. Attempted value: 0")
+            expect(error).to.have.property("message").that.equals("Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: 0")
             return
         }
     })
@@ -114,11 +120,10 @@ describe("can created a new data component", () =>
         }
         expect(data_component.test_run_id).to.exist
 
-        const db_data_component = prepare_data_component_for_db(data_component)
         let response: DBDataComponentRow
         try
         {
-            response = await insert_data_component(db_data_component)
+            response = await insert_data_component(data_component)
             expect.fail(`Production data likely corrupted!! Should have failed to insert data component with id > 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -141,11 +146,10 @@ describe("can created a new data component", () =>
             test_run_id: undefined, // Explicitly set to undefined
         }
 
-        const db_data_component = prepare_data_component_for_db(data_component)
         let response: DBDataComponentRow
         try
         {
-            response = await insert_data_component(db_data_component)
+            response = await insert_data_component(data_component)
             expect.fail(`Should have failed to insert data component with id < 0 and test_run_id not set, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -159,6 +163,7 @@ describe("can created a new data component", () =>
     })
 
 
+    let inserted_data_component: DataComponent
     it("should write the data component to the database", async function ()
     {
         const data_component = {
@@ -171,12 +176,12 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        const db_data_component = prepare_data_component_for_db(data_component)
         let response: DBDataComponentRow
         try
         {
-            console.log("Inserting data component:", db_data_component)
-            response = await insert_data_component(db_data_component)
+            // console .log("Inserting data component:", data_component)
+            inserted_data_component = data_component
+            response = await insert_data_component(data_component)
             // await delete_test_data_in_db("data_components_archive")
             // await delete_test_data_in_db("data_components")
         }
@@ -186,12 +191,11 @@ describe("can created a new data component", () =>
             return
         }
 
-        const { created_at, ...response_without_created_at } = response
-        expect(response_without_created_at).to.deep.equals({
+        const expected_response: DBDataComponentRow = {
             id: -1,
             version_number: 1,
             editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
-            // created_at: "2025-07-15T21:06:20.283898+00:00",
+            created_at: "2025-07-15T21:06:20.283898+00:00",
             comment: null,
             bytes_changed: 0,
             version_type: null,
@@ -209,7 +213,73 @@ describe("can created a new data component", () =>
             plain_title: "Test Title",
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
-        })
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { created_at: _, ...response_without_created_at } = response
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { created_at: _1, ...expected_response_without_created_at } = expected_response
+        deep_diff(response_without_created_at, expected_response_without_created_at)
+    })
+
+
+    it("should update the test data component in the database", async function ()
+    {
+        expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
+
+        const data_component = {
+            ...inserted_data_component,
+            title: "<p>Test Title2</p>",
+            plain_title: "Test Title2",
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        let response: DBDataComponentRow
+        try
+        {
+            console .log("Updating data component:", data_component)
+            response = await update_data_component(data_component)
+        }
+        catch (error)
+        {
+            expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
+            return
+        }
+
+        const expected_response: DBDataComponentRow = {
+            // The version number should have been increased by the DB
+            version_number: 2,
+            // The title and plain_title should have been updated
+            title: "<p>Test Title2</p>",
+            plain_title: "Test Title2",
+            // The test_run_id should remain the same
+            test_run_id: inserted_data_component.test_run_id!,
+
+            // All other fields should remain the same
+            id: -1,
+            editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
+            created_at: "2025-07-15T21:06:20.283898+00:00",
+            comment: null,
+            bytes_changed: 0,
+            version_type: null,
+            version_rolled_back_to: null,
+            description: "<p>Test Description</p>",
+            label_ids: null,
+            value: null,
+            value_type: null,
+            datetime_range_start: null,
+            datetime_range_end: null,
+            datetime_repeat_every: null,
+            units: null,
+            dimension_ids: null,
+            plain_description: "Test Description",
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { created_at: _, ...response_without_created_at } = response
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { created_at: _1, ...expected_response_without_created_at } = expected_response
+        deep_diff(response_without_created_at, expected_response_without_created_at)
     })
 })
 

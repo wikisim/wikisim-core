@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>Mocha Tests</title>
-  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+  <link rel="stylesheet" href="https://unpkg.com/mocha@11.7.1/mocha.css" />
 </head>
 <body>
   <div id="mocha"></div>
-  <script src="https://unpkg.com/mocha/mocha.js"></script>
-  <script src="https://unpkg.com/chai/chai.js"></script>
+  <script src="https://unpkg.com/mocha@11.7.1/mocha.js"></script>
   <script>
-    mocha.setup('bdd');
+    mocha.setup("bdd");
   </script>
   <!-- Include your test files and source files here -->
   <script type="module" src="../src/data/modify.browser.test.ts"></script>

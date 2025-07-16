@@ -1,6 +1,5 @@
 import { DBDataComponentsRow } from "../supabase"
 import { IdAndMaybeVersion } from "./id"
-
 import { DataComponent } from "./interface"
 
 

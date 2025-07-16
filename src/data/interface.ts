@@ -63,5 +63,7 @@ export interface DataComponent
 
 
 export type DBDataComponentRow = Database["public"]["Tables"]["data_components"]["Row"]
-export type DBDataComponentInsert = Database["public"]["Tables"]["data_components"]["Insert"]
-export type DBDataComponentUpdate = Database["public"]["Tables"]["data_components"]["Update"]
+export type DBDataComponentInsertRow = Database["public"]["Tables"]["data_components"]["Insert"]
+export type DBDataComponentUpdateRow = Database["public"]["Tables"]["data_components"]["Update"]
+export type DBDataComponentInsertArgs = Database["public"]["Functions"]["insert_data_component"]["Args"]
+export type DBDataComponentUpdateArgs = Database["public"]["Functions"]["update_data_component"]["Args"]

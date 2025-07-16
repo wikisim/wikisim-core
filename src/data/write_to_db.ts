@@ -1,8 +1,14 @@
 import { get_supabase } from "../supabase"
-import { DataComponent, DBDataComponentInsert, DBDataComponentRow } from "./interface"
+import {
+    DataComponent,
+    DBDataComponentInsertArgs,
+    DBDataComponentInsertRow,
+    DBDataComponentRow,
+    DBDataComponentUpdateArgs,
+} from "./interface"
 
 
-export function prepare_data_component_for_db (data_component: DataComponent): DBDataComponentInsert
+export function prepare_data_component_for_db_insert (data_component: DataComponent): DBDataComponentInsertArgs
 {
     const {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -11,7 +17,7 @@ export function prepare_data_component_for_db (data_component: DataComponent): D
     } = data_component
 
     // Prepare the data component for writing to the database
-    const obj: DBDataComponentInsert = {
+    const row: DBDataComponentInsertRow = {
         ...rest,
         created_at: data_component.created_at.toISOString(),
 
@@ -35,40 +41,63 @@ export function prepare_data_component_for_db (data_component: DataComponent): D
         plain_description: data_component.plain_description,
     }
 
-    return obj
+    const args: DBDataComponentInsertArgs = {
+        p_editor_id: row.editor_id,
+        p_comment: row.comment ?? undefined,
+        p_bytes_changed: row.bytes_changed,
+        p_version_type: row.version_type ?? undefined,
+        p_version_rolled_back_to: row.version_rolled_back_to ?? undefined,
+        p_title: row.title,
+        p_description: row.description,
+        p_label_ids: row.label_ids ?? undefined,
+        p_value: row.value ?? undefined,
+        p_value_type: row.value_type ?? undefined,
+        p_datetime_range_start: row.datetime_range_start ?? undefined,
+        p_datetime_range_end: row.datetime_range_end ?? undefined,
+        p_datetime_repeat_every: row.datetime_repeat_every ?? undefined,
+        p_units: row.units ?? undefined,
+        p_dimension_ids: row.dimension_ids ?? undefined,
+        p_plain_title: row.plain_title,
+        p_plain_description: row.plain_description,
+        p_test_run_id: row.test_run_id ?? undefined,
+        p_id: row.id,
+    }
+
+    return args
 }
 
 
-export function insert_data_component (data_component: DBDataComponentInsert): Promise<DBDataComponentRow>
+export function prepare_data_component_for_db_update (data_component: DataComponent): DBDataComponentUpdateArgs
 {
+    const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        p_test_run_id, p_id,
+        ...insert_args
+    } = prepare_data_component_for_db_insert(data_component)
+
+    const args: DBDataComponentUpdateArgs = {
+        ...insert_args,
+        p_id: data_component.id,
+        p_version_number: data_component.version_number,
+    }
+
+    return args
+}
+
+
+export function insert_data_component (data_component: DataComponent): Promise<DBDataComponentRow>
+{
+    const db_data_component = prepare_data_component_for_db_insert(data_component)
+
     if (data_component.version_number !== 1)
     {
-        throw new Error(`Inserts into data_components are only allowed when version_number = 1. Attempted value: ${data_component.version_number}`)
+        throw new Error(`Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: ${data_component.version_number}`)
     }
 
     return new Promise((resolve, reject) =>
     {
-        get_supabase().rpc("insert_data_component", {
-            p_editor_id: data_component.editor_id,
-            p_comment: data_component.comment ?? undefined,
-            p_bytes_changed: data_component.bytes_changed,
-            p_version_type: data_component.version_type ?? undefined,
-            p_version_rolled_back_to: data_component.version_rolled_back_to ?? undefined,
-            p_title: data_component.title,
-            p_description: data_component.description,
-            p_label_ids: data_component.label_ids ?? undefined,
-            p_value: data_component.value ?? undefined,
-            p_value_type: data_component.value_type ?? undefined,
-            p_datetime_range_start: data_component.datetime_range_start ?? undefined,
-            p_datetime_range_end: data_component.datetime_range_end ?? undefined,
-            p_datetime_repeat_every: data_component.datetime_repeat_every ?? undefined,
-            p_units: data_component.units ?? undefined,
-            p_dimension_ids: data_component.dimension_ids ?? undefined,
-            p_plain_title: data_component.plain_title,
-            p_plain_description: data_component.plain_description,
-            p_test_run_id: data_component.test_run_id ?? undefined,
-            p_id: data_component.id,
-        })
+        get_supabase()
+            .rpc("insert_data_component", db_data_component)
             .then(({ data, error }) =>
             {
                 if (error) reject(error)
@@ -77,39 +106,18 @@ export function insert_data_component (data_component: DBDataComponentInsert): P
     })
 }
 
-// export function update_data_component (data_component: DBDataComponentUpdate): Promise<DBDataComponentRow[]>
-// {
-//     return new Promise((resolve, reject) => {
-//         get_supabase()
-//             .rpc("update_data_component", {
-//                 p_id: data_component.id,
-//                 p_version_number: data_component.version_number,
-//                 p_editor_id: data_component.editor_id,
-//                 p_comment: data_component.comment,
-//                 p_bytes_changed: data_component.bytes_changed,
-//                 p_version_type: data_component.version_type,
-//                 p_version_rolled_back_to: data_component.version_rolled_back_to,
-//                 p_title: data_component.title,
-//                 p_description: data_component.description,
-//                 p_label_ids: data_component.label_ids,
-//                 p_value: data_component.value,
-//                 p_value_type: data_component.value_type,
-//                 p_datetime_range_start: data_component.datetime_range_start,
-//                 p_datetime_range_end: data_component.datetime_range_end,
-//                 p_datetime_repeat_every: data_component.datetime_repeat_every,
-//                 p_units: data_component.units,
-//                 p_dimension_ids: data_component.dimension_ids,
-//                 p_plain_title: data_component.plain_title,
-//                 p_plain_description: data_component.plain_description,
-//             })
-//             // .upsert(data_component)
-//             // .select("*")
-//             // .then(({ data, error }) => {
-//             //     if (error) {
-//             //         reject(error)
-//             //     } else {
-//             //         resolve(data)
-//             //     }
-//             // })
-//     })
-// }
+
+export function update_data_component (data_component: DataComponent): Promise<DBDataComponentRow>
+{
+    const db_data_component = prepare_data_component_for_db_update(data_component)
+
+    return new Promise((resolve, reject) => {
+        get_supabase()
+            .rpc("update_data_component", db_data_component)
+            .then(({ data, error }) =>
+            {
+                if (error) reject(error)
+                else resolve(data)
+            })
+    })
+}
