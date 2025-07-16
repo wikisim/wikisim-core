@@ -1,12 +1,14 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
-import { DBDataComponentArchiveRow, DBDataComponentRow, GetSupabase } from "../supabase"
+import { GetSupabase } from "../supabase"
 import { clamp } from "../utils/clamp"
+import { convert_from_db_row } from "./convert_between_db"
+import { DataComponent } from "./interface"
 
 
 export type RequestDataComponentsReturn =
 {
-    data: DBDataComponentRow[]
+    data: DataComponent[]
     error: null
 } | {
     data: null
@@ -30,13 +32,14 @@ export async function request_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            else return { data, error: null }
+            const instances = data.map(d => convert_from_db_row(d, "yes"))
+            return { data: instances, error: null }
         })
 }
 
 export type RequestDataComponentsHistoryReturn =
 {
-    data: DBDataComponentArchiveRow[]
+    data: DataComponent[]
     error: null
 } | {
     data: null
@@ -60,7 +63,8 @@ export async function request_data_components_history(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            else return { data, error: null }
+            const instances = data.map(d => convert_from_db_row(d, "maybe"))
+            return { data: instances, error: null }
         })
 }
 

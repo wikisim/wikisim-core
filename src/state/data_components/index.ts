@@ -1,7 +1,7 @@
-import { convert_from_db_row } from "../../data/convert_from_db"
 import { request_data_components } from "../../data/fetch"
 import { IdAndMaybeVersion } from "../../data/id"
-import { DBDataComponentRow, GetSupabase } from "../../supabase"
+import { DataComponent } from "../../data/interface"
+import { GetSupabase } from "../../supabase"
 import { GetCoreState, RootCoreState, SetCoreState } from "../interface"
 import { CoreStore } from "../store"
 import { DataComponentsState } from "./interface"
@@ -91,25 +91,25 @@ async function load_requested_data_components(
 function update_store_with_loaded_data_components(
     expected_ids: number[],
     core_store: CoreStore,
-    data: DBDataComponentRow[],
+    data: DataComponent[],
 )
 {
     const expected_ids_to_load: Set<number> = new Set(expected_ids)
 
     core_store.setState(state =>
     {
-        data.forEach(row =>
+        data.forEach(instance =>
         {
             // For each entry, find it's placeholder in `data_components_by_id_only`
             // and update it with the loaded data component
             const { data_component_by_id_and_maybe_version } = state.data_components
-            const entry = data_component_by_id_and_maybe_version[row.id]
+            const entry = data_component_by_id_and_maybe_version[instance.id]
             // type guard, should not happen
-            if (!entry) throw new Error(`Exception: No placeholder found for data component with ID ${row.id}`)
+            if (!entry) throw new Error(`Exception: No placeholder found for data component with ID ${instance.id}`)
 
             entry.status = "loaded"
-            entry.component = convert_from_db_row(row, true)
-            expected_ids_to_load.delete(row.id)
+            entry.component = instance
+            expected_ids_to_load.delete(instance.id)
         })
 
         expected_ids_to_load.forEach(id =>

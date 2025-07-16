@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from "chai"
 
-import { DBDataComponentRow, get_supabase } from "../supabase"
+import { get_supabase } from "../supabase"
 import { deep_diff } from "../utils/deep_diff"
-import { request_data_components, request_data_components_history, RequestDataComponentsHistoryReturn, RequestDataComponentsReturn } from "./fetch"
+import {
+    request_data_components,
+    request_data_components_history,
+    RequestDataComponentsHistoryReturn,
+    RequestDataComponentsReturn,
+} from "./fetch"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
 import { insert_data_component, update_data_component } from "./write_to_db"
@@ -74,7 +79,7 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DBDataComponentRow
+        let response: DataComponent
         try
         {
             response = await insert_data_component(data_component)
@@ -97,7 +102,7 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DBDataComponentRow
+        let response: DataComponent
         try
         {
             response = await insert_data_component(data_component)
@@ -121,7 +126,7 @@ describe("can created a new data component", () =>
         }
         expect(data_component.test_run_id).to.exist
 
-        let response: DBDataComponentRow
+        let response: DataComponent
         try
         {
             response = await insert_data_component(data_component)
@@ -147,7 +152,7 @@ describe("can created a new data component", () =>
             test_run_id: undefined, // Explicitly set to undefined
         }
 
-        let response: DBDataComponentRow
+        let response: DataComponent
         try
         {
             response = await insert_data_component(data_component)
@@ -177,7 +182,7 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DBDataComponentRow
+        let response: DataComponent
         try
         {
             inserted_data_component = data_component
@@ -188,38 +193,42 @@ describe("can created a new data component", () =>
             expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
         }
 
-        const expected_response: DBDataComponentRow = {
+        const expected_response: DataComponent = {
             id: -1,
             version_number: 1,
             editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
-            created_at: "2025-07-15T21:06:20.283898+00:00",
-            comment: null,
+            created_at: new Date(),
+            comment: undefined,
             bytes_changed: 0,
-            version_type: null,
-            version_rolled_back_to: null,
+            version_type: undefined,
+            version_rolled_back_to: undefined,
             title: "<p>Test Title</p>",
             description: "<p>Test Description</p>",
-            label_ids: null,
-            value: null,
-            value_type: null,
-            datetime_range_start: null,
-            datetime_range_end: null,
-            datetime_repeat_every: null,
-            units: null,
-            dimension_ids: null,
+            label_ids: undefined,
+            value: undefined,
+            value_type: undefined,
+            datetime_range_start: undefined,
+            datetime_range_end: undefined,
+            datetime_repeat_every: undefined,
+            units: undefined,
+            dimension_ids: undefined,
             plain_title: "Test Title",
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
+
+            version_is_current: "yes",
+            version_requires_save: false,
         }
 
-        compare_db_row(response, expected_response)
+        compare_data_components(response, expected_response, "Data component from insertion should match expected response")
 
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, [-1])
         const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
-        compare_db_rows(row_from_data_components.data!, [expected_response])
-        compare_db_rows(row_from_data_components_archive.data!, [expected_response])
+        compare_data_component_lists(row_from_data_components.data!, [expected_response], "Data components fetched fresh from data_components table should match expected")
+        const expected_archive_response: DataComponent = { ...expected_response, version_is_current: "maybe" }
+        compare_data_component_lists(row_from_data_components_archive.data!, [expected_archive_response], "Archived data components fetched fresh from data_components_archive table should match expected")
     })
 
 
@@ -229,12 +238,12 @@ describe("can created a new data component", () =>
 
         const data_component = {
             ...inserted_data_component,
-            title: "<p>Test Title2</p>",
-            plain_title: "Test Title2",
+            title: "<p>Test Second Title</p>",
+            plain_title: "Test Second Title",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DBDataComponentRow
+        let response: DataComponent
         try
         {
             response = await update_data_component(data_component)
@@ -244,47 +253,52 @@ describe("can created a new data component", () =>
             expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
         }
 
-        const expected_response: DBDataComponentRow = {
+        const expected_response: DataComponent = {
             // The version number should have been increased by the DB
             version_number: 2,
             // The title and plain_title should have been updated
-            title: "<p>Test Title2</p>",
-            plain_title: "Test Title2",
+            title: "<p>Test Second Title</p>",
+            plain_title: "Test Second Title",
             // The test_run_id should remain the same
             test_run_id: inserted_data_component.test_run_id!,
 
             // All other fields should remain the same
             id: -1,
             editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
-            created_at: "2025-07-15T21:06:20.283898+00:00",
-            comment: null,
+            created_at: new Date(),
+            comment: undefined,
             bytes_changed: 0,
-            version_type: null,
-            version_rolled_back_to: null,
+            version_type: undefined,
+            version_rolled_back_to: undefined,
             description: "<p>Test Description</p>",
-            label_ids: null,
-            value: null,
-            value_type: null,
-            datetime_range_start: null,
-            datetime_range_end: null,
-            datetime_repeat_every: null,
-            units: null,
-            dimension_ids: null,
+            label_ids: undefined,
+            value: undefined,
+            value_type: undefined,
+            datetime_range_start: undefined,
+            datetime_range_end: undefined,
+            datetime_repeat_every: undefined,
+            units: undefined,
+            dimension_ids: undefined,
             plain_description: "Test Description",
+
+            version_is_current: "yes",
+            version_requires_save: false,
         }
 
-        compare_db_row(response, expected_response)
+        compare_data_components(response, expected_response)
 
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, [-1])
         const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
-        compare_db_rows(row_from_data_components.data!, [expected_response])
+        compare_data_component_lists(row_from_data_components.data!, [expected_response])
         expect(row_from_data_components_archive.data!.length).equals(2, "Should now have 2 rows in the archive table")
-        compare_db_row(row_from_data_components_archive.data![0]!, expected_response)
+        const expected_archive_response: DataComponent = { ...expected_response, version_is_current: "maybe" }
+        compare_data_components(row_from_data_components_archive.data![0]!, expected_archive_response)
     })
 
 
+    let second_inserted_data_component: DataComponent
     it("should paginate over the test data components in the database", async function ()
     {
         expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
@@ -303,8 +317,14 @@ describe("can created a new data component", () =>
         let archived_data_components_page_2: RequestDataComponentsHistoryReturn
         try
         {
-            ;({ id: id_2 } = await insert_data_component(data_component_2))
-            await update_data_component({ ...data_component_2, id: id_2, title: "<p>Test Title3</p>" })
+            second_inserted_data_component = await insert_data_component(data_component_2)
+            id_2 = second_inserted_data_component.id
+
+            await update_data_component({
+                ...data_component_2,
+                id: id_2,
+                title: "<p>Test Second Component's Second Title</p>"
+            })
 
             data_components_page_1 = await request_data_components(get_supabase, [id_1, id_2], { page: 0, size: 1 })
             data_components_page_2 = await request_data_components(get_supabase, [id_1, id_2], { page: 1, size: 1 })
@@ -316,7 +336,7 @@ describe("can created a new data component", () =>
             expect.fail(`Error whilst insert, update, request_data_components or request_data_components_history: ${JSON.stringify(error)}`)
         }
 
-        const get_ids_and_versions = (data: DBDataComponentRow[]) => data.map(row => ({ id: row.id, version_number: row.version_number }))
+        const get_ids_and_versions = (data: DataComponent[]) => data.map(row => ({ id: row.id, version_number: row.version_number }))
 
         expect(data_components_page_1.data, "Expected data to be an array").to.be.an("array")
         deep_diff(
@@ -364,22 +384,24 @@ async function delete_test_data_in_db(table_name: TABLE_NAME, data_count?: numbe
 }
 
 
-function compare_db_row(actual: DBDataComponentRow, expected: DBDataComponentRow): void
+function compare_data_components(actual: DataComponent, expected: DataComponent, message = ""): void
 {
-    // Compare two DBDataComponentRow objects, ignoring the created_at field
-    const { created_at: _, ...actual_without_created_at } = actual
-    const { created_at: _1, ...expected_without_created_at } = expected
-    deep_diff(actual_without_created_at, expected_without_created_at)
+    // Compare two DataComponent objects
+    const { created_at: created_at_actual, ...actual_without_created_at } = actual
+    const { created_at: _, ...expected_without_created_at } = expected
+    deep_diff(actual_without_created_at, expected_without_created_at, message)
+    const ten_minutes = 10 * 60 * 1000 // 10 minutes in milliseconds
+    expect(created_at_actual.getTime()).to.be.closeTo(new Date().getTime(), ten_minutes, `${message} Created at times should be close to each other`)
 }
 
-function compare_db_rows(actual: DBDataComponentRow[], expected: DBDataComponentRow[]): void
+function compare_data_component_lists(actual: DataComponent[], expected: DataComponent[], message = ""): void
 {
-    expect(actual.length).equals(expected.length, `Expected ${expected.length} rows, but got ${actual.length}`)
+    expect(actual.length).equals(expected.length, `${message} Expected ${expected.length} rows, but got ${actual.length}`)
     actual.forEach((row, index) => {
         const expected_row = expected[index]
-        expect(expected_row, `Expected row at index ${index} to exist`).to.exist
+        expect(expected_row, `${message} Expected row at index ${index} to exist`).to.exist
         // type guard
         if (!expected_row) return
-        compare_db_row(row, expected_row)
+        compare_data_components(row, expected_row, `${message} at index ${index}`)
     })
 }
