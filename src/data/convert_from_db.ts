@@ -1,9 +1,9 @@
-import { DBDataComponentsRow } from "../supabase"
+import { DBDataComponentRow } from "../supabase"
 import { IdAndMaybeVersion } from "./id"
 import { DataComponent } from "./interface"
 
 
-export function convert_from_db_row (row: DBDataComponentsRow, version_is_current: boolean): DataComponent
+export function convert_from_db_row (row: DBDataComponentRow, version_is_current: boolean): DataComponent
 {
     return {
         id: row.id,

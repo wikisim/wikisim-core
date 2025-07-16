@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from "chai"
 
-import { get_supabase } from "../supabase"
+import { DBDataComponentRow, get_supabase } from "../supabase"
 import { deep_diff } from "../utils/deep_diff"
-import { DataComponent, DBDataComponentRow } from "./interface"
+import { request_data_components, request_data_components_history } from "./fetch"
+import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
 import { insert_data_component, update_data_component } from "./write_to_db"
 
@@ -188,7 +189,6 @@ describe("can created a new data component", () =>
         catch (error)
         {
             expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
-            return
         }
 
         const expected_response: DBDataComponentRow = {
@@ -215,11 +215,14 @@ describe("can created a new data component", () =>
             test_run_id: data_component.test_run_id,
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { created_at: _, ...response_without_created_at } = response
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { created_at: _1, ...expected_response_without_created_at } = expected_response
-        deep_diff(response_without_created_at, expected_response_without_created_at)
+        compare_db_row(response, expected_response)
+
+        // Double check that the data component was inserted correctly into
+        // both the main table and archive table
+        const row_from_data_components = await request_data_components(get_supabase, [-1])
+        const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
+        compare_db_rows(row_from_data_components.data!, [expected_response])
+        compare_db_rows(row_from_data_components_archive.data!, [expected_response])
     })
 
 
@@ -243,7 +246,6 @@ describe("can created a new data component", () =>
         catch (error)
         {
             expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
-            return
         }
 
         const expected_response: DBDataComponentRow = {
@@ -275,11 +277,15 @@ describe("can created a new data component", () =>
             plain_description: "Test Description",
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { created_at: _, ...response_without_created_at } = response
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { created_at: _1, ...expected_response_without_created_at } = expected_response
-        deep_diff(response_without_created_at, expected_response_without_created_at)
+        compare_db_row(response, expected_response)
+
+        // Double check that the data component was inserted correctly into
+        // both the main table and archive table
+        const row_from_data_components = await request_data_components(get_supabase, [-1])
+        const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
+        compare_db_rows(row_from_data_components.data!, [expected_response])
+        expect(row_from_data_components_archive.data!.length).equals(2)
+        compare_db_row(row_from_data_components_archive.data![0]!, expected_response)
     })
 })
 
@@ -295,4 +301,25 @@ async function delete_test_data_in_db(table_name: TABLE_NAME, data_count?: numbe
     if (response.error) {
         expect.fail(`Failed to delete test rows from "${table_name}": ${response.error.message}`)
     }
+}
+
+
+function compare_db_row(actual: DBDataComponentRow, expected: DBDataComponentRow): void
+{
+    // Compare two DBDataComponentRow objects, ignoring the created_at field
+    const { created_at: _, ...actual_without_created_at } = actual
+    const { created_at: _1, ...expected_without_created_at } = expected
+    deep_diff(actual_without_created_at, expected_without_created_at)
+}
+
+function compare_db_rows(actual: DBDataComponentRow[], expected: DBDataComponentRow[]): void
+{
+    expect(actual.length).equals(expected.length, `Expected ${expected.length} rows, but got ${actual.length}`)
+    actual.forEach((row, index) => {
+        const expected_row = expected[index]
+        expect(expected_row, `Expected row at index ${index} to exist`).to.exist
+        // type guard
+        if (!expected_row) return
+        compare_db_row(row, expected_row)
+    })
 }

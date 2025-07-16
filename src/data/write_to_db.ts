@@ -1,11 +1,11 @@
-import { get_supabase } from "../supabase"
 import {
-    DataComponent,
     DBDataComponentInsertArgs,
     DBDataComponentInsertRow,
     DBDataComponentRow,
     DBDataComponentUpdateArgs,
-} from "./interface"
+    get_supabase,
+} from "../supabase"
+import { DataComponent } from "./interface"
 
 
 export function prepare_data_component_for_db_insert (data_component: DataComponent): DBDataComponentInsertArgs

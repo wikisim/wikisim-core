@@ -60,10 +60,3 @@ export interface DataComponent
     // // "Number of X in Y - Alternative according to MNO organisation".
     // source_of_alternative?: string
 }
-
-
-export type DBDataComponentRow = Database["public"]["Tables"]["data_components"]["Row"]
-export type DBDataComponentInsertRow = Database["public"]["Tables"]["data_components"]["Insert"]
-export type DBDataComponentUpdateRow = Database["public"]["Tables"]["data_components"]["Update"]
-export type DBDataComponentInsertArgs = Database["public"]["Functions"]["insert_data_component"]["Args"]
-export type DBDataComponentUpdateArgs = Database["public"]["Functions"]["update_data_component"]["Args"]

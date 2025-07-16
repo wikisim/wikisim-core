@@ -1,9 +1,7 @@
-import type { PostgrestError } from "@supabase/supabase-js"
-// import type { PostgrestResponseFailure } from "@supabase/postgrest-js"
-
 import { convert_from_db_row } from "../../data/convert_from_db"
+import { request_data_components } from "../../data/fetch"
 import { IdAndMaybeVersion } from "../../data/id"
-import { DBDataComponentsRow, GetSupabase } from "../../supabase"
+import { DBDataComponentRow, GetSupabase } from "../../supabase"
 import { GetCoreState, RootCoreState, SetCoreState } from "../interface"
 import { CoreStore } from "../store"
 import { DataComponentsState } from "./interface"
@@ -93,7 +91,7 @@ async function load_requested_data_components(
 function update_store_with_loaded_data_components(
     expected_ids: number[],
     core_store: CoreStore,
-    data: DBDataComponentsRow[],
+    data: DBDataComponentRow[],
 )
 {
     const expected_ids_to_load: Set<number> = new Set(expected_ids)
@@ -131,38 +129,4 @@ function update_store_with_loaded_data_components(
         state.data_components.data_component_ids_to_load = []
         return state
     })
-}
-
-
-type RequestDataComponentsReturn =
-{
-    data: DBDataComponentsRow[]
-    error: null
-} | {
-    data: null
-    error: PostgrestError | Error
-}
-async function request_data_components(
-    get_supabase: GetSupabase,
-    ids: number[]
-): Promise<RequestDataComponentsReturn>
-{
-    let response: RequestDataComponentsReturn
-
-    try
-    {
-        response = await get_supabase()
-            .from("data_components")
-            .select("*")
-            .in("id", ids)
-    }
-    catch (err)
-    {
-        response = {
-            data: null,
-            error: err as PostgrestError | Error,
-        }
-    }
-
-    return response
 }

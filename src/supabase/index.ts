@@ -26,4 +26,10 @@ export function get_supabase (): SupabaseClient<Database>
     return supabase
 }
 
-export type DBDataComponentsRow = Database["public"]["Tables"]["data_components"]["Row"]
+export type DBDataComponentRow = Database["public"]["Tables"]["data_components"]["Row"]
+export type DBDataComponentInsertRow = Database["public"]["Tables"]["data_components"]["Insert"]
+export type DBDataComponentUpdateRow = Database["public"]["Tables"]["data_components"]["Update"]
+export type DBDataComponentInsertArgs = Database["public"]["Functions"]["insert_data_component"]["Args"]
+export type DBDataComponentUpdateArgs = Database["public"]["Functions"]["update_data_component"]["Args"]
+
+export type DBDataComponentArchiveRow = Database["public"]["Tables"]["data_components_archive"]["Row"]
