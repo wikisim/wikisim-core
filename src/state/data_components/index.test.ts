@@ -42,7 +42,9 @@ describe("store.data_components", () =>
 
             const { data_components: data_components2 } = store.getState()
             expect(data_components2.data_component_ids_to_load).to.deep.equal([async_data_component.id])
-            expect(data_components2.data_component_by_id_and_maybe_version).to.equal(data_components.data_component_by_id_and_maybe_version, "data_component_by_id_and_version should remain unchanged")
+            expect(data_components2.data_component_by_id_and_maybe_version).to.deep.equal({
+                "123": async_data_component,
+            }, "data_component_by_id_and_version should have a placeholder added")
         })
 
         // TODO test that when a data component is requested by an id, that its
