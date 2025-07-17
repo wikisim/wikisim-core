@@ -1,11 +1,13 @@
 import { render } from "preact"
-import { useRef, useState } from "preact/hooks"
+import { useEffect, useRef, useState } from "preact/hooks"
 
+import { request_data_components } from "./data/fetch_from_db"
 import { DataComponent } from "./data/interface"
 import "./monkey_patch"
 import { core_store } from "./state/store"
 import { get_can_request_sign_in_with_OTP } from "./state/user_auth_session/accessor"
 import { UserAuthStatus } from "./state/user_auth_session/interface"
+import { get_supabase } from "./supabase"
 
 
 function App()
@@ -37,7 +39,18 @@ function App()
     const [account_email_address, set_account_email_address] = useState(default_account_email_address)
     localStorage.setItem("_testing.account_email_address", account_email_address)
 
-    const [data, _set_data] = useState<DataComponent[]>([])
+
+    const [data, set_data] = useState<DataComponent[]>([])
+    useEffect(() =>
+    {
+        if (state.user_auth_session.status !== "logged_in") return
+        request_data_components(get_supabase)
+            .then(response =>
+            {
+                if (response.data) set_data(response.data)
+            })
+    }, [state.user_auth_session.status])
+
 
     return <div style={{ fontFamily: "sans-serif", padding: "16px" }}>
         Demo of WikiSim core library in a Preact app.  Demonstrates user authentication data / methods:
@@ -94,7 +107,7 @@ function App()
                 {
                     state.user_auth_session.session?.user.email === undefined
                         ? "No user email info available yet."
-                        : state.user_auth_session.session?.user.email
+                        : state.user_auth_session.session.user.email
                 }
             </Highlight>
             <br/>
@@ -163,6 +176,7 @@ function App()
                         Your user name is not set yet, please set it now:
                         <br/>
                         <input type="text" placeholder="Enter your user name"
+                            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                             value={state.user_auth_session.user_name || ""}
                             onBlur={e => state.user_auth_session.set_user_name((e.target as HTMLInputElement).value)}
                         />

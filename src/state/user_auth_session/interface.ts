@@ -21,7 +21,8 @@ export interface UserAuthSessionState
     user_name?: string | null
     session?: Session | null
     status: UserAuthStatus
-    error?: AuthError | any
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+    error?: AuthError | unknown
 
     request_OTP_sign_in: (account_email_address: string) => void
     // OTP_sign_in_request_made: () => void

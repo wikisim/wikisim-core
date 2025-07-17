@@ -16,16 +16,21 @@ export type RequestDataComponentsReturn =
 }
 export async function request_data_components(
     get_supabase: GetSupabase,
-    ids: number[],
+    ids: number[] = [],
     options: { page?: number, size?: number } = {},
 ): Promise<RequestDataComponentsReturn>
 {
+    limit_ids(ids)
     const { from, to } = get_range_from_options(options)
 
-    return get_supabase()
+    let supa = get_supabase()
         .from("data_components")
         .select("*")
-        .in("id", ids)
+
+    if (ids.length > 0) supa = supa.in("id", ids)
+    else supa = supa.gte("id", 1) // ensure we don't get any test data with negative ids
+
+    return supa
         .order("version_number", { ascending: false })
         .order("id", { ascending: true })
         .range(from, to)
@@ -51,6 +56,7 @@ export async function request_data_components_history(
     options: { page?: number, size?: number } = {},
 ): Promise<RequestDataComponentsHistoryReturn>
 {
+    limit_ids(ids)
     const { from, to } = get_range_from_options(options)
 
     return get_supabase()
@@ -95,6 +101,15 @@ export async function search_data_components(
             const instances = data.map(d => convert_from_db_row(d, "yes"))
             return { data: instances, error: null }
         })
+}
+
+
+function limit_ids(ids: number[])
+{
+    if (ids.length > 1000)
+    {
+        throw new Error("Too many IDs provided, maximum is 1000")
+    }
 }
 
 
