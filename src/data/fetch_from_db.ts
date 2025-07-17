@@ -69,6 +69,35 @@ export async function request_data_components_history(
 }
 
 
+
+export async function search_data_components(
+    get_supabase: GetSupabase,
+    search_terms: string,
+    options: { page?: number, size?: number } = {},
+): Promise<RequestDataComponentsReturn>
+{
+    const { from, to } = get_range_from_options(options)
+
+    return get_supabase()
+        .from("data_components")
+        // .select(`*, ts_rank(search_vector, plainto_tsquery('english', '${search_terms}')) as rank`)
+        // .select("*, ts_rank(search_vector, plainto_tsquery('english', ?)) as rank", { count: "exact" })
+        .select("*")
+        .textSearch("search_vector", search_terms, {
+            config: "english",
+            type: "websearch",
+        })
+        // .order("rank", { ascending: false })
+        .range(from, to)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            const instances = data.map(d => convert_from_db_row(d, "yes"))
+            return { data: instances, error: null }
+        })
+}
+
+
 function get_range_from_options(options: { page?: number, size?: number } = {}): { from: number, to: number }
 {
     let { page, size } = options

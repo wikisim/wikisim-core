@@ -5,6 +5,8 @@ alter table public.data_components_archive enable row level security;
 CREATE policy "Any user can select from data_components" on public.data_components for select using ( true );
 CREATE policy "Any user can select from data_components_archive" on public.data_components_archive for select using ( true );
 
+-- Instead of allowing insert to data_components directly,
+-- we will use a function to handle inserts.
 -- -- Allow any authenticated user to insert into data_components
 -- -- as long as they set themselves as the editor_id
 -- CREATE policy "Any authenticated user can insert normally into data_components" on public.data_components for insert with check (

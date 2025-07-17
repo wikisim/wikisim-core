@@ -1,3 +1,4 @@
+import { convert_tiptap_text_to_plain_text } from "../rich_text/editor"
 import { DBDataComponentRow } from "../supabase"
 import { IdAndMaybeVersion } from "./id"
 import { DataComponent, YesNoMaybe } from "./interface"
@@ -36,14 +37,8 @@ export function convert_to_db_row(data_component: DataComponent): DBDataComponen
             ? data_component.dimension_ids.map(d => d.to_str())
             : null,
 
-        // Will leave plain_title and plain_description as they are, because we
-        // assume:
-        // 1) the lack of @tiptap libraries in this repo means that no one is
-        // going to be displaying or editing the rich text in the title or
-        // description and thus:
-        // 2) the plain_title and plain_description will already be set.
-        plain_title: data_component.plain_title,
-        plain_description: data_component.plain_description,
+        plain_title: convert_tiptap_text_to_plain_text(data_component.title),
+        plain_description: convert_tiptap_text_to_plain_text(data_component.description),
 
         test_run_id: data_component.test_run_id ?? null,
     }

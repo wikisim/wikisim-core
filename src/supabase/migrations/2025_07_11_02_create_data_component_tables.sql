@@ -30,6 +30,7 @@ CREATE TABLE data_components
 
     plain_title TEXT NOT NULL,
     plain_description TEXT NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('english', plain_title || ' ' || plain_description)) STORED,
 
     test_run_id TEXT, -- Optional field for test runs
 
@@ -41,6 +42,18 @@ CREATE TABLE data_components
         (id > 0 AND test_run_id IS NULL)
     )
 );
+
+
+-- Create search indices for data_components
+CREATE INDEX idx_data_components_search_vector ON data_components USING GIN (search_vector);
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_data_components_plain_title_trgm
+  ON data_components USING GIN (plain_title gin_trgm_ops);
+
+CREATE INDEX idx_data_components_plain_description_trgm
+  ON data_components USING GIN (plain_description gin_trgm_ops);
+
 
 
 CREATE TABLE data_components_archive

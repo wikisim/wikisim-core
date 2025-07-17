@@ -8,6 +8,7 @@ import {
     request_data_components_history,
     RequestDataComponentsHistoryReturn,
     RequestDataComponentsReturn,
+    search_data_components
 } from "./fetch_from_db"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
@@ -19,7 +20,7 @@ type TABLE_NAME = "data_components_archive" | "data_components"
 describe("can created a new data component", () =>
 {
     const data_component_fixture: DataComponent = Object.freeze(new_data_component())
-    let user_id: string
+
 
     after(async () =>
     {
@@ -28,6 +29,7 @@ describe("can created a new data component", () =>
         await delete_test_data_in_db("data_components")
     })
 
+    let user_id: string
     it("should be logged in", async () =>
     {
         const { data: { user }, error } = await get_supabase().auth.getUser()
@@ -177,8 +179,8 @@ describe("can created a new data component", () =>
             editor_id: user_id,
             title: "<p>Test Title</p>",
             description: "<p>Test Description</p>",
-            plain_title: "Test Title",
-            plain_description: "Test Description",
+            plain_title: "Some other title",
+            plain_description: "Some other description",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
@@ -212,7 +214,9 @@ describe("can created a new data component", () =>
             datetime_repeat_every: undefined,
             units: undefined,
             dimension_ids: undefined,
+            // Should be set by the convert_to_db_row function
             plain_title: "Test Title",
+            // Should be set by the convert_to_db_row function
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
 
@@ -298,7 +302,7 @@ describe("can created a new data component", () =>
     })
 
 
-    let second_inserted_data_component: DataComponent
+    let second_updated_data_component: DataComponent
     it("should paginate over the test data components in the database", async function ()
     {
         expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
@@ -317,10 +321,9 @@ describe("can created a new data component", () =>
         let archived_data_components_page_2: RequestDataComponentsHistoryReturn
         try
         {
-            second_inserted_data_component = await insert_data_component(data_component_2)
-            id_2 = second_inserted_data_component.id
+            ({ id: id_2 } = await insert_data_component(data_component_2))
 
-            await update_data_component({
+            second_updated_data_component = await update_data_component({
                 ...data_component_2,
                 id: id_2,
                 title: "<p>Test Second Component's Second Title</p>"
@@ -365,6 +368,34 @@ describe("can created a new data component", () =>
             get_ids_and_versions(archived_data_components_page_2.data!),
             [{ id: id_2, version_number: 1 }, { id: id_1, version_number: 1 }],
             "Expected second page of archived data"
+        )
+    })
+
+
+    it("should search over title and description of data components", async function ()
+    {
+        expect(second_updated_data_component, "This test is stateful and requires the insertion and update from previous test").to.exist
+
+        let search_results: RequestDataComponentsReturn
+        let search_2_results: RequestDataComponentsReturn
+        try
+        {
+            search_results = await search_data_components(get_supabase, "second title", { page: 0, size: 10 })
+            search_2_results = await search_data_components(get_supabase, `"Second Component"`, { page: 0, size: 10 })
+        }
+        catch (error)
+        {
+            expect.fail(`Error whilst inserting second data component: ${JSON.stringify(error)}`)
+        }
+
+        expect(search_results.data, "Expected search results to be an array").to.be.an("array")
+        expect(search_2_results.data, "Expected search 2 results to be an array").to.be.an("array")
+        expect(search_results.data!.length).equals(2, "Expected search results to match both data components")
+        expect(search_2_results.data!.length).equals(1, "Expected search two results to match only the second data component")
+        deep_diff(
+            search_2_results.data!,
+            [second_updated_data_component],
+            "Expected search results to match inserted and updated second data component"
         )
     })
 })
