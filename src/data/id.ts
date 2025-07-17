@@ -1,69 +1,72 @@
 
 
-export interface IdOnly
+export class IdOnly
 {
     id: number
-    version: null
-    to_str(): string
+    constructor(id: number | string)
+    {
+        const parsed_id = typeof id === "string" ? parseInt(id, 10) : id
+        if (isNaN(parsed_id))
+        {
+            throw new Error(`id must be a valid number but got "${id}"`)
+        }
+        this.id = parsed_id
+    }
+
+    to_str(): string { return `${this.id}` }
 }
 
-export interface IdAndVersion
+
+export class IdAndVersion
 {
     id: number
     version: number
-    to_str(): string
+    constructor(id: number | string, version: number | string)
+    {
+        const parsed_id = typeof id === "string" ? parseInt(id, 10) : id
+        const parsed_version = typeof version === "string" ? parseInt(version, 10) : version
+        if (isNaN(parsed_id))
+        {
+            throw new Error(`id must be a valid number but got "${id}"`)
+        }
+        if (isNaN(parsed_version) || parsed_version < 1)
+        {
+            throw new Error(`version must be a valid number >= 1 but got "${version}"`)
+        }
+        this.id = parsed_id
+        this.version = parsed_version
+    }
+
+    to_str(): string { return `${this.id}v${this.version}` }
 }
 
 
+export type IdAndMaybeVersion = IdAndVersion | IdOnly
 
-export class IdAndMaybeVersion
+export function parse_id(instance: string | IdAndMaybeVersion, enforce_version?: false): IdAndMaybeVersion
+export function parse_id(instance: string | IdAndMaybeVersion, enforce_version?: true): IdAndVersion
+export function parse_id(instance: string | IdAndMaybeVersion, enforce_version?: boolean): IdAndMaybeVersion
 {
-    constructor(
-        public id: number,
-        public version: number | null
-    ) {}
-
-    to_str(): string
+    let instance_id: IdAndMaybeVersion
+    if (instance instanceof IdOnly || instance instanceof IdAndVersion)
     {
-        return this.version === null
-            ? `${this.id}`
-            : `${this.id}v${this.version}`
+        instance_id = instance
+    }
+    else
+    {
+        const [id, version] = instance.includes("v")
+            ? instance.split("v")
+            : [instance, undefined]
+
+        instance_id = version !== undefined
+            ? new IdAndVersion(id, version)
+            : new IdOnly(id)
     }
 
-    static from_str(instance: string | IdAndMaybeVersion, enforce_version?: false): IdOnly | IdAndVersion
-    static from_str(instance: string | IdAndMaybeVersion, enforce_version?: true): IdAndVersion
-    static from_str(instance: string | IdAndMaybeVersion, enforce_version?: boolean): IdOnly | IdAndVersion
+    if (enforce_version && instance_id instanceof IdOnly)
     {
-        let instance_id: IdAndMaybeVersion
-        if (instance instanceof IdAndMaybeVersion)
-        {
-            instance_id = instance
-        }
-        else
-        {
-            const [id, version] = instance.includes("v")
-                ? instance.split("v").map(Number)
-                : [Number(instance), undefined]
-
-            if (isNaN(id))
-            {
-                throw new Error(`Invalid id in DataComponentId string: ${instance}`)
-            }
-            if (version !== undefined && isNaN(version))
-            {
-                throw new Error(`Invalid version in DataComponentId string: ${instance}`)
-            }
-
-            instance_id = new IdAndMaybeVersion(id, version ?? null)
-        }
-
-        if (enforce_version && instance_id.version === null)
-        {
-            throw new Error(`DataComponentId string must include version: ${instance}`)
-        }
-
-        return instance_id.version === null
-            ? instance_id as IdOnly
-            : instance_id as IdAndVersion
+        throw new Error(`DataComponentId string must include version: ${instance}`)
     }
+
+    return instance_id
 }

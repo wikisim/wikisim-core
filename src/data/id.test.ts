@@ -1,66 +1,91 @@
 import { expect } from "chai"
 
-import { IdAndMaybeVersion } from "./id"
+import { IdAndVersion, IdOnly, parse_id } from "./id"
 
 
-describe("DataComponentId", () =>
+describe("IdOnly", () =>
+{
+    it("should instantiate with id and no version", () =>
+    {
+        let id = new IdOnly(123)
+        expect(id.id).equals(123)
+        expect(id).to.not.have.property("version")
+    })
+
+    it("should convert to string without version", () =>
+    {
+        const id = new IdOnly(123)
+        expect(id.to_str()).equals("123")
+    })
+})
+
+
+describe("IdAndVersion", () =>
 {
     it("should instantiate with id and version", () =>
     {
-        const id = new IdAndMaybeVersion(123, 2)
+        const id = new IdAndVersion(123, 2)
         expect(id.id).equals(123)
         expect(id.version).equals(2)
     })
 
-    it("should instantiate with id and no version", () =>
+    it("should convert to string with version", () =>
     {
-        let id = new IdAndMaybeVersion(123, null)
-        expect(id.id).equals(123)
-        expect(id.version).equals(null)
+        const id = new IdAndVersion(123, 2)
+        expect(id.to_str()).equals("123v2")
     })
+})
 
+
+describe("parse_id", () =>
+{
+    it("should parse from a string without version", () =>
+    {
+        const id = parse_id("123")
+        expect(id.id).equals(123)
+        expect(id).to.be.instanceOf(IdOnly)
+    })
 
     it("should parse from a string with version", () =>
     {
-        const id = IdAndMaybeVersion.from_str("123v2")
+        const id = parse_id("123v2")
         expect(id.id).equals(123)
-        expect(id.version).equals(2)
-    })
-
-    it("should parse from a string without version", () =>
-    {
-        const id = IdAndMaybeVersion.from_str("123")
-        expect(id.id).equals(123)
-        expect(id.version).equals(null)
+        expect(id).to.be.instanceOf(IdAndVersion)
+        expect((id as IdAndVersion).version).equals(2)
     })
 
     it("should throw an error when parsing an invalid id", () =>
     {
-        expect(() => IdAndMaybeVersion.from_str("abc")).to.throw("Invalid id in DataComponentId string: abc")
+        expect(() => parse_id("abc")).to.throw(`id must be a valid number but got "abc"`)
     })
 
     it("should throw an error when parsing an invalid version", () =>
     {
-        expect(() => IdAndMaybeVersion.from_str("123vabc")).to.throw("Invalid version in DataComponentId string: 123vabc")
+        expect(() => parse_id("123vabc")).to.throw(`version must be a valid number >= 1 but got "abc"`)
     })
 
-    it("should return itself when DataComponentIdMaybeVersion passed to from_str function", () =>
+    it("should return itself when IdOnly passed to parse_id function", () =>
     {
-        const id = new IdAndMaybeVersion(123, 2)
-        const id2 = IdAndMaybeVersion.from_str(id)
+        const id = new IdOnly(123)
+        const id2 = parse_id(id)
         expect(id2).equals(id)
     })
 
-
-    it("should convert to string with version", () =>
+    it("should return itself when IdAndVersion passed to parse_id function", () =>
     {
-        const id = new IdAndMaybeVersion(123, 2)
-        expect(id.to_str()).equals("123v2")
+        const id = new IdAndVersion(123, 2)
+        const id2 = parse_id(id)
+        expect(id2).equals(id)
     })
 
-    it("should not error when converting to string without version", () =>
+    it("should only return IdAndVersion when parse_id function given enforce_version true", () =>
     {
-        const id = new IdAndMaybeVersion(123, null)
-        expect(id.to_str()).equals("123")
+        const id = parse_id("123v2", true)
+        expect(id).to.be.instanceOf(IdAndVersion)
+    })
+
+    it("should error when parse_id function given enforce_version true and version is missing", () =>
+    {
+        expect(() => parse_id("123", true)).to.throw("DataComponentId string must include version: 123")
     })
 })

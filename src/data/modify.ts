@@ -1,14 +1,14 @@
 // TODO: rename this file
 
+import { IdAndVersion } from "./id"
 import { DataComponent } from "./interface"
 
 
 export function new_data_component(partial: Partial<DataComponent> = {}): DataComponent
 {
     return {
-        id: -1, // Use a negative ID for test data
+        id: new IdAndVersion(-1, 1), // Use a negative ID for test data
 
-        version_number: 1,
         editor_id: "",
         created_at: new Date(),
         bytes_changed: 0,

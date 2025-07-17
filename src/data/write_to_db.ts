@@ -48,8 +48,8 @@ export function prepare_data_component_for_db_update (data_component: DataCompon
 
     const args: DBDataComponentUpdateArgs = {
         ...insert_args,
-        p_id: data_component.id,
-        p_version_number: data_component.version_number,
+        p_id: data_component.id.id,
+        p_version_number: data_component.id.version,
     }
 
     return args
@@ -60,9 +60,9 @@ export function insert_data_component (data_component: DataComponent): Promise<D
 {
     const db_data_component = prepare_data_component_for_db_insert(data_component)
 
-    if (data_component.version_number !== 1)
+    if (data_component.id.version !== 1)
     {
-        throw new Error(`Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: ${data_component.version_number}`)
+        throw new Error(`Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: ${data_component.id.version}`)
     }
 
     return new Promise((resolve, reject) =>

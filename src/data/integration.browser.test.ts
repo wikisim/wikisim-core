@@ -10,6 +10,7 @@ import {
     RequestDataComponentsReturn,
     search_data_components
 } from "./fetch_from_db"
+import { IdAndVersion } from "./id"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
 import { insert_data_component, update_data_component } from "./write_to_db"
@@ -97,10 +98,12 @@ describe("can created a new data component", () =>
 
     it("should disallowed inserting new data component when version != 1", async function ()
     {
-        const data_component = {
+        const id = new IdAndVersion(data_component_fixture.id.id, 1) // Version 0 is not allowed
+        id.version = 0 // Explicitly set to 0 to test the error
+        const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
-            version_number: 0,
+            id,
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
@@ -118,12 +121,12 @@ describe("can created a new data component", () =>
     })
 
 
-    it("should disallowed inserting test data component when id > 0", async function ()
+    it("should disallowed inserting test data component when id >= 0 and test_run_id is set", async function ()
     {
-        const data_component = {
+        const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
-            id: 1,
+            id: new IdAndVersion(0, 1), // Version 1 is allowed, but id must be < 0 for test data
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
         expect(data_component.test_run_id).to.exist
@@ -132,11 +135,11 @@ describe("can created a new data component", () =>
         try
         {
             response = await insert_data_component(data_component)
-            expect.fail(`Production data likely corrupted!! Should have failed to insert data component with id > 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
+            expect.fail(`Production data at risk of corruption.  Should have failed to insert data component with id >= 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
         {
-            expect(error).to.have.property("message").that.equals(`p_id must be negative for test runs, got 1`)
+            expect(error).to.have.property("message").that.equals(`p_id must be negative for test runs, got 0`)
             // This error would be produced but we raise our own error in the function.
             // Belt and braces approach.
             // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
@@ -147,10 +150,10 @@ describe("can created a new data component", () =>
 
     it("should disallowed inserting test data component when id < 0 and test_run_id not set", async () =>
     {
-        const data_component = {
+        const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
-            id: -1,
+            id: new IdAndVersion(-1, 1), // Re-instantiating the id to be explicit about it being valid for test data
             test_run_id: undefined, // Explicitly set to undefined
         }
 
@@ -196,8 +199,7 @@ describe("can created a new data component", () =>
         }
 
         const expected_response: DataComponent = {
-            id: -1,
-            version_number: 1,
+            id: new IdAndVersion(-1, 1),
             editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
             created_at: new Date(),
             comment: undefined,
@@ -259,7 +261,7 @@ describe("can created a new data component", () =>
 
         const expected_response: DataComponent = {
             // The version number should have been increased by the DB
-            version_number: 2,
+            id: new IdAndVersion(-1, 2),
             // The title and plain_title should have been updated
             title: "<p>Test Second Title</p>",
             plain_title: "Test Second Title",
@@ -267,7 +269,6 @@ describe("can created a new data component", () =>
             test_run_id: inserted_data_component.test_run_id!,
 
             // All other fields should remain the same
-            id: -1,
             editor_id: "85347368-a8cb-431f-bcfc-1a211c20b97a",
             created_at: new Date(),
             comment: undefined,
@@ -306,15 +307,15 @@ describe("can created a new data component", () =>
     it("should paginate over the test data components in the database", async function ()
     {
         expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
-        const data_component_2 = {
+        const data_component_2: DataComponent = {
             ...inserted_data_component,
-            id: -2,
+            id: new IdAndVersion(-2, 1),
             editor_id: user_id,
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`
         }
 
         const id_1 = inserted_data_component.id
-        let id_2: number
+        let id_2: IdAndVersion
         let data_components_page_1: RequestDataComponentsReturn
         let data_components_page_2: RequestDataComponentsReturn
         let archived_data_components_page_1: RequestDataComponentsHistoryReturn
@@ -329,17 +330,18 @@ describe("can created a new data component", () =>
                 title: "<p>Test Second Component's Second Title</p>"
             })
 
-            data_components_page_1 = await request_data_components(get_supabase, [id_1, id_2], { page: 0, size: 1 })
-            data_components_page_2 = await request_data_components(get_supabase, [id_1, id_2], { page: 1, size: 1 })
-            archived_data_components_page_1 = await request_data_components_history(get_supabase, [id_1, id_2], { page: 0, size: 2 })
-            archived_data_components_page_2 = await request_data_components_history(get_supabase, [id_1, id_2], { page: 1, size: 2 })
+            const id_numbers = [id_1.id, id_2.id]
+            data_components_page_1 = await request_data_components(get_supabase, id_numbers, { page: 0, size: 1 })
+            data_components_page_2 = await request_data_components(get_supabase, id_numbers, { page: 1, size: 1 })
+            archived_data_components_page_1 = await request_data_components_history(get_supabase, id_numbers, { page: 0, size: 2 })
+            archived_data_components_page_2 = await request_data_components_history(get_supabase, id_numbers, { page: 1, size: 2 })
         }
         catch (error)
         {
             expect.fail(`Error whilst insert, update, request_data_components or request_data_components_history: ${JSON.stringify(error)}`)
         }
 
-        const get_ids_and_versions = (data: DataComponent[]) => data.map(row => ({ id: row.id, version_number: row.version_number }))
+        const get_ids_and_versions = (data: DataComponent[]) => data.map(row => ({ id: row.id.id, version_number: row.id.version }))
 
         expect(data_components_page_1.data, "Expected data to be an array").to.be.an("array")
         deep_diff(
@@ -349,24 +351,24 @@ describe("can created a new data component", () =>
             // but as we use negative ids for the tests then it returns the largest
             // negative id first, which is also the most recent data component
             // rather than the oldest.
-            [{ id: id_2, version_number: 2 }],
+            [{ id: id_2.id, version_number: 2 }],
             "Expected first page of data"
         )
         deep_diff(
             get_ids_and_versions(data_components_page_2.data!),
-            [{ id: id_1, version_number: 2 }],
+            [{ id: id_1.id, version_number: 2 }],
             "Expected second page of data"
         )
 
         expect(archived_data_components_page_1.data, "Expected archived data to be an array").to.be.an("array")
         deep_diff(
             get_ids_and_versions(archived_data_components_page_1.data!),
-            [{ id: id_2, version_number: 2 }, { id: id_1, version_number: 2 }],
+            [{ id: id_2.id, version_number: 2 }, { id: id_1.id, version_number: 2 }],
             "Expected first page of archived data"
         )
         deep_diff(
             get_ids_and_versions(archived_data_components_page_2.data!),
-            [{ id: id_2, version_number: 1 }, { id: id_1, version_number: 1 }],
+            [{ id: id_2.id, version_number: 1 }, { id: id_1.id, version_number: 1 }],
             "Expected second page of archived data"
         )
     })

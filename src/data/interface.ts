@@ -8,10 +8,9 @@ export type YesNoMaybe = "yes" | "no" | "maybe"
 
 export interface DataComponent
 {
-    id: number
+    id: IdAndVersion
 
     // For managing versions
-    version_number: number
     editor_id: string
     created_at: Date
     comment?: string

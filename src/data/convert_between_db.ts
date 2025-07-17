@@ -1,12 +1,13 @@
 import { convert_tiptap_text_to_plain_text } from "../rich_text/editor"
 import { DBDataComponentRow } from "../supabase"
-import { IdAndMaybeVersion } from "./id"
+import { IdAndVersion, parse_id } from "./id"
 import { DataComponent, YesNoMaybe } from "./interface"
 
 
 export function convert_to_db_row(data_component: DataComponent): DBDataComponentRow
 {
     const {
+        id,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         version_is_current, version_requires_save,
         ...rest
@@ -15,6 +16,9 @@ export function convert_to_db_row(data_component: DataComponent): DBDataComponen
     // Prepare the data component for writing to the database
     const row: DBDataComponentRow = {
         ...rest,
+
+        id: id.id,
+        version_number: id.version,
 
         created_at: data_component.created_at.toISOString(),
         comment: data_component.comment ?? null,
@@ -50,9 +54,8 @@ export function convert_to_db_row(data_component: DataComponent): DBDataComponen
 export function convert_from_db_row (row: DBDataComponentRow, version_is_current: YesNoMaybe): DataComponent
 {
     return {
-        id: row.id,
+        id: new IdAndVersion(row.id, row.version_number),
 
-        version_number: row.version_number,
         editor_id: row.editor_id,
         created_at: new Date(row.created_at),
         comment: row.comment ?? undefined,
@@ -70,7 +73,7 @@ export function convert_from_db_row (row: DBDataComponentRow, version_is_current
         datetime_range_end: convert_datetime(row.datetime_range_end),
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
         units: row.units ?? undefined,
-        dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => IdAndMaybeVersion.from_str(id, true)) : undefined,
+        dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => parse_id(id, true)) : undefined,
 
         plain_title: row.plain_title,
         plain_description: row.plain_description,

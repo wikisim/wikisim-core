@@ -39,7 +39,7 @@ CREATE TABLE data_components
     CHECK (
         (id < 0 AND test_run_id IS NOT NULL AND test_run_id <> '')
         OR
-        (id > 0 AND test_run_id IS NULL)
+        (id >= 0 AND test_run_id IS NULL)
     )
 );
 
@@ -93,6 +93,6 @@ CREATE TABLE data_components_archive
     CHECK (
         (id < 0 AND test_run_id IS NOT NULL AND test_run_id <> '')
         OR
-        (id > 0 AND test_run_id IS NULL)
+        (id >= 0 AND test_run_id IS NULL)
     )
 );

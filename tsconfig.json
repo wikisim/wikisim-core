@@ -10,8 +10,7 @@
       "react-dom": ["./node_modules/preact/compat/"]
     },
     "typeRoots": [
-      "./node_modules/@types",
-      "./src/data_curator/types"
+      "./node_modules/@types"
     ],
 
     /* Bundler mode */
