@@ -46,11 +46,15 @@ export function create_mocked_supabase (session_data: Session | null = null, db_
         upsert: sinon.stub().returnsThis(),
         eq: sinon.stub().returnsThis(),
         select: sinon.stub().returnsThis(),
+        in: sinon.stub().returnsThis(),
+        order: sinon.stub().returnsThis(),
+        range: sinon.stub().returnsThis(),
     }
 
     if (db_data)
     {
         const eq_stub = sinon.stub().resolves({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             data: db_data,
             error: null,
         });
@@ -64,3 +68,5 @@ export function create_mocked_supabase (session_data: Session | null = null, db_
         get_supabase: () => mocked_supabase as any as SupabaseClient<Database>,
     }
 }
+
+export type MockedSupabase = ReturnType<typeof create_mocked_supabase>["mocked_supabase"]
