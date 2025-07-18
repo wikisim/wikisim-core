@@ -60,3 +60,9 @@ export interface DataComponent
     // // "Number of X in Y - Alternative according to MNO organisation".
     // source_of_alternative?: string
 }
+
+
+export function is_data_component(data_component?: DataComponent | null): data_component is DataComponent
+{
+    return !!data_component
+}
