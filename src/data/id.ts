@@ -38,6 +38,8 @@ export class IdAndVersion
     }
 
     to_str(): string { return `${this.id}v${this.version}` }
+
+    to_str_without_version(): string { return `${this.id}` }
 }
 
 

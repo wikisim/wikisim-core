@@ -80,7 +80,6 @@ export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase
                 console.error("Supabase sign out error:", error)
                 set(root_state =>
                 {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     root_state.user_auth_session.error = error
                     return root_state
                 })
@@ -123,7 +122,6 @@ function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, 
     {
         console.log("Supabase OTP_sign_in request (signInWithOtp) error:", error)
         transition_status(root_state.user_auth_session, "logged_out__OTP_sign_in_request_errored")
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         root_state.user_auth_session.error = error
         return root_state
     })

@@ -2,7 +2,7 @@
 import { expect } from "chai"
 
 import { get_supabase } from "../supabase"
-import { deep_diff } from "../utils/deep_diff"
+import { deep_equals } from "../utils/deep_equals"
 import {
     request_data_components,
     request_data_components_history,
@@ -344,7 +344,7 @@ describe("can created a new data component", () =>
         const get_ids_and_versions = (data: DataComponent[]) => data.map(row => ({ id: row.id.id, version_number: row.id.version }))
 
         expect(data_components_page_1.data, "Expected data to be an array").to.be.an("array")
-        deep_diff(
+        deep_equals(
             get_ids_and_versions(data_components_page_1.data!),
             // Note that we expect the smallest id to be returned first which would
             // normally be the smallest _positive_ id, i.e. the oldest data component
@@ -354,19 +354,19 @@ describe("can created a new data component", () =>
             [{ id: id_2.id, version_number: 2 }],
             "Expected first page of data"
         )
-        deep_diff(
+        deep_equals(
             get_ids_and_versions(data_components_page_2.data!),
             [{ id: id_1.id, version_number: 2 }],
             "Expected second page of data"
         )
 
         expect(archived_data_components_page_1.data, "Expected archived data to be an array").to.be.an("array")
-        deep_diff(
+        deep_equals(
             get_ids_and_versions(archived_data_components_page_1.data!),
             [{ id: id_2.id, version_number: 2 }, { id: id_1.id, version_number: 2 }],
             "Expected first page of archived data"
         )
-        deep_diff(
+        deep_equals(
             get_ids_and_versions(archived_data_components_page_2.data!),
             [{ id: id_2.id, version_number: 1 }, { id: id_1.id, version_number: 1 }],
             "Expected second page of archived data"
@@ -394,7 +394,7 @@ describe("can created a new data component", () =>
         expect(search_2_results.data, "Expected search 2 results to be an array").to.be.an("array")
         expect(search_results.data!.length).equals(2, "Expected search results to match both data components")
         expect(search_2_results.data!.length).equals(1, "Expected search two results to match only the second data component")
-        deep_diff(
+        deep_equals(
             search_2_results.data!,
             [second_updated_data_component],
             "Expected search results to match inserted and updated second data component"
@@ -422,7 +422,7 @@ function compare_data_components(actual: DataComponent, expected: DataComponent,
     // Compare two DataComponent objects
     const { created_at: created_at_actual, ...actual_without_created_at } = actual
     const { created_at: _, ...expected_without_created_at } = expected
-    deep_diff(actual_without_created_at, expected_without_created_at, message)
+    deep_equals(actual_without_created_at, expected_without_created_at, message)
     const ten_minutes = 10 * 60 * 1000 // 10 minutes in milliseconds
     expect(created_at_actual.getTime()).to.be.closeTo(new Date().getTime(), ten_minutes, `${message} Created at times should be close to each other`)
 }

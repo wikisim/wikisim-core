@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { create_mock_session, create_mocked_supabase } from "../../test/mock_session"
+import { create_mock_session, create_mocked_supabase } from "../../test/mock_supabase_and_session"
 import { get_new_core_store } from "../store"
 
 
