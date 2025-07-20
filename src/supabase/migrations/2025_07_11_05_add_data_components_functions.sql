@@ -26,7 +26,11 @@ CREATE OR REPLACE FUNCTION insert_data_component(
     -- Optional id field for test runs, can only be negative
     p_id integer DEFAULT NULL
 )
-RETURNS data_components AS $$
+RETURNS data_components
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = 'public'
+AS $$
 DECLARE
     new_row data_components;
 BEGIN
@@ -92,7 +96,7 @@ BEGIN
 
     RETURN new_row;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 
 -- Grant execute to authenticated users only
@@ -148,7 +152,11 @@ CREATE OR REPLACE FUNCTION update_data_component(
     -- Optional field for test runs should not be updatable
     -- p_test_run_id text DEFAULT NULL
 )
-RETURNS data_components AS $$
+RETURNS data_components
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = 'public'
+AS $$
 DECLARE
     updated_row data_components;
 BEGIN
@@ -194,7 +202,7 @@ BEGIN
 
     RETURN updated_row;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 
 -- Grant execute to authenticated users only

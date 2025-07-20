@@ -1,13 +1,16 @@
 -- Function and trigger on before insert to data_components to ensure version_number starts at 1
 CREATE OR REPLACE FUNCTION check_inserting_data_component_version_number_starts_at_1()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = 'public'
+AS $$
 BEGIN
     IF NEW.version_number <> 1 THEN
         RAISE EXCEPTION 'Inserts into data_components are only allowed when version_number = 1. Attempted value: %', NEW.version_number;
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE TRIGGER data_components_version_number_check_trigger
 BEFORE INSERT ON data_components
@@ -17,12 +20,15 @@ EXECUTE FUNCTION check_inserting_data_component_version_number_starts_at_1();
 
 -- Function and trigger to set the created_at timestamp on insert or update
 CREATE OR REPLACE FUNCTION set_data_component_created_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = 'public'
+AS $$
 BEGIN
     NEW.created_at := now();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE TRIGGER data_components_set_created_at_trigger
 BEFORE INSERT OR UPDATE ON data_components
@@ -32,7 +38,10 @@ EXECUTE FUNCTION set_data_component_created_at();
 
 -- Function and trigger to check version_number on update and increment it
 CREATE OR REPLACE FUNCTION check_data_component_version_number()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = 'public'
+AS $$
 BEGIN
     -- Check that the provided version_number matches the current version_number + 1
     IF (OLD.version_number + 1) = NEW.version_number THEN
@@ -42,7 +51,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE TRIGGER data_components_version_number_update_check_trigger
 BEFORE UPDATE ON data_components
@@ -52,7 +61,10 @@ EXECUTE FUNCTION check_data_component_version_number();
 
 -- Function and trigger to archive the new row after insert or update
 CREATE OR REPLACE FUNCTION archive_data_component_after_insert_or_update()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = 'public'
+AS $$
 BEGIN
     INSERT INTO data_components_archive (
         id,
@@ -111,7 +123,7 @@ BEGIN
     );
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 
 CREATE TRIGGER archive_data_component_after_insert_or_update_trigger
