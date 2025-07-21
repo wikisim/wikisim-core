@@ -12,7 +12,7 @@ import {
 import { IdAndVersion } from "./id"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
-import { insert_data_component, update_data_component, UpdateDataComponentResponse } from "./write_to_db"
+import { insert_data_component, update_data_component, UpsertDataComponentResponse } from "./write_to_db"
 
 
 type TABLE_NAME = "data_components_archive" | "data_components"
@@ -81,17 +81,12 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DataComponent
-        try
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.data)
         {
-            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         }
-        catch (error)
-        {
-            expect(error).to.have.property("message").that.equals("editor_id must match your user id" )
-            return
-        }
+        expect(response.error).to.have.property("message").that.equals("editor_id must match your user id" )
     })
 
 
@@ -106,17 +101,12 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DataComponent
-        try
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.data)
         {
-            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Should have failed to insert data component with version 0, but got response: ${JSON.stringify(response)}`)
         }
-        catch (error)
-        {
-            expect(error).to.have.property("message").that.equals("Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: 0")
-            return
-        }
+        expect(response.error).to.have.property("message").that.equals("Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: 0")
     })
 
 
@@ -130,20 +120,15 @@ describe("can created a new data component", () =>
         }
         expect(data_component.test_run_id).to.exist
 
-        let response: DataComponent
-        try
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.data)
         {
-            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Production data at risk of corruption.  Should have failed to insert data component with id >= 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
-        catch (error)
-        {
-            expect(error).to.have.property("message").that.equals(`p_id must be negative for test runs, got 0`)
-            // This error would be produced but we raise our own error in the function.
-            // Belt and braces approach.
-            // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
-            return
-        }
+        expect(response.error).to.have.property("message").that.equals(`p_id must be negative for test runs, got 0`)
+        // This error would be produced but we raise our own error in the function.
+        // Belt and braces approach.
+        // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
 
@@ -156,27 +141,23 @@ describe("can created a new data component", () =>
             test_run_id: undefined, // Explicitly set to undefined
         }
 
-        let response: DataComponent
-        try
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.data)
         {
-            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Should have failed to insert data component with id < 0 and test_run_id not set, but got response: ${JSON.stringify(response)}`)
         }
-        catch (error)
-        {
-            expect(error).to.have.property("message").that.equals(`p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
-            // This error would be produced but we raise our own error in the function.
-            // Belt and braces approach.
-            // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
-            return
-        }
+
+        expect(response.error).to.have.property("message").that.equals(`p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
+        // This error would be produced but we raise our own error in the function.
+        // Belt and braces approach.
+        // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
 
     let inserted_data_component: DataComponent
     it("should write the data component to the database", async function ()
     {
-        const data_component = {
+        inserted_data_component = {
             ...data_component_fixture,
             editor_id: user_id,
             title: "<p>Test Title</p>",
@@ -186,15 +167,10 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DataComponent
-        try
+        const response = await insert_data_component(get_supabase, inserted_data_component)
+        if (response.error)
         {
-            inserted_data_component = data_component
-            response = await insert_data_component(get_supabase, data_component)
-        }
-        catch (error)
-        {
-            expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
+            expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         }
 
         const expected_response: DataComponent = {
@@ -219,13 +195,13 @@ describe("can created a new data component", () =>
             plain_title: "Test Title",
             // Should be set by the convert_to_db_row function
             plain_description: "Test Description",
-            test_run_id: data_component.test_run_id,
+            test_run_id: inserted_data_component.test_run_id,
 
             version_is_current: "yes",
             version_requires_save: false,
         }
 
-        compare_data_components(response, expected_response, "Data component from insertion should match expected response")
+        compare_data_components(response.data, expected_response, "Data component from insertion should match expected response")
 
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
@@ -298,7 +274,7 @@ describe("can created a new data component", () =>
     })
 
 
-    let second_updated_data_component: UpdateDataComponentResponse
+    let second_updated_data_component: UpsertDataComponentResponse
     it("should paginate over the test data components in the database", async function ()
     {
         expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
@@ -310,9 +286,13 @@ describe("can created a new data component", () =>
         }
 
         const id_1 = inserted_data_component.id
-        let id_2: IdAndVersion
 
-        ({ id: id_2 } = await insert_data_component(get_supabase, data_component_2))
+        const response = await insert_data_component(get_supabase, data_component_2)
+        if (response.error)
+        {
+            expect.fail(`Failed to insert second data component: ${JSON.stringify(response.error)}`)
+        }
+        const id_2 = response.data.id
 
         second_updated_data_component = await update_data_component(get_supabase, {
             ...data_component_2,

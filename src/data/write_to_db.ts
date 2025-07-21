@@ -57,36 +57,36 @@ export function prepare_data_component_for_db_update (data_component: DataCompon
 }
 
 
-export function insert_data_component (get_supabase: GetSupabase, data_component: DataComponent): Promise<DataComponent>
+export type UpsertDataComponentResponse = {
+    data: null;
+    error: Error | PostgrestError;
+} | {
+    data: DataComponent;
+    error: null;
+}
+export function insert_data_component (get_supabase: GetSupabase, data_component: DataComponent): PromiseLike<UpsertDataComponentResponse>
 {
     const db_data_component = prepare_data_component_for_db_insert(data_component)
 
     if (data_component.id.version !== 1)
     {
-        throw new Error(`Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: ${data_component.id.version}`)
+        return Promise.resolve({
+            data: null,
+            error: new Error(`Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: ${data_component.id.version}`)
+        })
     }
 
-    return new Promise((resolve, reject) =>
-    {
-        get_supabase()
-            .rpc("insert_data_component", db_data_component)
-            .then(({ data, error }) =>
-            {
-                if (error) reject(error)
-                else resolve(convert_from_db_row(data, "yes"))
-            })
-    })
+    return get_supabase()
+        .rpc("insert_data_component", db_data_component)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            else return { data: convert_from_db_row(data, "yes"), error: null }
+        })
 }
 
 
-export type UpdateDataComponentResponse = {
-    data: null;
-    error: PostgrestError;
-} | {
-    data: DataComponent;
-    error: null;
-}
-export function update_data_component (get_supabase: GetSupabase, data_component: DataComponent): PromiseLike<UpdateDataComponentResponse>
+export function update_data_component (get_supabase: GetSupabase, data_component: DataComponent): PromiseLike<UpsertDataComponentResponse>
 {
     const db_data_component = prepare_data_component_for_db_update(data_component)
 
