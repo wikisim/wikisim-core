@@ -156,10 +156,11 @@ function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name:
     if (!user_id) throw new Error("Cannot set user name, user is not logged in.")
 
     // Update user name in supabase users table
-    get_supabase().from("users").upsert({
-        id: user_id,
-        name: user_name,
-    }).eq("id", user_id).select("*")
+    get_supabase()
+        .from("users")
+        .upsert({ id: user_id, name: user_name })
+        .eq("id", user_id)
+        .select("*")
     .then(({ data, error }) =>
     {
         const entry = (data || [])[0]
@@ -187,10 +188,11 @@ export function subscriptions (store: CoreStore, get_supabase: GetSupabase)
     store.subscribe((state, previous_state) =>
     {
         const user_id = state.user_auth_session.session?.user.id
+        if (!user_id) return
+
         const should_load_user_info = (
             state.user_auth_session.status === "logged_in"
             && previous_state.user_auth_session.status !== "logged_in"
-            && user_id !== undefined
         )
 
         if (should_load_user_info) load_user_info(store, user_id, get_supabase)
@@ -200,21 +202,16 @@ export function subscriptions (store: CoreStore, get_supabase: GetSupabase)
 
 async function load_user_info(store: CoreStore, user_id: string, get_supabase: GetSupabase)
 {
-    // console .log("Loading user info for user...", state.user_auth_session.session?.user.id)
-    const response = await get_supabase().from("users")
+    // console .debug("Loading user info for user...", state.user_auth_session.session?.user.id)
+    const response = await get_supabase()
+        .from("users")
         .select("id, name")
         .eq("id", user_id)
     const entry = (response.data || [])[0]
 
-    let user_name: string | null = null
+    // console .debug("got user info from supabase users table: ", entry, response)
+    let user_name: string | null = entry?.name ?? null
 
-    if (entry)
-    {
-        // console .log("got user info from supabase users table: ", entries[0])
-        user_name = entry.name
-    }
-
-    // console .log("got user info from supabase users table: ", response)
     store.setState(root_state =>
     {
         root_state.user_auth_session.user_name = user_name
