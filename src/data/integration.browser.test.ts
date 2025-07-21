@@ -6,14 +6,13 @@ import { deep_equals } from "../utils/deep_equals"
 import {
     request_data_component_history,
     request_data_components,
-    RequestDataComponentsHistoryReturn,
     RequestDataComponentsReturn,
     search_data_components
 } from "./fetch_from_db"
 import { IdAndVersion } from "./id"
 import { DataComponent } from "./interface"
 import { new_data_component } from "./modify"
-import { insert_data_component, update_data_component } from "./write_to_db"
+import { insert_data_component, update_data_component, UpdateDataComponentResponse } from "./write_to_db"
 
 
 type TABLE_NAME = "data_components_archive" | "data_components"
@@ -85,7 +84,7 @@ describe("can created a new data component", () =>
         let response: DataComponent
         try
         {
-            response = await insert_data_component(data_component)
+            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -110,7 +109,7 @@ describe("can created a new data component", () =>
         let response: DataComponent
         try
         {
-            response = await insert_data_component(data_component)
+            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Should have failed to insert data component with version 0, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -134,7 +133,7 @@ describe("can created a new data component", () =>
         let response: DataComponent
         try
         {
-            response = await insert_data_component(data_component)
+            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Production data at risk of corruption.  Should have failed to insert data component with id >= 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -160,7 +159,7 @@ describe("can created a new data component", () =>
         let response: DataComponent
         try
         {
-            response = await insert_data_component(data_component)
+            response = await insert_data_component(get_supabase, data_component)
             expect.fail(`Should have failed to insert data component with id < 0 and test_run_id not set, but got response: ${JSON.stringify(response)}`)
         }
         catch (error)
@@ -191,7 +190,7 @@ describe("can created a new data component", () =>
         try
         {
             inserted_data_component = data_component
-            response = await insert_data_component(data_component)
+            response = await insert_data_component(get_supabase, data_component)
         }
         catch (error)
         {
@@ -249,14 +248,10 @@ describe("can created a new data component", () =>
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        let response: DataComponent
-        try
+        const response = await update_data_component(get_supabase, data_component)
+        if (response.error)
         {
-            response = await update_data_component(data_component)
-        }
-        catch (error)
-        {
-            expect.fail(`Failed to upsert data component: ${JSON.stringify(error)}`)
+            expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         }
 
         const expected_response: DataComponent = {
@@ -290,7 +285,7 @@ describe("can created a new data component", () =>
             version_requires_save: false,
         }
 
-        compare_data_components(response, expected_response)
+        compare_data_components(response.data, expected_response)
 
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
@@ -303,7 +298,7 @@ describe("can created a new data component", () =>
     })
 
 
-    let second_updated_data_component: DataComponent
+    let second_updated_data_component: UpdateDataComponentResponse
     it("should paginate over the test data components in the database", async function ()
     {
         expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
@@ -316,32 +311,26 @@ describe("can created a new data component", () =>
 
         const id_1 = inserted_data_component.id
         let id_2: IdAndVersion
-        let data_components_page_1: RequestDataComponentsReturn
-        let data_components_page_2: RequestDataComponentsReturn
-        let archived_data_component_1_page_1: RequestDataComponentsHistoryReturn
-        let archived_data_component_1_page_2: RequestDataComponentsHistoryReturn
-        let archived_data_components_page_2: RequestDataComponentsHistoryReturn
-        try
-        {
-            ({ id: id_2 } = await insert_data_component(data_component_2))
 
-            second_updated_data_component = await update_data_component({
-                ...data_component_2,
-                id: id_2,
-                title: "<p>Test Second Component's Second Title</p>"
-            })
+        ({ id: id_2 } = await insert_data_component(get_supabase, data_component_2))
 
-            const id_numbers = [id_1.id, id_2.id]
-            data_components_page_1 = await request_data_components(get_supabase, id_numbers, { page: 0, size: 1 })
-            data_components_page_2 = await request_data_components(get_supabase, id_numbers, { page: 1, size: 1 })
-            archived_data_component_1_page_1 = await request_data_component_history(get_supabase, id_1.id, { page: 0, size: 1 })
-            archived_data_component_1_page_2 = await request_data_component_history(get_supabase, id_1.id, { page: 1, size: 1 })
-            archived_data_components_page_2 = await request_data_component_history(get_supabase, id_2.id, { page: 0, size: 2 })
-        }
-        catch (error)
+        second_updated_data_component = await update_data_component(get_supabase, {
+            ...data_component_2,
+            id: id_2,
+            title: "<p>Test Second Component's Second Title</p>"
+        })
+
+        if (second_updated_data_component.error)
         {
-            expect.fail(`Error whilst insert, update, request_data_components or request_data_components_history: ${JSON.stringify(error)}`)
+            expect.fail(`Failed to update second data component: ${JSON.stringify(second_updated_data_component.error)}`)
         }
+
+        const id_numbers = [id_1.id, id_2.id]
+        const data_components_page_1 = await request_data_components(get_supabase, id_numbers, { page: 0, size: 1 })
+        const data_components_page_2 = await request_data_components(get_supabase, id_numbers, { page: 1, size: 1 })
+        const archived_data_component_1_page_1 = await request_data_component_history(get_supabase, id_1.id, { page: 0, size: 1 })
+        const archived_data_component_1_page_2 = await request_data_component_history(get_supabase, id_1.id, { page: 1, size: 1 })
+        const archived_data_components_page_2 = await request_data_component_history(get_supabase, id_2.id, { page: 0, size: 2 })
 
         const get_ids_and_versions = (data: DataComponent[]) => data.map(row => ({ id: row.id.id, version_number: row.id.version }))
 
@@ -383,7 +372,7 @@ describe("can created a new data component", () =>
 
     it("should search over title and description of data components", async function ()
     {
-        expect(second_updated_data_component, "This test is stateful and requires the insertion and update from previous test").to.exist
+        expect(second_updated_data_component.data, "This test is stateful and requires the insertion and update from previous test").to.exist
 
         let search_results: RequestDataComponentsReturn
         let search_2_results: RequestDataComponentsReturn
@@ -403,7 +392,7 @@ describe("can created a new data component", () =>
         expect(search_2_results.data!.length).equals(1, "Expected search two results to match only the second data component")
         deep_equals(
             search_2_results.data!,
-            [second_updated_data_component],
+            [second_updated_data_component.data],
             "Expected search results to match inserted and updated second data component"
         )
     })

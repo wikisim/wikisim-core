@@ -1,10 +1,11 @@
-import {
+import { PostgrestError } from "@supabase/supabase-js"
+import type {
     DBDataComponentInsertArgs,
     DBDataComponentUpdateArgs,
-    get_supabase
+    GetSupabase
 } from "../supabase"
 import { convert_from_db_row, convert_to_db_row } from "./convert_between_db"
-import { DataComponent } from "./interface"
+import type { DataComponent } from "./interface"
 
 
 export function prepare_data_component_for_db_insert (data_component: DataComponent): DBDataComponentInsertArgs
@@ -56,7 +57,7 @@ export function prepare_data_component_for_db_update (data_component: DataCompon
 }
 
 
-export function insert_data_component (data_component: DataComponent): Promise<DataComponent>
+export function insert_data_component (get_supabase: GetSupabase, data_component: DataComponent): Promise<DataComponent>
 {
     const db_data_component = prepare_data_component_for_db_insert(data_component)
 
@@ -78,17 +79,22 @@ export function insert_data_component (data_component: DataComponent): Promise<D
 }
 
 
-export function update_data_component (data_component: DataComponent): Promise<DataComponent>
+export type UpdateDataComponentResponse = {
+    data: null;
+    error: PostgrestError;
+} | {
+    data: DataComponent;
+    error: null;
+}
+export function update_data_component (get_supabase: GetSupabase, data_component: DataComponent): PromiseLike<UpdateDataComponentResponse>
 {
     const db_data_component = prepare_data_component_for_db_update(data_component)
 
-    return new Promise((resolve, reject) => {
-        get_supabase()
-            .rpc("update_data_component", db_data_component)
-            .then(({ data, error }) =>
-            {
-                if (error) reject(error)
-                else resolve(convert_from_db_row(data, "yes"))
-            })
-    })
+    return get_supabase()
+        .rpc("update_data_component", db_data_component)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            else return { data: convert_from_db_row(data, "yes"), error: null }
+        })
 }
