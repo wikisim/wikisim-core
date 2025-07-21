@@ -1,7 +1,7 @@
 import { expect } from "chai"
 
 import { DataComponent } from "./interface"
-import { new_data_component, set_fields } from "./modify"
+import { changes_made, new_data_component, set_fields } from "./modify"
 
 
 describe("can created a new data component", () => {
@@ -27,5 +27,21 @@ describe("can created a new data component", () => {
         expect(() =>
             set_fields(data_component, { description: "Test Description" })
         ).throws("Cannot set description, requires UI libraries.")
+    })
+})
+
+
+describe("changes_made function", () => {
+    it("should detect changes made to the data component", () => {
+        const original: DataComponent = new_data_component({ title: "Original Title", description: "Original Description" })
+        const unchanged: DataComponent = new_data_component({ title: "Original Title", description: "Original Description" })
+        const modified: DataComponent = new_data_component({ title: "Modified Title", description: "Original Description" })
+
+        expect(changes_made(original, original)).equals(false)
+        expect(changes_made(unchanged, original)).equals(false)
+        expect(changes_made(modified, modified)).equals(false)
+
+        expect(changes_made(modified, original)).equals(true)
+        expect(changes_made(original, modified)).equals(true, "Changes should be detected in both directions")
     })
 })

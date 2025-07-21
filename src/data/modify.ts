@@ -51,3 +51,10 @@ export function set_fields(data_component: DataComponent, fields: Partial<DataCo
         // version_is_current: fields.version_is_current ?? true,
     }
 }
+
+
+export function changes_made(component_1: DataComponent, component_2: DataComponent): boolean
+{
+    return component_1.title !== component_2.title ||
+           component_1.description !== component_2.description
+}
