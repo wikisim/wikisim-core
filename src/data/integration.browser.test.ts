@@ -4,8 +4,8 @@ import { expect } from "chai"
 import { get_supabase } from "../supabase"
 import { deep_equals } from "../utils/deep_equals"
 import {
+    request_data_component_history,
     request_data_components,
-    request_data_components_history,
     RequestDataComponentsHistoryReturn,
     RequestDataComponentsReturn,
     search_data_components
@@ -231,7 +231,7 @@ describe("can created a new data component", () =>
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, [-1])
-        const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
+        const row_from_data_components_archive = await request_data_component_history(get_supabase, -1)
         compare_data_component_lists(row_from_data_components.data!, [expected_response], "Data components fetched fresh from data_components table should match expected")
         const expected_archive_response: DataComponent = { ...expected_response, version_is_current: "maybe" }
         compare_data_component_lists(row_from_data_components_archive.data!, [expected_archive_response], "Archived data components fetched fresh from data_components_archive table should match expected")
@@ -295,7 +295,7 @@ describe("can created a new data component", () =>
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, [-1])
-        const row_from_data_components_archive = await request_data_components_history(get_supabase, [-1])
+        const row_from_data_components_archive = await request_data_component_history(get_supabase, -1)
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
         expect(row_from_data_components_archive.data!.length).equals(2, "Should now have 2 rows in the archive table")
         const expected_archive_response: DataComponent = { ...expected_response, version_is_current: "maybe" }
@@ -318,7 +318,8 @@ describe("can created a new data component", () =>
         let id_2: IdAndVersion
         let data_components_page_1: RequestDataComponentsReturn
         let data_components_page_2: RequestDataComponentsReturn
-        let archived_data_components_page_1: RequestDataComponentsHistoryReturn
+        let archived_data_component_1_page_1: RequestDataComponentsHistoryReturn
+        let archived_data_component_1_page_2: RequestDataComponentsHistoryReturn
         let archived_data_components_page_2: RequestDataComponentsHistoryReturn
         try
         {
@@ -333,8 +334,9 @@ describe("can created a new data component", () =>
             const id_numbers = [id_1.id, id_2.id]
             data_components_page_1 = await request_data_components(get_supabase, id_numbers, { page: 0, size: 1 })
             data_components_page_2 = await request_data_components(get_supabase, id_numbers, { page: 1, size: 1 })
-            archived_data_components_page_1 = await request_data_components_history(get_supabase, id_numbers, { page: 0, size: 2 })
-            archived_data_components_page_2 = await request_data_components_history(get_supabase, id_numbers, { page: 1, size: 2 })
+            archived_data_component_1_page_1 = await request_data_component_history(get_supabase, id_1.id, { page: 0, size: 1 })
+            archived_data_component_1_page_2 = await request_data_component_history(get_supabase, id_1.id, { page: 1, size: 1 })
+            archived_data_components_page_2 = await request_data_component_history(get_supabase, id_2.id, { page: 0, size: 2 })
         }
         catch (error)
         {
@@ -360,16 +362,21 @@ describe("can created a new data component", () =>
             "Expected second page of data"
         )
 
-        expect(archived_data_components_page_1.data, "Expected archived data to be an array").to.be.an("array")
+        expect(archived_data_component_1_page_1.data, "Expected archived data to be an array").to.be.an("array")
         deep_equals(
-            get_ids_and_versions(archived_data_components_page_1.data!),
-            [{ id: id_2.id, version_number: 2 }, { id: id_1.id, version_number: 2 }],
-            "Expected first page of archived data"
+            get_ids_and_versions(archived_data_component_1_page_1.data!),
+            [{ id: id_1.id, version_number: 2 }],
+            "Expected first page of archived data for component 1"
+        )
+        deep_equals(
+            get_ids_and_versions(archived_data_component_1_page_2.data!),
+            [{ id: id_1.id, version_number: 1 }],
+            "Expected second page of archived data for component 1"
         )
         deep_equals(
             get_ids_and_versions(archived_data_components_page_2.data!),
-            [{ id: id_2.id, version_number: 1 }, { id: id_1.id, version_number: 1 }],
-            "Expected second page of archived data"
+            [{ id: id_2.id, version_number: 2 }, { id: id_2.id, version_number: 1 }],
+            "Expected second page of archived data for component 2"
         )
     })
 

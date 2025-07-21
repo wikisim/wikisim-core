@@ -50,21 +50,19 @@ export type RequestDataComponentsHistoryReturn =
     data: null
     error: PostgrestError | Error
 }
-export async function request_data_components_history(
+export async function request_data_component_history(
     get_supabase: GetSupabase,
-    ids: number[],
+    id: number,
     options: { page?: number, size?: number } = {},
 ): Promise<RequestDataComponentsHistoryReturn>
 {
-    limit_ids(ids)
     const { from, to } = get_range_from_options(options)
 
     return get_supabase()
         .from("data_components_archive")
         .select("*")
-        .in("id", ids)
+        .eq("id", id)
         .order("version_number", { ascending: false })
-        .order("id", { ascending: true })
         .range(from, to)
         .then(({ data, error }) =>
         {
