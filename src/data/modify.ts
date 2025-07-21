@@ -53,8 +53,13 @@ export function set_fields(data_component: DataComponent, fields: Partial<DataCo
 }
 
 
-export function changes_made(component_1: DataComponent, component_2: DataComponent): boolean
+export function changes_made(component_1: DataComponent, component_2: DataComponent, compare_meta_fields?: boolean): boolean
 {
-    return component_1.title !== component_2.title ||
-           component_1.description !== component_2.description
+    const diff = component_1.title !== component_2.title
+           || component_1.description !== component_2.description
+
+    if (diff || !compare_meta_fields) return diff
+
+    return component_1.comment !== component_2.comment
+        || component_1.version_type !== component_2.version_type
 }

@@ -44,4 +44,19 @@ describe("changes_made function", () => {
         expect(changes_made(modified, original)).equals(true)
         expect(changes_made(original, modified)).equals(true, "Changes should be detected in both directions")
     })
+
+    it("should only detect changes to meta fields if compare_meta_fields is true", () => {
+        const original: DataComponent = new_data_component({ comment: "Comment one" })
+        const modified: DataComponent = new_data_component({ comment: "New comment two" })
+
+        expect(changes_made(original, modified, false)).equals(false)
+        expect(changes_made(modified, original, false)).equals(false)
+
+        // If we only compare meta fields, changes should not be detected
+        expect(changes_made(original, modified, true)).equals(true)
+
+        const modified_version_type: DataComponent = new_data_component({ version_type: "minor" })
+        expect(changes_made(original, modified_version_type, false)).equals(false)
+        expect(changes_made(original, modified_version_type, true)).equals(true)
+    })
 })
