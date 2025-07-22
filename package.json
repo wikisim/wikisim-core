@@ -6,7 +6,10 @@
     "scripts": {
         "dev": "vite",
         "preview": "vite preview",
-        "test": "mocha"
+        "test": "mocha",
+        "check_compile": "npx tsc --noEmit",
+        "lint": "eslint . --ext .ts,.tsx",
+        "check": "pnpm run test && pnpm run check_compile && pnpm run lint"
     },
     "dependencies": {
         "@supabase/supabase-js": "2.52.0",
