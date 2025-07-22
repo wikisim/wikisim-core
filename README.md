@@ -40,3 +40,18 @@ To run the integration tests in the browser:
 * open the browser at `http://localhost:8080/` to see the demo of a minimal working example.
 * use that demo to sign in
 * open the browser at `http://localhost:8080/test/` to run the integration tests.
+
+### Pre-push Hook
+
+If you want to ensure your tests, typescript compilation, and linting pass before pushing, you can set up a pre-push hook:
+```bash
+ln -s $(pwd)/scripts/pre-push.sh .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
+If this repo is a submodule, for example within wikisim-frontend, then you can
+run the following command to set up the pre-push hook:
+```bash
+ln -s $(pwd)/scripts/pre-push.sh ../../.git/modules/lib/core/hooks/pre-push
+chmod +x ../../.git/modules/lib/core/hooks/pre-push
+```
