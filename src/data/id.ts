@@ -39,6 +39,11 @@ export class IdAndVersion
         this.version = parsed_version
     }
 
+    as_IdOnly(): IdOnly
+    {
+        return new IdOnly(this.id)
+    }
+
     to_str(): string { return `${this.id}v${this.version}` }
 
     to_str_without_version(): string { return `${this.id}` }

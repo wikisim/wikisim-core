@@ -3,6 +3,7 @@ import { PostgrestError } from "@supabase/supabase-js"
 import { GetSupabase } from "../supabase"
 import { clamp } from "../utils/clamp"
 import { convert_from_db_row } from "./convert_between_db"
+import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
 import { DataComponent } from "./interface"
 
 
@@ -16,8 +17,8 @@ export type RequestDataComponentsReturn =
 }
 export async function request_data_components(
     get_supabase: GetSupabase,
-    ids: number[] = [],
     options: { page?: number, size?: number } = {},
+    ids: IdOnly[] = [],
 ): Promise<RequestDataComponentsReturn>
 {
     limit_ids(ids)
@@ -27,11 +28,15 @@ export async function request_data_components(
         .from("data_components")
         .select("*")
 
-    if (ids.length > 0) supa = supa.in("id", ids)
-    else supa = supa.gte("id", 1) // ensure we don't get any test data with negative ids
+    // Currently only using this feature in intergration.browser.test.ts
+    if (ids.length > 0) supa = supa.in("id", ids.map(id => id.id))
+
+    // When there are no ids provided this is currently because we are
+    // requesting current components for the home page.
+    // Filter by gte 1 to ensure we don't get any test data with negative ids.
+    else supa = supa.gte("id", 1)
 
     return supa
-        .order("version_number", { ascending: false })
         .order("id", { ascending: true })
         .range(from, to)
         .then(({ data, error }) =>
@@ -42,27 +47,41 @@ export async function request_data_components(
         })
 }
 
-export type RequestDataComponentsHistoryReturn =
-{
-    data: DataComponent[]
-    error: null
-} | {
-    data: null
-    error: PostgrestError | Error
-}
-export async function request_data_component_history(
+
+export async function request_archived_data_components(
     get_supabase: GetSupabase,
-    id: number,
+    ids: IdAndMaybeVersion[] = [],
     options: { page?: number, size?: number } = {},
-): Promise<RequestDataComponentsHistoryReturn>
+): Promise<RequestDataComponentsReturn>
 {
+    limit_ids(ids, 1)
     const { from, to } = get_range_from_options(options)
 
-    return get_supabase()
+    let supa = get_supabase()
         .from("data_components_archive")
         .select("*")
-        .eq("id", id)
+
+    const or_clauses: string[] = []
+    ids.forEach(id =>
+    {
+        if (id instanceof IdOnly)
+        {
+            or_clauses.push(`id.eq.${id.to_str_without_version()}`)
+        }
+        else if (id instanceof IdAndVersion)
+        {
+            or_clauses.push(`and(id.eq.${id.id},version_number.eq.${id.version})`)
+        }
+        else
+        {
+            throw new Error(`Invalid ID type: ${id}, typeof: ${typeof id}, expected IdAndVersion or IdOnly`)
+        }
+    })
+    supa = supa.or(or_clauses.join(','))
+
+    return supa
         .order("version_number", { ascending: false })
+        .order("id", { ascending: true })
         .range(from, to)
         .then(({ data, error }) =>
         {
@@ -70,6 +89,16 @@ export async function request_data_component_history(
             const instances = data.map(d => convert_from_db_row(d, "maybe"))
             return { data: instances, error: null }
         })
+}
+
+
+export async function request_data_component_history(
+    get_supabase: GetSupabase,
+    id: number,
+    options: { page?: number, size?: number } = {},
+): Promise<RequestDataComponentsReturn>
+{
+    return request_archived_data_components(get_supabase, [new IdOnly(id)], options)
 }
 
 
@@ -102,11 +131,15 @@ export async function search_data_components(
 }
 
 
-function limit_ids(ids: number[])
+function limit_ids(ids: IdAndMaybeVersion[], min: number = 0, max: number = 1000)
 {
-    if (ids.length > 1000)
+    if (ids.length > max)
     {
-        throw new Error("Too many IDs provided, maximum is 1000")
+        throw new Error(`Too many IDs provided, maximum is ${max} but got ${ids.length}`)
+    }
+    if (ids.length < min)
+    {
+        throw new Error(`Too few IDs provided, minium is ${min} but got ${ids.length}`)
     }
 }
 
