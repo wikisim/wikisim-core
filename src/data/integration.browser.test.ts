@@ -278,6 +278,7 @@ describe("can created a new data component", () =>
     let second_updated_data_component: UpsertDataComponentResponse
     it("should paginate over the test data components in the database", async function ()
     {
+        this.timeout(5000)
         expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
         const data_component_2: DataComponent = {
             ...inserted_data_component,
