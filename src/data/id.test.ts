@@ -89,3 +89,13 @@ describe("parse_id", () =>
         expect(() => parse_id("123", true)).to.throw("DataComponentId string must include version: 123")
     })
 })
+
+
+// @ts-expect-error: IdOnly requires only one argument
+new IdOnly(123, 2)
+
+// @ts-expect-error: IdAndVersion should not be used where IdOnly is expected
+const _bad_id_2: IdOnly = new IdAndVersion(1, 2)
+
+// @ts-expect-error: IdOnly should not be used where IdAndVersion is expected
+const _bad_id_3: IdAndVersion = new IdOnly(1)

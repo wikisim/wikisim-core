@@ -16,6 +16,9 @@ export class IdOnly
     to_str(): string { return `${this.id}` }
 
     to_str_without_version(): string { return `${this.id}` }
+
+    // This is used to differentiate between IdOnly and IdAndVersion
+    _type_discriminator: string = "IdOnly"
 }
 
 
@@ -78,4 +81,25 @@ export function parse_id(instance: string | IdAndMaybeVersion, enforce_version?:
     }
 
     return instance_id
+}
+
+
+export function is_id_only(id: IdAndMaybeVersion): id is IdOnly
+{
+    return id instanceof IdOnly
+}
+
+export function is_id_and_version(id: IdAndMaybeVersion): id is IdAndVersion
+{
+    return id instanceof IdAndVersion
+}
+
+export function all_are_id_only(ids: IdAndMaybeVersion[]): ids is IdOnly[]
+{
+    return ids.every(is_id_only)
+}
+
+export function all_are_id_and_version(ids: IdAndMaybeVersion[]): ids is IdAndVersion[]
+{
+    return ids.every(is_id_and_version)
 }
