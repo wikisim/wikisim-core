@@ -50,6 +50,7 @@ export function create_mocked_supabase (session_data: Session | null = null, db_
         order: sinon.stub().returnsThis(),
         range: sinon.stub().returnsThis(),
         gte: sinon.stub().returnsThis(),
+        or: sinon.stub().returnsThis(),
     }
 
     if (db_data)
