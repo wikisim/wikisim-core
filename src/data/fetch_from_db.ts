@@ -28,7 +28,8 @@ export async function request_data_components(
         .from("data_components")
         .select("*")
 
-    // Currently only using this feature in intergration.browser.test.ts
+    // Use this feature for loading latest DataComponents, i.e. loading by IdOnly
+    // (Also use in intergration.browser.test.ts)
     if (ids.length > 0) supa = supa.in("id", ids.map(id => id.id))
 
     // When there are no ids provided this is currently because we are
