@@ -35,19 +35,19 @@ DECLARE
     new_row data_components;
 BEGIN
     IF auth.role() <> 'authenticated' THEN
-        RAISE EXCEPTION 'Must be authenticated';
+        RAISE EXCEPTION 'ERR03. Must be authenticated';
     END IF;
 
     IF p_editor_id IS DISTINCT FROM auth.uid() THEN
-        RAISE EXCEPTION 'editor_id must match your user id';
+        RAISE EXCEPTION 'ERR04. editor_id must match your user id';
     END IF;
 
     IF p_id IS NULL THEN
         p_id := nextval('data_components_id_seq'); -- Use sequence for new IDs
     ELSIF p_id >= 0 THEN
-        RAISE EXCEPTION 'p_id must be negative for test runs, got %', p_id;
+        RAISE EXCEPTION 'ERR05. p_id must be negative for test runs, got %', p_id;
     ELSIF p_test_run_id IS NULL THEN
-        RAISE EXCEPTION 'p_test_run_id must be provided for test runs with negative id of %, but got %', p_id, p_test_run_id;
+        RAISE EXCEPTION 'ERR06. p_test_run_id must be provided for test runs with negative id of %, but got %', p_id, p_test_run_id;
     END IF;
 
     INSERT INTO data_components (
@@ -163,11 +163,11 @@ BEGIN
     IF auth.role() <> 'authenticated' THEN
         -- This error should never be raised because a non-authenticated user
         -- should be stopped by the `GRANT EXECUTE ... TO authenticated`.
-        RAISE EXCEPTION 'Must be authenticated';
+        RAISE EXCEPTION 'ERR07. Must be authenticated';
     END IF;
 
     IF p_editor_id IS DISTINCT FROM auth.uid() THEN
-        RAISE EXCEPTION 'editor_id must match your user id';
+        RAISE EXCEPTION 'ERR08. editor_id must match your user id';
     END IF;
 
     UPDATE data_components
@@ -197,7 +197,7 @@ BEGIN
     RETURNING * INTO updated_row;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Update failed: id % with version_number % not found or version mismatch.', p_id, p_version_number;
+        RAISE EXCEPTION 'ERR09. Update failed: id % with version_number % not found or version mismatch.', p_id, p_version_number;
     END IF;
 
     RETURN updated_row;

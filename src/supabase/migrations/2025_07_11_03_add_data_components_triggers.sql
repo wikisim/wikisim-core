@@ -6,7 +6,7 @@ SET search_path = 'public'
 AS $$
 BEGIN
     IF NEW.version_number <> 1 THEN
-        RAISE EXCEPTION 'Inserts into data_components are only allowed when version_number = 1. Attempted value: %', NEW.version_number;
+        RAISE EXCEPTION 'ERR01. Inserts into data_components are only allowed when version_number = 1. Attempted value: %', NEW.version_number;
     END IF;
     RETURN NEW;
 END;
@@ -47,7 +47,7 @@ BEGIN
     IF (OLD.version_number + 1) = NEW.version_number THEN
         -- pass
     ELSE
-        RAISE EXCEPTION 'Update failed: version_number mismatch. Existing: %, Update Attempt: %, Expected: %', OLD.version_number, NEW.version_number, OLD.version_number + 1;
+        RAISE EXCEPTION 'ERR02. Update failed: version_number mismatch. Existing: %, Update Attempt: %, Expected: %', OLD.version_number, NEW.version_number, OLD.version_number + 1;
     END IF;
     RETURN NEW;
 END;
