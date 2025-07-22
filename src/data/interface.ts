@@ -4,8 +4,6 @@ import { IdAndVersion } from "./id"
 
 type DBEnums = Database["public"]["Enums"]
 
-export type YesNoMaybe = "yes" | "no" | "maybe"
-
 export interface DataComponent
 {
     id: IdAndVersion
@@ -42,11 +40,6 @@ export interface DataComponent
     plain_description: string
 
     test_run_id?: string
-
-    // Derived properties for managing versions
-    version_is_current: YesNoMaybe
-    // Meta data
-    version_requires_save: boolean
 
     // // Not implementing yet until we get more use cases to check it against.
     // // Alternatives

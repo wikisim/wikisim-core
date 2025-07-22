@@ -81,7 +81,7 @@ export function insert_data_component (get_supabase: GetSupabase, data_component
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            else return { data: convert_from_db_row(data, "yes"), error: null }
+            else return { data: convert_from_db_row(data), error: null }
         })
 }
 
@@ -95,6 +95,6 @@ export function update_data_component (get_supabase: GetSupabase, data_component
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            else return { data: convert_from_db_row(data, "yes"), error: null }
+            else return { data: convert_from_db_row(data), error: null }
         })
 }

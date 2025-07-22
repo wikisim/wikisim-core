@@ -1,17 +1,12 @@
 import { convert_tiptap_text_to_plain_text } from "../rich_text/editor"
 import { DBDataComponentRow } from "../supabase"
 import { IdAndVersion, parse_id } from "./id"
-import { DataComponent, YesNoMaybe } from "./interface"
+import { DataComponent } from "./interface"
 
 
 export function convert_to_db_row(data_component: DataComponent): DBDataComponentRow
 {
-    const {
-        id,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        version_is_current, version_requires_save,
-        ...rest
-    } = data_component
+    const { id, ...rest } = data_component
 
     // Prepare the data component for writing to the database
     const row: DBDataComponentRow = {
@@ -51,7 +46,7 @@ export function convert_to_db_row(data_component: DataComponent): DBDataComponen
 }
 
 
-export function convert_from_db_row (row: DBDataComponentRow, version_is_current: YesNoMaybe): DataComponent
+export function convert_from_db_row (row: DBDataComponentRow): DataComponent
 {
     return {
         id: new IdAndVersion(row.id, row.version_number),
@@ -79,9 +74,6 @@ export function convert_from_db_row (row: DBDataComponentRow, version_is_current
         plain_description: row.plain_description,
 
         test_run_id: row.test_run_id ?? undefined,
-
-        version_is_current,
-        version_requires_save: false,
     }
 }
 

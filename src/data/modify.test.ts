@@ -14,8 +14,6 @@ describe("can created a new data component", () => {
         expect(data_component.description).equals("")
         expect(data_component.value_type).equals(undefined)
         expect(data_component.datetime_repeat_every).equals(undefined)
-        expect(data_component.version_is_current).equals("yes")
-        expect(data_component.version_requires_save).equals(true)
     })
 
     it("should set fields correctly", () => {

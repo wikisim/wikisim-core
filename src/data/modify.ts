@@ -29,8 +29,6 @@ export function new_data_component(partial: Partial<DataComponent> = {}): DataCo
 
         test_run_id: new Date().toISOString(), // Default to current time for test runs
 
-        version_is_current: "yes",
-        version_requires_save: true,
         ...partial,
     }
 }
@@ -48,7 +46,6 @@ export function set_fields(data_component: DataComponent, fields: Partial<DataCo
         // value_type: fields.value_type ?? "number",
         // datetime_repeat_every: fields.datetime_repeat_every ?? "day",
         // created_at: fields.created_at ?? new Date(),
-        // version_is_current: fields.version_is_current ?? true,
     }
 }
 

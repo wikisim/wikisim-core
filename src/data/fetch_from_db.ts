@@ -42,7 +42,7 @@ export async function request_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d, "yes"))
+            const instances = data.map(d => convert_from_db_row(d))
             return { data: instances, error: null }
         })
 }
@@ -86,7 +86,7 @@ export async function request_archived_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d, "maybe"))
+            const instances = data.map(d => convert_from_db_row(d))
             return { data: instances, error: null }
         })
 }
@@ -125,7 +125,7 @@ export async function search_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d, "yes"))
+            const instances = data.map(d => convert_from_db_row(d))
             return { data: instances, error: null }
         })
 }

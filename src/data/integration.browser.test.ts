@@ -197,9 +197,6 @@ describe("can created a new data component", () =>
             // Should be set by the convert_to_db_row function
             plain_description: "Test Description",
             test_run_id: inserted_data_component.test_run_id,
-
-            version_is_current: "yes",
-            version_requires_save: false,
         }
 
         compare_data_components(response.data, expected_response, "Data component from insertion should match expected response")
@@ -208,9 +205,8 @@ describe("can created a new data component", () =>
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, {}, [new IdOnly(-1)])
         const row_from_data_components_archive = await request_data_component_history(get_supabase, -1)
-        compare_data_component_lists(row_from_data_components.data!, [expected_response], "Data components fetched fresh from data_components table should match expected")
-        const expected_archive_response: DataComponent = { ...expected_response, version_is_current: "maybe" }
-        compare_data_component_lists(row_from_data_components_archive.data!, [expected_archive_response], "Archived data components fetched fresh from data_components_archive table should match expected")
+        compare_data_component_lists(row_from_data_components.data!, [expected_response], "Fetched data components should match expected")
+        compare_data_component_lists(row_from_data_components_archive.data!, [expected_response], "Fetched data components history fetched should match expected")
     })
 
 
@@ -257,9 +253,6 @@ describe("can created a new data component", () =>
             units: undefined,
             dimension_ids: undefined,
             plain_description: "Test Description",
-
-            version_is_current: "yes",
-            version_requires_save: false,
         }
 
         compare_data_components(response.data, expected_response)
@@ -270,8 +263,7 @@ describe("can created a new data component", () =>
         const row_from_data_components_archive = await request_data_component_history(get_supabase, -1)
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
         expect(row_from_data_components_archive.data!.length).equals(2, "Should now have 2 rows in the archive table")
-        const expected_archive_response: DataComponent = { ...expected_response, version_is_current: "maybe" }
-        compare_data_components(row_from_data_components_archive.data![0]!, expected_archive_response)
+        compare_data_components(row_from_data_components_archive.data![0]!, expected_response)
     })
 
 
