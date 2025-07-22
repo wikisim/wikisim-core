@@ -87,7 +87,7 @@ describe("can created a new data component", () =>
         {
             expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals("editor_id must match your user id" )
+        expect(response.error).to.have.property("message").that.equals("ERR04. editor_id must match your user id" )
     })
 
 
@@ -126,7 +126,7 @@ describe("can created a new data component", () =>
         {
             expect.fail(`Production data at risk of corruption.  Should have failed to insert data component with id >= 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals(`p_id must be negative for test runs, got 0`)
+        expect(response.error).to.have.property("message").that.equals(`ERR05. p_id must be negative for test runs, got 0`)
         // This error would be produced but we raise our own error in the function.
         // Belt and braces approach.
         // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
@@ -148,7 +148,7 @@ describe("can created a new data component", () =>
             expect.fail(`Should have failed to insert data component with id < 0 and test_run_id not set, but got response: ${JSON.stringify(response)}`)
         }
 
-        expect(response.error).to.have.property("message").that.equals(`p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
+        expect(response.error).to.have.property("message").that.equals(`ERR06. p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
         // This error would be produced but we raise our own error in the function.
         // Belt and braces approach.
         // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
