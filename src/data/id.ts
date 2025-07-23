@@ -53,6 +53,22 @@ export class IdAndVersion
 }
 
 
+export class TempId
+{
+    temp_id: string
+    constructor(temp_id?: string)
+    {
+        if (temp_id && !temp_id.startsWith("temp_id_"))
+        {
+            throw new Error(`Temporary ID must start with "temp_id_" but got "${temp_id}"`)
+        }
+        this.temp_id = temp_id || `temp_id_${new Date().getTime()}`
+    }
+
+    to_str(): string { return this.temp_id }
+}
+
+
 export type IdAndMaybeVersion = IdAndVersion | IdOnly
 
 export function parse_id(instance: string | IdAndMaybeVersion, enforce_version?: false): IdAndMaybeVersion

@@ -1,13 +1,11 @@
 import { Database } from "../supabase/interface"
-import { IdAndVersion } from "./id"
+import { IdAndVersion, TempId } from "./id"
 
 
 type DBEnums = Database["public"]["Enums"]
 
-export interface DataComponent
+interface DataComponentFields
 {
-    id: IdAndVersion
-
     // For managing versions
     editor_id: string
     created_at: Date
@@ -54,8 +52,27 @@ export interface DataComponent
     // source_of_alternative?: string
 }
 
-
-export function is_data_component(data_component?: DataComponent | null): data_component is DataComponent
+export interface DataComponent extends DataComponentFields
 {
-    return !!data_component
+    id: IdAndVersion
+}
+
+/**
+ * This interface is used to create a new data component that is not yet saved
+ * to the database.
+ */
+export interface NewDataComponent extends DataComponentFields
+{
+    temporary_id: TempId
+}
+
+
+export function is_data_component(data_component?: DataComponent | NewDataComponent | null): data_component is DataComponent
+{
+    return !!data_component && "id" in data_component && data_component.id instanceof IdAndVersion
+}
+
+export function is_new_data_component(data_component?: DataComponent | NewDataComponent | null): data_component is NewDataComponent
+{
+    return !!data_component && "temporary_id" in data_component && data_component.temporary_id instanceof TempId
 }

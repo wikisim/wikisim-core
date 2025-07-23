@@ -35,6 +35,8 @@ DECLARE
     new_row data_components;
 BEGIN
     IF auth.role() <> 'authenticated' THEN
+        -- This check is essential in stopping a non-authenticated user because
+        -- the `GRANT EXECUTE ... TO authenticated` does not work at this level.
         RAISE EXCEPTION 'ERR03. Must be authenticated';
     END IF;
 
@@ -99,29 +101,6 @@ END;
 $$;
 
 
--- Grant execute to authenticated users only
-GRANT EXECUTE ON FUNCTION insert_data_component(
-    uuid,
-    text,
-    text,
-    text,
-    text,
-    integer,
-    text,
-    data_component_version_type,
-    integer,
-    integer[],
-    text,
-    data_component_value_type,
-    timestamptz,
-    timestamptz,
-    data_component_datetime_repeat_every,
-    text,
-    text[],
-    text,
-    integer
-) TO authenticated;
-
 
 CREATE OR REPLACE FUNCTION update_data_component(
     p_id integer,
@@ -161,8 +140,8 @@ DECLARE
     updated_row data_components;
 BEGIN
     IF auth.role() <> 'authenticated' THEN
-        -- This error should never be raised because a non-authenticated user
-        -- should be stopped by the `GRANT EXECUTE ... TO authenticated`.
+        -- This check is essential in stopping a non-authenticated user because
+        -- the `GRANT EXECUTE ... TO authenticated` does not work at this level.
         RAISE EXCEPTION 'ERR07. Must be authenticated';
     END IF;
 
@@ -203,27 +182,3 @@ BEGIN
     RETURN updated_row;
 END;
 $$;
-
-
--- Grant execute to authenticated users only
-GRANT EXECUTE ON FUNCTION update_data_component(
-    integer,
-    integer,
-    uuid,
-    text,
-    text,
-    text,
-    text,
-    integer,
-    text,
-    data_component_version_type,
-    integer,
-    integer[],
-    text,
-    data_component_value_type,
-    timestamptz,
-    timestamptz,
-    data_component_datetime_repeat_every,
-    text,
-    text[]
-) TO authenticated;

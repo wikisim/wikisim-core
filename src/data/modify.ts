@@ -1,10 +1,10 @@
 // TODO: rename this file
 
-import { IdAndVersion } from "./id"
-import { DataComponent } from "./interface"
+import { IdAndVersion, TempId } from "./id"
+import { DataComponent, NewDataComponent } from "./interface"
 
 
-export function new_data_component(partial: Partial<DataComponent> = {}): DataComponent
+export function init_data_component(partial: Partial<DataComponent> = {}): DataComponent
 {
     return {
         id: new IdAndVersion(-1, 1), // Use a negative ID for test data
@@ -13,8 +13,11 @@ export function new_data_component(partial: Partial<DataComponent> = {}): DataCo
         created_at: new Date(),
         bytes_changed: 0,
 
-        title: "",
-        description: "",
+        // Use the default values produced by the TipTap editor so that the
+        // new form does not show changes to the title and description when none
+        // were made.
+        title: "<p></p>",
+        description: "<p></p>",
 
         // value: "",
         // value_type: "number",
@@ -27,9 +30,21 @@ export function new_data_component(partial: Partial<DataComponent> = {}): DataCo
         plain_title: "",
         plain_description: "",
 
-        test_run_id: new Date().toISOString(), // Default to current time for test runs
+        test_run_id: `test_run_id_${new Date().toISOString()}`, // Default to current time for test runs
 
         ...partial,
+    }
+}
+
+
+export function init_new_data_component(partial: Partial<DataComponent> = {}): NewDataComponent
+{
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...rest } = init_data_component(partial)
+    return {
+        ...rest,
+        // Use a temporary ID for draft components
+        temporary_id: new TempId(),
     }
 }
 
@@ -50,7 +65,7 @@ export function set_fields(data_component: DataComponent, fields: Partial<DataCo
 }
 
 
-export function changes_made(component_1: DataComponent, component_2: DataComponent, compare_meta_fields?: boolean): boolean
+export function changes_made(component_1: DataComponent | NewDataComponent, component_2: DataComponent | NewDataComponent, compare_meta_fields?: boolean): boolean
 {
     const diff = component_1.title !== component_2.title
            || component_1.description !== component_2.description

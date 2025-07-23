@@ -5,12 +5,29 @@ import type {
     GetSupabase
 } from "../supabase"
 import { convert_from_db_row, convert_to_db_row } from "./convert_between_db"
-import type { DataComponent } from "./interface"
+import { IdAndVersion } from "./id"
+import { is_data_component, type DataComponent, type NewDataComponent } from "./interface"
 
 
-export function prepare_data_component_for_db_insert (data_component: DataComponent): DBDataComponentInsertArgs
+export function prepare_data_component_for_db_insert (data_component: DataComponent | NewDataComponent): DBDataComponentInsertArgs
 {
-    const row = convert_to_db_row(data_component)
+    let row
+    let use_row_id: boolean
+    if (is_data_component(data_component))
+    {
+        row = convert_to_db_row(data_component)
+        use_row_id = true
+    }
+    else
+    {
+        const { temporary_id: _, ...rest } = data_component
+        // Set a placeholder ID to allow use of `convert_to_db_row`
+        const temp_data_component: DataComponent = { ...rest, id: new IdAndVersion(-1, 1) }
+        row = convert_to_db_row(temp_data_component)
+        use_row_id = false
+    }
+
+
 
     const args: DBDataComponentInsertArgs = {
         p_editor_id: row.editor_id,
@@ -31,7 +48,7 @@ export function prepare_data_component_for_db_insert (data_component: DataCompon
         p_plain_title: row.plain_title,
         p_plain_description: row.plain_description,
         p_test_run_id: row.test_run_id ?? undefined,
-        p_id: row.id,
+        p_id: use_row_id ? row.id : undefined,
     }
 
     return args
@@ -64,17 +81,9 @@ export type UpsertDataComponentResponse = {
     data: DataComponent;
     error: null;
 }
-export function insert_data_component (get_supabase: GetSupabase, data_component: DataComponent): PromiseLike<UpsertDataComponentResponse>
+export function insert_data_component (get_supabase: GetSupabase, data_component: DataComponent | NewDataComponent): PromiseLike<UpsertDataComponentResponse>
 {
     const db_data_component = prepare_data_component_for_db_insert(data_component)
-
-    if (data_component.id.version !== 1)
-    {
-        return Promise.resolve({
-            data: null,
-            error: new Error(`Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: ${data_component.id.version}`)
-        })
-    }
 
     return get_supabase()
         .rpc("insert_data_component", db_data_component)

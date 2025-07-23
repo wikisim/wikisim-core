@@ -12,15 +12,15 @@ import {
 } from "./fetch_from_db"
 import { IdAndVersion, IdOnly } from "./id"
 import { DataComponent } from "./interface"
-import { new_data_component } from "./modify"
+import { init_data_component } from "./modify"
 import { insert_data_component, update_data_component, UpsertDataComponentResponse } from "./write_to_db"
 
 
 type TABLE_NAME = "data_components_archive" | "data_components"
 
-describe("can created a new data component", () =>
+describe("can init a data component", () =>
 {
-    const data_component_fixture: DataComponent = Object.freeze(new_data_component())
+    const data_component_fixture: DataComponent = Object.freeze(init_data_component())
 
 
     after(async () =>
@@ -91,10 +91,12 @@ describe("can created a new data component", () =>
     })
 
 
-    it("should disallowed inserting new data component when version != 1", async function ()
+    it("should ignore version_number when inserting new data component", async function ()
     {
-        const id = new IdAndVersion(data_component_fixture.id.id, 1) // Version 0 is not allowed
-        id.version = 0 // Explicitly set to 0 to test the error
+        this.timeout(3000)
+
+        const id = new IdAndVersion(data_component_fixture.id.id, 1) // Version 0 is not allowed in constructor
+        id.version = 0 // Explicitly set to 0 for this test
         const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -103,11 +105,28 @@ describe("can created a new data component", () =>
         }
 
         const response = await insert_data_component(get_supabase, data_component)
-        if (response.data)
+        if (response.error)
         {
-            expect.fail(`Should have failed to insert data component with version 0, but got response: ${JSON.stringify(response)}`)
+            expect.fail(`Should not have failed to insert data component when version 0 as it should have been ignored, but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals("Inserts into data_components will be rejected by DB when version_number != 1. Attempted value: 0")
+        deep_equals(response.data, {
+            ...data_component,
+            id: new IdAndVersion(data_component.id.id, 1), // Version should be set to 1 by the DB
+            comment: undefined,
+            version_type: undefined,
+            version_rolled_back_to: undefined,
+            label_ids: undefined,
+            value: undefined,
+            value_type: undefined,
+            datetime_range_start: undefined,
+            datetime_range_end: undefined,
+            datetime_repeat_every: undefined,
+            units: undefined,
+            dimension_ids: undefined,
+        })
+
+        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components")
     })
 
 
