@@ -17,6 +17,8 @@ export class IdOnly
 
     to_str_without_version(): string { return `${this.id}` }
 
+    add_version(v: number): IdAndVersion { return new IdAndVersion(this.id, v) }
+
     // This is used to differentiate between IdOnly and IdAndVersion
     _type_discriminator: string = "IdOnly"
 }
