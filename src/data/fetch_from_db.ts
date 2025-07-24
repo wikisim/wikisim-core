@@ -17,6 +17,10 @@ export type RequestDataComponentsReturn =
 }
 export async function request_data_components(
     get_supabase: GetSupabase,
+    /**
+     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     */
     options: { page?: number, size?: number } = {},
     ids: IdOnly[] = [],
 ): Promise<RequestDataComponentsReturn>
@@ -52,6 +56,10 @@ export async function request_data_components(
 export async function request_archived_data_components(
     get_supabase: GetSupabase,
     ids: IdAndMaybeVersion[] = [],
+    /**
+     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     */
     options: { page?: number, size?: number } = {},
 ): Promise<RequestDataComponentsReturn>
 {
@@ -96,6 +104,10 @@ export async function request_archived_data_components(
 export async function request_data_component_history(
     get_supabase: GetSupabase,
     id: number,
+    /**
+     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     */
     options: { page?: number, size?: number } = {},
 ): Promise<RequestDataComponentsReturn>
 {
@@ -107,6 +119,10 @@ export async function request_data_component_history(
 export async function search_data_components(
     get_supabase: GetSupabase,
     search_terms: string,
+    /**
+     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     */
     options: { page?: number, size?: number } = {},
 ): Promise<RequestDataComponentsReturn>
 {
