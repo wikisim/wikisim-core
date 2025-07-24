@@ -28,7 +28,6 @@ export function prepare_data_component_for_db_insert (data_component: DataCompon
     }
 
 
-
     const args: DBDataComponentInsertArgs = {
         p_editor_id: row.editor_id,
         p_comment: row.comment ?? undefined,
