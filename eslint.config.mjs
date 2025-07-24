@@ -2,7 +2,11 @@ import eslint from "@eslint/js"
 import tseslint from "typescript-eslint"
 
 export default tseslint.config(
-    eslint.configs.recommended,
+    // Apply base ESLint rules only to src directory
+    {
+        files: ["src/**/*.ts", "src/**/*.tsx"],
+        extends: [eslint.configs.recommended],
+    },
     // Apply TypeScript checking only to TypeScript files
     {
         files: ["**/*.ts", "**/*.tsx"],
