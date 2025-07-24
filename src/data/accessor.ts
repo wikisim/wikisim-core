@@ -1,13 +1,13 @@
 import { DataComponent, NewDataComponent, is_data_component } from "./interface"
 
 
-export function get_id_str_of_data_component(data_component: DataComponent | NewDataComponent): string
+export function get_id_str_of_data_component(data_component: DataComponent | NewDataComponent, all_temp_ids_are_same?: boolean): string
 {
     if (is_data_component(data_component))
     {
         return data_component.id.to_str_without_version()
     }
-    return data_component.temporary_id.to_str()
+    return all_temp_ids_are_same ? "temp_id" : data_component.temporary_id.to_str()
 }
 
 
