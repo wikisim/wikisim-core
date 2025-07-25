@@ -223,28 +223,39 @@ STABLE
 SET search_path = 'public'
 AS $$
 
+WITH params AS (
+    SELECT
+        LEAST(GREATEST(limit_n, 1), 20) AS final_limit,  -- clamp to [1, 20]
+        LEAST(GREATEST(offset_n, 0), 500) AS final_offset  -- clamp to [0, 500]
+)
+
+SELECT
+    d.id,
+    d.version_number,
+    d.editor_id,
+    d.created_at,
+    d.comment,
+    d.bytes_changed,
+    d.version_type,
+    d.version_rolled_back_to,
+    d.title,
+    d.description,
+    d.label_ids,
+    d.value,
+    d.value_type,
+    d.datetime_range_start,
+    d.datetime_range_end,
+    d.datetime_repeat_every,
+    d.units,
+    d.dimension_ids,
+    d.plain_title,
+    d.plain_description,
+    d.test_run_id,
+    combined_distinct.score,
+    combined_distinct.method
+FROM (
     SELECT DISTINCT ON (id)
-        d.id,
-        d.version_number,
-        d.editor_id,
-        d.created_at,
-        d.comment,
-        d.bytes_changed,
-        d.version_type,
-        d.version_rolled_back_to,
-        d.title,
-        d.description,
-        d.label_ids,
-        d.value,
-        d.value_type,
-        d.datetime_range_start,
-        d.datetime_range_end,
-        d.datetime_repeat_every,
-        d.units,
-        d.dimension_ids,
-        d.plain_title,
-        d.plain_description,
-        d.test_run_id,
+        id,
         combined.score,
         combined.method
     FROM (
@@ -265,14 +276,17 @@ AS $$
             2 AS method
         FROM data_components
         WHERE similarity(plain_search_text, query) > similarity_threshold
+        LIMIT (SELECT final_limit FROM params)
 
     ) AS combined
-    JOIN data_components d ON d.id = combined.id
+    ORDER BY id
 
-    ORDER BY d.id, score DESC, method ASC
+) as combined_distinct
+JOIN data_components d ON d.id = combined_distinct.id
+ORDER BY combined_distinct.score DESC, combined_distinct.method ASC
 
-    LIMIT LEAST(GREATEST(limit_n, 1), 20)  -- clamp to [1, 20]
-    OFFSET LEAST(GREATEST(offset_n, 0), 500);  -- clamp to [0, 500]
+LIMIT (SELECT final_limit FROM params)
+OFFSET (SELECT final_offset FROM params);
 
 $$;
 -- Example usage:
