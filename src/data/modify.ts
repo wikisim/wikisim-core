@@ -13,10 +13,10 @@ export function init_data_component(partial: Partial<DataComponent> = {}): DataC
         created_at: new Date(),
         bytes_changed: 0,
 
+        title: "",
         // Use the default values produced by the TipTap editor so that the
         // new form does not show changes to the title and description when none
         // were made.
-        title: "<p></p>",
         description: "<p></p>",
 
         // value: "",

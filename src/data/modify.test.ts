@@ -10,7 +10,7 @@ describe("can created a new data component", () => {
         expect(data_component.id.to_str()).equals(`-1v1`)
         expect(data_component.id.id).equals(-1)
         expect(data_component.id.version).equals(1)
-        expect(data_component.title).equals("<p></p>")
+        expect(data_component.title).equals("")
         expect(data_component.description).equals("<p></p>")
         expect(data_component.value_type).equals(undefined)
         expect(data_component.datetime_repeat_every).equals(undefined)
