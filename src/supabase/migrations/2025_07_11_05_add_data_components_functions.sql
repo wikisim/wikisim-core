@@ -182,3 +182,98 @@ BEGIN
     RETURN updated_row;
 END;
 $$;
+
+
+
+CREATE OR REPLACE FUNCTION search_data_components(
+    query TEXT,
+    similarity_threshold FLOAT DEFAULT 0.2,
+    limit_n INT DEFAULT 20,
+    offset_n INT DEFAULT 0
+)
+RETURNS TABLE (
+    id INT,
+    version_number INTEGER,
+    editor_id uuid,
+    created_at TIMESTAMPTZ,
+    comment TEXT,
+    bytes_changed INTEGER,
+    version_type data_component_version_type,
+    version_rolled_back_to INTEGER,
+    title TEXT,
+    description TEXT,
+    label_ids INTEGER[],
+    value TEXT,
+    value_type data_component_value_type,
+    datetime_range_start TIMESTAMPTZ,
+    datetime_range_end TIMESTAMPTZ,
+    datetime_repeat_every data_component_datetime_repeat_every,
+    units TEXT,
+    dimension_ids TEXT[],
+    plain_title TEXT,
+    plain_description TEXT,
+    test_run_id TEXT,
+    score FLOAT,
+    method INT
+)
+LANGUAGE SQL
+-- Use caller's permissions in case in the future we add private data
+SECURITY INVOKER
+STABLE
+SET search_path = 'public'
+AS $$
+
+    SELECT DISTINCT ON (id)
+        d.id,
+        d.version_number,
+        d.editor_id,
+        d.created_at,
+        d.comment,
+        d.bytes_changed,
+        d.version_type,
+        d.version_rolled_back_to,
+        d.title,
+        d.description,
+        d.label_ids,
+        d.value,
+        d.value_type,
+        d.datetime_range_start,
+        d.datetime_range_end,
+        d.datetime_repeat_every,
+        d.units,
+        d.dimension_ids,
+        d.plain_title,
+        d.plain_description,
+        d.test_run_id,
+        combined.score,
+        combined.method
+    FROM (
+        -- Full-text search
+        SELECT
+            id,
+            ts_rank(search_vector, websearch_to_tsquery('english', query)) AS score,
+            1 AS method
+        FROM data_components
+        WHERE search_vector @@ websearch_to_tsquery('english', query)
+
+        UNION ALL
+
+        -- Trigram similarity on plain_search_text
+        SELECT
+            id,
+            similarity(plain_search_text, query) AS score,
+            2 AS method
+        FROM data_components
+        WHERE similarity(plain_search_text, query) > similarity_threshold
+
+    ) AS combined
+    JOIN data_components d ON d.id = combined.id
+
+    ORDER BY d.id, score DESC, method ASC
+
+    LIMIT LEAST(GREATEST(limit_n, 1), 20)  -- clamp to [1, 20]
+    OFFSET LEAST(GREATEST(offset_n, 0), 500);  -- clamp to [0, 500]
+
+$$;
+-- Example usage:
+-- SELECT * FROM search_data_components('grav', 0, 10, 0);

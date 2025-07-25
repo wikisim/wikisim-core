@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Adapted from
-// `npx supabase gen types typescript --project-id sfkgqscbwofiphfxhnxg --schema public > src/supabase/interface.ts`
+// `npx supabase gen types typescript --project-id sfkgqscbwofiphfxhnxg --schema public > src/supabase/interface2.ts`
 
 export type Json =
   | string
@@ -34,7 +34,9 @@ export type Database = {
           id: number
           label_ids: number[] | null
           plain_description: string
+          // plain_search_text: string | null
           plain_title: string
+          // search_vector: unknown | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -63,7 +65,9 @@ export type Database = {
           id?: number
           label_ids?: number[] | null
           plain_description: string
+          // plain_search_text?: string | null
           plain_title: string
+          // search_vector?: unknown | null
           test_run_id?: string | null
           title: string
           units?: string | null
@@ -92,7 +96,9 @@ export type Database = {
           id?: number
           label_ids?: number[] | null
           plain_description?: string
+          // plain_search_text?: string | null
           plain_title?: string
+          // search_vector?: unknown | null
           test_run_id?: string | null
           title?: string
           units?: string | null
@@ -302,6 +308,45 @@ export type Database = {
             | null
         }
       }
+      search_data_components: {
+        Args: {
+          query: string
+          similarity_threshold?: number
+          /**
+           * Allowed values: [1, 20]
+           */
+          limit_n?: number
+          /**
+           * Allowed values: [0, 500]
+           */
+          offset_n?: number
+        }
+        Returns: {
+          id: number
+          version_number: number
+          editor_id: string
+          created_at: string
+          comment: string
+          bytes_changed: number
+          version_type: Database["public"]["Enums"]["data_component_version_type"]
+          version_rolled_back_to: number
+          title: string
+          description: string
+          label_ids: number[]
+          value: string
+          value_type: Database["public"]["Enums"]["data_component_value_type"]
+          datetime_range_start: string
+          datetime_range_end: string
+          datetime_repeat_every: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+          units: string
+          dimension_ids: string[]
+          plain_title: string
+          plain_description: string
+          test_run_id: string | null
+          score: number
+          method: number
+        }[]
+      }
       update_data_component: {
         Args:
           | {
@@ -361,7 +406,9 @@ export type Database = {
           id: number
           label_ids: number[] | null
           plain_description: string
+          // plain_search_text: string | null
           plain_title: string
+          // search_vector: unknown | null
           test_run_id: string | null
           title: string
           units: string | null

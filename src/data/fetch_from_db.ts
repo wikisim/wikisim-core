@@ -116,7 +116,7 @@ export async function request_data_component_history(
 
 
 
-export async function search_data_components(
+export async function search_data_components_v1(
     get_supabase: GetSupabase,
     search_terms: string,
     /**
@@ -139,6 +139,36 @@ export async function search_data_components(
         })
         // .order("rank", { ascending: false })
         .range(from, to)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            const instances = data.map(d => convert_from_db_row(d))
+            return { data: instances, error: null }
+        })
+}
+
+
+export async function search_data_components(
+    get_supabase: GetSupabase,
+    search_terms: string,
+    /**
+     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     */
+    options: { page?: number, size?: number } = {},
+): Promise<RequestDataComponentsReturn>
+{
+    const limit_n = clamp(options.size ?? 20, 1, 20)
+    const page = Math.max(options.page ?? 0, 0)
+    const offset_n = page * limit_n
+
+    return get_supabase()
+        .rpc("search_data_components", {
+            query: search_terms,
+            similarity_threshold: 0,
+            offset_n,
+            limit_n,
+        })
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
