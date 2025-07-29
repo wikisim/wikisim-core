@@ -83,6 +83,8 @@ BEGIN
 
         value,
         value_type,
+        value_number_display_type,
+        value_number_sig_figs,
         datetime_range_start,
         datetime_range_end,
         datetime_repeat_every,
@@ -110,6 +112,8 @@ BEGIN
 
         NEW.value,
         NEW.value_type,
+        NEW.value_number_display_type,
+        NEW.value_number_sig_figs,
         NEW.datetime_range_start,
         NEW.datetime_range_end,
         NEW.datetime_repeat_every,

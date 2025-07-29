@@ -2,6 +2,14 @@
 CREATE TYPE data_component_value_type AS ENUM ('number', 'datetime_range', 'number_array');
 CREATE TYPE data_component_datetime_repeat_every AS ENUM ('second', 'minute', 'hour', 'day', 'month', 'year', 'decade', 'century');
 CREATE TYPE data_component_version_type AS ENUM ('minor', 'rollback');
+CREATE TYPE data_component_value_number_display_type AS ENUM (
+    'bare', -- only the number so that numbers like 2023 do not have a comma
+    'simple', -- formats numbers to have a comma like 2,023
+    'scaled', -- replaces zeros in large numbers like 2.0 million
+    'abbreviated_scaled', -- abbreviates to 2.0 M
+    'percentage', -- formats numbers as a percentage like 2.0%
+    'scientific' -- formats numbers in scientific notation like 2.0e6
+);
 
 CREATE TABLE data_components
 (
@@ -22,6 +30,8 @@ CREATE TABLE data_components
 
     value TEXT,
     value_type data_component_value_type,
+    value_number_display_type data_component_value_number_display_type,
+    value_number_sig_figs SMALLINT, -- Number of significant figures to display for numbers
     datetime_range_start TIMESTAMPTZ,
     datetime_range_end TIMESTAMPTZ,
     datetime_repeat_every data_component_datetime_repeat_every,
@@ -79,6 +89,8 @@ CREATE TABLE data_components_archive
 
     value TEXT,
     value_type data_component_value_type,
+    value_number_display_type data_component_value_number_display_type,
+    value_number_sig_figs SMALLINT, -- Number of significant figures to display for numbers
     datetime_range_start TIMESTAMPTZ,
     datetime_range_end TIMESTAMPTZ,
     datetime_repeat_every data_component_datetime_repeat_every,

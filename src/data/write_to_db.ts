@@ -39,6 +39,8 @@ export function prepare_data_component_for_db_insert (data_component: DataCompon
         p_label_ids: row.label_ids ?? undefined,
         p_value: row.value ?? undefined,
         p_value_type: row.value_type ?? undefined,
+        p_value_number_display_type: row.value_number_display_type ?? undefined,
+        p_value_number_sig_figs: row.value_number_sig_figs ?? undefined,
         p_datetime_range_start: row.datetime_range_start ?? undefined,
         p_datetime_range_end: row.datetime_range_end ?? undefined,
         p_datetime_repeat_every: row.datetime_repeat_every ?? undefined,

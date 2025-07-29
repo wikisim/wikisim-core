@@ -21,6 +21,8 @@ describe("prepare_data_component_for_db_insert", function ()
             label_ids: [-3, -4],
             value: "123",
             value_type: "number",
+            value_number_display_type: "bare",
+            value_number_sig_figs: 2,
             datetime_range_start: new Date("2023-01-01T00:00:00Z"),
             datetime_range_end: new Date("2023-01-02T00:00:00Z"),
             datetime_repeat_every: undefined,
@@ -44,6 +46,8 @@ describe("prepare_data_component_for_db_insert", function ()
         expect(result).to.have.property("p_comment", data_component.comment)
         expect(result).to.have.property("p_bytes_changed", data_component.bytes_changed)
         expect(result).to.have.property("p_version_type", data_component.version_type)
+        expect(result).to.have.property("p_value_number_display_type", data_component.value_number_display_type)
+        expect(result).to.have.property("p_value_number_sig_figs", data_component.value_number_sig_figs)
         expect(result).to.have.property("p_version_rolled_back_to", data_component.version_rolled_back_to)
         expect(result).to.have.property("p_title", data_component.title)
         expect(result).to.have.property("p_description", data_component.description)

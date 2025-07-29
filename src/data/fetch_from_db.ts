@@ -155,7 +155,7 @@ export async function search_data_components(
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
      * Size is the number of items per page. Default is 20, min is 1, max is 1000.
      */
-    options: { page?: number, size?: number } = {},
+    options: { page?: number, size?: number, similarity_threshold?: number } = {},
 ): Promise<RequestDataComponentsReturn>
 {
     const limit_n = clamp(options.size ?? 20, 1, 20)
@@ -165,7 +165,7 @@ export async function search_data_components(
     return get_supabase()
         .rpc("search_data_components", {
             query: search_terms,
-            similarity_threshold: 0,
+            similarity_threshold: options.similarity_threshold ?? 0,
             offset_n,
             limit_n,
         })

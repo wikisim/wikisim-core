@@ -118,6 +118,8 @@ describe("can init a data component", () =>
             label_ids: undefined,
             value: undefined,
             value_type: undefined,
+            value_number_display_type: undefined,
+            value_number_sig_figs: undefined,
             datetime_range_start: undefined,
             datetime_range_end: undefined,
             datetime_repeat_every: undefined,
@@ -182,6 +184,17 @@ describe("can init a data component", () =>
             editor_id: user_id,
             title: "<p>Test Title</p>",
             description: "<p>Test Description</p>",
+            label_ids: [-1, -2],
+            value: "123",
+            value_type: "number",
+            value_number_display_type: "bare",
+            value_number_sig_figs: 2,
+            // The datetime_range_* fields are not used with the value* fields or the units field
+            datetime_range_start: new Date("2023-01-01T00:00:00Z"),
+            datetime_range_end: new Date("2023-01-02T00:00:00Z"),
+            datetime_repeat_every: "day",
+            units: "kg",
+            dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             plain_title: "Some other title",
             plain_description: "Some other description",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
@@ -203,14 +216,16 @@ describe("can init a data component", () =>
             version_rolled_back_to: undefined,
             title: "<p>Test Title</p>",
             description: "<p>Test Description</p>",
-            label_ids: undefined,
-            value: undefined,
-            value_type: undefined,
-            datetime_range_start: undefined,
-            datetime_range_end: undefined,
-            datetime_repeat_every: undefined,
-            units: undefined,
-            dimension_ids: undefined,
+            label_ids: [-1, -2],
+            value: "123",
+            value_type: "number",
+            value_number_display_type: "bare",
+            value_number_sig_figs: 2,
+            datetime_range_start: new Date("2023-01-01T00:00:00Z"),
+            datetime_range_end: new Date("2023-01-02T00:00:00Z"),
+            datetime_repeat_every: "day",
+            units: "kg",
+            dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             // Should be set by the convert_to_db_row function
             plain_title: "Test Title",
             // Should be set by the convert_to_db_row function
@@ -263,14 +278,16 @@ describe("can init a data component", () =>
             version_type: undefined,
             version_rolled_back_to: undefined,
             description: "<p>Test Description</p>",
-            label_ids: undefined,
-            value: undefined,
-            value_type: undefined,
-            datetime_range_start: undefined,
-            datetime_range_end: undefined,
-            datetime_repeat_every: undefined,
-            units: undefined,
-            dimension_ids: undefined,
+            label_ids: [-1, -2],
+            value: "123",
+            value_type: "number",
+            value_number_display_type: "bare",
+            value_number_sig_figs: 2,
+            datetime_range_start: new Date("2023-01-01T00:00:00.000Z"),
+            datetime_range_end: new Date("2023-01-02T00:00:00.000Z"),
+            datetime_repeat_every: "day",
+            units: "kg",
+            dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             plain_description: "Test Description",
         }
 
@@ -377,8 +394,8 @@ describe("can init a data component", () =>
         let search_2_results: RequestDataComponentsReturn
         try
         {
-            search_results = await search_data_components(get_supabase, "second title", { page: 0, size: 10 })
-            search_2_results = await search_data_components(get_supabase, `"Second Component"`, { page: 0, size: 10 })
+            search_results = await search_data_components(get_supabase, "second title", { page: 0, size: 10, similarity_threshold: 0.5 })
+            search_2_results = await search_data_components(get_supabase, `"Second Component"`, { page: 0, size: 10, similarity_threshold: 0.5 })
         }
         catch (error)
         {

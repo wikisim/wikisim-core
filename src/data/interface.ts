@@ -3,6 +3,7 @@ import { IdAndVersion, TempId } from "./id"
 
 
 type DBEnums = Database["public"]["Enums"]
+type NumberDisplayType = DBEnums["data_component_value_number_display_type"]
 
 interface DataComponentFields
 {
@@ -20,6 +21,8 @@ interface DataComponentFields
 
     value?: string
     value_type?: DBEnums["data_component_value_type"]
+    value_number_display_type?: NumberDisplayType
+    value_number_sig_figs?: number
     datetime_range_start?: Date
     datetime_range_end?: Date
     datetime_repeat_every?: DBEnums["data_component_datetime_repeat_every"]

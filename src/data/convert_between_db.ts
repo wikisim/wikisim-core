@@ -20,6 +20,8 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
 
         value: data_component.value ?? null,
         value_type: data_component.value_type ?? null,
+        value_number_display_type: data_component.value_number_display_type ?? null,
+        value_number_sig_figs: data_component.value_number_sig_figs ?? null,
         datetime_range_start: data_component.datetime_range_start
             ? data_component.datetime_range_start.toISOString()
             : null,
@@ -54,6 +56,8 @@ export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id
 
         value: row.value ?? undefined,
         value_type: row.value_type ?? undefined,
+        value_number_display_type: row.value_number_display_type ?? undefined,
+        value_number_sig_figs: row.value_number_sig_figs ?? undefined,
         datetime_range_start: convert_datetime(row.datetime_range_start),
         datetime_range_end: convert_datetime(row.datetime_range_end),
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
