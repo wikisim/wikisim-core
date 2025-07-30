@@ -20,6 +20,8 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
 
         value: null,
         value_type: null,
+        value_number_display_type: null,
+        value_number_sig_figs: null,
         datetime_range_start: null,
         datetime_range_end: null,
         datetime_repeat_every: null,
