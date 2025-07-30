@@ -49,29 +49,29 @@ export function init_new_data_component(partial: Partial<DataComponent> = {}): N
 }
 
 
-export function set_fields(data_component: DataComponent, fields: Partial<DataComponent>): DataComponent
-{
-    if (fields.title !== undefined) throw new Error("Cannot set title, requires UI libraries.")
-    if (fields.description !== undefined) throw new Error("Cannot set description, requires UI libraries.")
-
-    return {
-        ...data_component,
-        ...fields,
-        // // Ensure that certain fields are set to default values if not provided
-        // value_type: fields.value_type ?? "number",
-        // datetime_repeat_every: fields.datetime_repeat_every ?? "day",
-        // created_at: fields.created_at ?? new Date(),
-    }
-}
-
-
 export function changes_made(component_1: DataComponent | NewDataComponent, component_2: DataComponent | NewDataComponent, compare_meta_fields?: boolean): boolean
 {
     const diff = component_1.title !== component_2.title
-           || component_1.description !== component_2.description
+        || component_1.description !== component_2.description
+        || JSON.stringify(component_1.label_ids) !== JSON.stringify(component_2.label_ids)
+
+        || component_1.value !== component_2.value
+        || component_1.value_type !== component_2.value_type
+        || component_1.value_number_display_type !== component_2.value_number_display_type
+        || component_1.value_number_sig_figs !== component_2.value_number_sig_figs
+        || component_1.datetime_range_start?.getTime() !== component_2.datetime_range_start?.getTime()
+        || component_1.datetime_range_end?.getTime() !== component_2.datetime_range_end?.getTime()
+        || component_1.datetime_repeat_every !== component_2.datetime_repeat_every
+        || component_1.units !== component_2.units
+        || JSON.stringify(component_1.dimension_ids) !== JSON.stringify(component_2.dimension_ids)
 
     if (diff || !compare_meta_fields) return diff
 
     return component_1.comment !== component_2.comment
         || component_1.version_type !== component_2.version_type
+        || component_1.version_rolled_back_to !== component_2.version_rolled_back_to
+        || component_1.bytes_changed !== component_2.bytes_changed
+        // || component_1.test_run_id !== component_2.test_run_id
+        // || component_1.editor_id !== component_2.editor_id
+        // || component_1.created_at.getTime() !== component_2.created_at.getTime()
 }

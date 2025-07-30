@@ -1,7 +1,8 @@
 import { expect } from "chai"
 
+import { IdAndVersion } from "./id"
 import { DataComponent } from "./interface"
-import { changes_made, init_data_component, set_fields } from "./modify"
+import { changes_made, init_data_component } from "./modify"
 
 
 describe("can created a new data component", () => {
@@ -15,46 +16,115 @@ describe("can created a new data component", () => {
         expect(data_component.value_type).equals(undefined)
         expect(data_component.datetime_repeat_every).equals(undefined)
     })
-
-    it("should set fields correctly", () => {
-        let data_component: DataComponent = init_data_component()
-        expect(() =>
-            set_fields(data_component, { title: "Test Title" })
-        ).throws("Cannot set title, requires UI libraries.")
-
-        expect(() =>
-            set_fields(data_component, { description: "Test Description" })
-        ).throws("Cannot set description, requires UI libraries.")
-    })
 })
 
 
 describe("changes_made function", () => {
-    it("should detect changes made to the data component", () => {
+    it("should return false when no changes made to the data component", () =>
+    {
         const original: DataComponent = init_data_component({ title: "Original Title", description: "Original Description" })
         const unchanged: DataComponent = init_data_component({ title: "Original Title", description: "Original Description" })
-        const modified: DataComponent = init_data_component({ title: "Modified Title", description: "Original Description" })
 
         expect(changes_made(original, original)).equals(false)
         expect(changes_made(unchanged, original)).equals(false)
-        expect(changes_made(modified, modified)).equals(false)
-
-        expect(changes_made(modified, original)).equals(true)
-        expect(changes_made(original, modified)).equals(true, "Changes should be detected in both directions")
     })
 
-    it("should only detect changes to meta fields if compare_meta_fields is true", () => {
-        const original: DataComponent = init_data_component({ comment: "Comment one" })
-        const modified: DataComponent = init_data_component({ comment: "New comment two" })
+    const original: DataComponent = init_data_component()
+    const modified: DataComponent = init_data_component({
+        editor_id: "editor_1",
+        created_at: new Date("2025-07-30T00:00:00Z"),
+        comment: "Another comment",
+        bytes_changed: 100,
+        version_type: "minor",
+        version_rolled_back_to: -10,
 
-        expect(changes_made(original, modified, false)).equals(false)
-        expect(changes_made(modified, original, false)).equals(false)
+        title: "<p>Modified Title</p>",
+        description: "<p>Modified Description</p>",
+        label_ids: [-2, -3],
 
-        // If we only compare meta fields, changes should not be detected
-        expect(changes_made(original, modified, true)).equals(true)
+        value: "Modified Value",
+        value_type: "number",
+        value_number_display_type: "scientific",
+        value_number_sig_figs: 3,
+        datetime_range_start: new Date("2025-07-30T00:00:00Z"),
+        datetime_range_end: new Date("2025-07-30T00:00:00Z"),
+        datetime_repeat_every: "day",
+        units: "some units",
+        dimension_ids: [ new IdAndVersion(-1, 1) ],
 
-        const modified_version_type: DataComponent = init_data_component({ version_type: "minor" })
-        expect(changes_made(original, modified_version_type, false)).equals(false)
-        expect(changes_made(original, modified_version_type, true)).equals(true)
+        plain_title: "Modified Title",
+        plain_description: "Modified Description",
+
+        test_run_id: "test_run_-789",
+    })
+
+    const normal_fields: (keyof DataComponent)[] = [
+        "title",
+        "description",
+        "label_ids",
+
+        "value",
+        "value_type",
+        "value_number_display_type",
+        "value_number_sig_figs",
+        "datetime_range_start",
+        "datetime_range_end",
+        "datetime_repeat_every",
+        "units",
+        "dimension_ids",
+    ]
+
+    const meta_fields: (keyof DataComponent)[] = [
+        "comment",
+        "bytes_changed",
+        "version_type",
+        "version_rolled_back_to",
+    ]
+
+    const derived_or_special_fields: (keyof DataComponent)[] = [
+        // Not sure we want to compare these fields yet
+        "editor_id",
+        "created_at",
+
+        // These fields are derived or special and should not be compared
+        "plain_title",
+        "plain_description",
+        "test_run_id",
+    ]
+
+    it("should return true for changes to normal fields but not meta or special when compare_meta_fields is false", () =>
+    {
+        normal_fields.forEach(field => {
+            const updated_component = { ...original, [field]: modified[field] }
+            expect(changes_made(original, updated_component)).equals(true, `Changes should be detected for field "${field}"`)
+            expect(changes_made(updated_component, original)).equals(true, `Changes should be detected for field "${field}" in both directions`)
+        })
+
+        meta_fields.forEach(field => {
+            const updated_component = { ...original, [field]: modified[field] }
+            expect(changes_made(original, updated_component)).equals(false, `Changes should be not detected for meta field "${field}" when compare_meta_fields is false`)
+            expect(changes_made(updated_component, original)).equals(false, `Changes should be not detected for meta field "${field}" in both directions when compare_meta_fields is false`)
+        })
+
+        derived_or_special_fields.forEach(field => {
+            const updated_component = { ...original, [field]: modified[field] }
+            expect(changes_made(original, updated_component)).equals(false, `Changes should be not detected for derived or special field "${field}" when compare_meta_fields is false`)
+            expect(changes_made(updated_component, original)).equals(false, `Changes should be not detected for derived or special field "${field}" in both directions when compare_meta_fields is false`)
+        })
+    })
+
+    it("should return true for changes to normal and meta fields but not special when compare_meta_fields is true", () =>
+    {
+        [...normal_fields, ...meta_fields].forEach(field => {
+            const updated_component = { ...original, [field]: modified[field] }
+            expect(changes_made(original, updated_component, true)).equals(true, `Changes should be detected for field "${field}"`)
+            expect(changes_made(updated_component, original, true)).equals(true, `Changes should be detected for field "${field}" in both directions`)
+        })
+
+        derived_or_special_fields.forEach(field => {
+            const updated_component = { ...original, [field]: modified[field] }
+            expect(changes_made(original, updated_component, true)).equals(false, `Changes should be not detected for derived or special field "${field}" when compare_meta_fields is true`)
+            expect(changes_made(updated_component, original, true)).equals(false, `Changes should be not detected for derived or special field "${field}" in both directions when compare_meta_fields is true`)
+        })
     })
 })
