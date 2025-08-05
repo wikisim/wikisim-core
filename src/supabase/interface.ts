@@ -329,41 +329,32 @@ export type Database = {
           p_id?: number
         }
         Returns: {
-          bytes_changed: number
-          comment: string | null
-          created_at: string
-          datetime_range_end: string | null
-          datetime_range_start: string | null
-          datetime_repeat_every:
-            | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
-            | null
-          description: string
-          dimension_ids: string[] | null
-          editor_id: string
           id: number
-          label_ids: number[] | null
-          owner_id: string | null
-          plain_description: string
-          // plain_search_text: string | null
-          plain_title: string
-          // search_vector: unknown | null
-          test_run_id: string | null
-          title: string
-          units: string | null
-          value: string | null
-          value_number_display_type:
-            | Database["public"]["Enums"]["data_component_value_number_display_type"]
-            | null
-          value_number_sig_figs: number | null
-          value_type:
-            | Database["public"]["Enums"]["data_component_value_type"]
-            | null
+          owner_id: string
           version_number: number
-          version_rolled_back_to: number | null
-          version_type:
-            | Database["public"]["Enums"]["data_component_version_type"]
-            | null
-        }
+          editor_id: string
+          created_at: string
+          comment: string
+          bytes_changed: number
+          version_type: Database["public"]["Enums"]["data_component_version_type"]
+          version_rolled_back_to: number
+          title: string
+          description: string
+          label_ids: number[]
+          value: string
+          value_type: Database["public"]["Enums"]["data_component_value_type"]
+          value_number_display_type: Database["public"]["Enums"]["data_component_value_number_display_type"]
+          value_number_sig_figs: number
+          datetime_range_start: string
+          datetime_range_end: string
+          datetime_repeat_every: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+          units: string
+          dimension_ids: string[]
+          plain_title: string
+          plain_description: string
+          test_run_id: string
+          warning_message: string
+        }[]
       }
       search_data_components: {
         Args: {
@@ -431,41 +422,32 @@ export type Database = {
           p_dimension_ids?: string[]
         }
         Returns: {
-          bytes_changed: number
-          comment: string | null
-          created_at: string
-          datetime_range_end: string | null
-          datetime_range_start: string | null
-          datetime_repeat_every:
-            | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
-            | null
-          description: string
-          dimension_ids: string[] | null
-          editor_id: string
           id: number
-          label_ids: number[] | null
-          owner_id: string | null
-          plain_description: string
-          // plain_search_text: string | null
-          plain_title: string
-          // search_vector: unknown | null
-          test_run_id: string | null
-          title: string
-          units: string | null
-          value: string | null
-          value_number_display_type:
-            | Database["public"]["Enums"]["data_component_value_number_display_type"]
-            | null
-          value_number_sig_figs: number | null
-          value_type:
-            | Database["public"]["Enums"]["data_component_value_type"]
-            | null
+          owner_id: string
           version_number: number
-          version_rolled_back_to: number | null
-          version_type:
-            | Database["public"]["Enums"]["data_component_version_type"]
-            | null
-        }
+          editor_id: string
+          created_at: string
+          comment: string
+          bytes_changed: number
+          version_type: Database["public"]["Enums"]["data_component_version_type"]
+          version_rolled_back_to: number
+          title: string
+          description: string
+          label_ids: number[]
+          value: string
+          value_type: Database["public"]["Enums"]["data_component_value_type"]
+          value_number_display_type: Database["public"]["Enums"]["data_component_value_number_display_type"]
+          value_number_sig_figs: number
+          datetime_range_start: string
+          datetime_range_end: string
+          datetime_repeat_every: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+          units: string
+          dimension_ids: string[]
+          plain_title: string
+          plain_description: string
+          test_run_id: string
+          warning_message: string
+        }[]
       }
     }
     Enums: {

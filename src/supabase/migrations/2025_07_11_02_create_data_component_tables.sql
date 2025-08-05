@@ -68,7 +68,7 @@ CREATE SCHEMA IF NOT EXISTS extension_pg_trgm;
 GRANT USAGE ON SCHEMA extension_pg_trgm TO authenticated, anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA extension_pg_trgm TO authenticated, anon;
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm SET SCHEMA extension_pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extension_pg_trgm;
 CREATE INDEX idx_data_components_plain_search_text_trgm
   ON data_components USING GIN (plain_search_text gin_trgm_ops);
 

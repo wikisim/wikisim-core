@@ -1,114 +1,125 @@
-CREATE OR REPLACE FUNCTION insert_data_component(
+CREATE SCHEMA IF NOT EXISTS internal_functions;
+
+
+CREATE OR REPLACE FUNCTION internal_functions.get_edge_function_base_url()
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+SET search_path = 'public'
+AS $$
+    SELECT 'https://sfkgqscbwofiphfxhnxg.supabase.co/functions/v1';
+$$;
+
+
+CREATE OR REPLACE FUNCTION internal_functions.get_supabase_public_anon_key()
+RETURNS text
+LANGUAGE sql
+IMMUTABLE
+SET search_path = 'public'
+AS $$
+    SELECT 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMjA2MTkwNSwiZXhwIjoxOTQ3NjM3OTA1fQ.or3FBQDa4CtAA8w7XQtYl_3NTmtFFYPWoafolOpPKgA';
+$$;
+
+
+CREATE SCHEMA IF NOT EXISTS extension_http;
+GRANT USAGE ON SCHEMA extension_http TO authenticated;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA extension_http TO authenticated;
+-- Enable the http extension for making HTTP requests from PostgreSQL
+CREATE EXTENSION IF NOT EXISTS http WITH SCHEMA extension_http;
+
+
+
+CREATE OR REPLACE FUNCTION internal_functions.calculate_plain_text(
+    p_id integer,
     p_title text,
     p_description text,
     p_plain_title text,
-    p_plain_description text,
-    p_bytes_changed integer,
-
-    p_owner_id uuid DEFAULT NULL, -- Optional owner ID for personal data
-
-    p_comment text DEFAULT NULL,
-    p_version_type data_component_version_type DEFAULT NULL,
-    p_version_rolled_back_to integer DEFAULT NULL,
-
-    p_label_ids integer[] DEFAULT NULL,
-
-    p_value text DEFAULT NULL,
-    p_value_type data_component_value_type DEFAULT NULL,
-    p_value_number_display_type data_component_value_number_display_type DEFAULT NULL,
-    p_value_number_sig_figs smallint DEFAULT NULL,
-    p_datetime_range_start timestamptz DEFAULT NULL,
-    p_datetime_range_end timestamptz DEFAULT NULL,
-    p_datetime_repeat_every data_component_datetime_repeat_every DEFAULT NULL,
-    p_units text DEFAULT NULL,
-    p_dimension_ids text[] DEFAULT NULL,
-
-    -- Optional field for test runs
-    p_test_run_id text DEFAULT NULL,
-    -- Optional id field for test runs, can only be negative
-    p_id integer DEFAULT NULL
+    p_plain_description text
 )
-RETURNS data_components
+RETURNS TABLE (
+    id integer,
+    plain_title text,
+    plain_description text,
+    warning_message text
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = 'public'
+SET search_path = 'internal_functions'
 AS $$
 DECLARE
-    new_row data_components;
+    edge_function_url text;
+    http_response record;
+    conversion_response jsonb;
+    converted_plain_title text := p_plain_title;
+    converted_plain_description text := p_plain_description;
+    warning_message text := NULL;
 BEGIN
-    IF auth.role() <> 'authenticated' THEN
-        -- This check is essential in stopping a non-authenticated user because
-        -- the `GRANT EXECUTE ... TO authenticated` does not work at this level.
-        RAISE EXCEPTION 'ERR03. Must be authenticated';
-    END IF;
 
-    -- IF p_editor_id IS DISTINCT FROM auth.uid() THEN
-    --     RAISE EXCEPTION 'ERR04. editor_id must match your user id';
-    -- END IF;
+    -- Call Edge Function to convert TipTap content to plain text
+    BEGIN
+        -- Get the Edge Function URL
+        edge_function_url := internal_functions.get_edge_function_base_url() || '/convert_tiptap_to_plain';
 
-    IF p_id IS NULL THEN
-        p_id := nextval('data_components_id_seq'); -- Use sequence for new IDs
-    ELSIF p_id >= 0 THEN
-        RAISE EXCEPTION 'ERR05. p_id must be negative for test runs, got %', p_id;
-    ELSIF p_test_run_id IS NULL THEN
-        RAISE EXCEPTION 'ERR06. p_test_run_id must be provided for test runs with negative id of %, but got %', p_id, p_test_run_id;
-    END IF;
+        -- Set a default timeout for HTTP requests to prevent long waits.
+        SET extension_http.http.curlopt_timeout_msec = 500;
 
-    IF p_owner_id IS NOT NULL AND p_owner_id <> auth.uid() THEN
-        RAISE EXCEPTION 'ERR10. owner_id must match your user id or be NULL';
-    END IF;
+        -- Make HTTP request to Edge Function
+        -- I don't like doing this in a transaction because I assume this will
+        -- tie up DB resources and block other inserts whilst it waits for the
+        -- Edge Function to respond.
+        SELECT * FROM extension_http.http((
+            'POST',
+            edge_function_url,
+            ARRAY[
+                extension_http.http_header('Authorization', 'Bearer ' || internal_functions.get_supabase_public_anon_key())
+            ],
+            'application/json',
+            jsonb_build_object(
+                'batch', jsonb_build_array(
+                    jsonb_build_object(
+                        'id', p_id,
+                        'title', p_title,
+                        'description', p_description
+                    )
+                )
+            )::text
+        )::extension_http.http_request) INTO http_response;
 
-    INSERT INTO data_components (
-        owner_id,
-        version_number,
-        editor_id,
-        comment,
-        bytes_changed,
-        version_type,
-        version_rolled_back_to,
-        title,
-        description,
-        label_ids,
-        value,
-        value_type,
-        value_number_display_type,
-        value_number_sig_figs,
-        datetime_range_start,
-        datetime_range_end,
-        datetime_repeat_every,
-        units,
-        dimension_ids,
-        plain_title,
-        plain_description,
-        test_run_id,
-        id
-    ) VALUES (
-        p_owner_id,
-        1, -- initial version number
-        auth.uid(),
-        p_comment,
-        p_bytes_changed,
-        p_version_type,
-        p_version_rolled_back_to,
-        p_title,
-        p_description,
-        p_label_ids,
-        p_value,
-        p_value_type,
-        p_value_number_display_type,
-        p_value_number_sig_figs,
-        p_datetime_range_start,
-        p_datetime_range_end,
-        p_datetime_repeat_every,
-        p_units,
-        p_dimension_ids,
-        p_plain_title,
-        p_plain_description,
-        p_test_run_id,
-        p_id
-    ) RETURNING * INTO new_row;
+        -- Parse the response
+        IF http_response.status = 200 THEN
+            conversion_response := http_response.content::jsonb;
 
-    RETURN new_row;
+            -- Extract converted plain text
+            converted_plain_title := COALESCE(
+                (conversion_response->'results'->0->>'plain_title'),
+                ''
+            );
+            converted_plain_description := COALESCE(
+                (conversion_response->'results'->0->>'plain_description'),
+                ''
+            );
+        ELSE
+            -- Log the error but don't fail the insert
+            warning_message := format(
+                'Edge Function call failed with status %s. Using plain text fields from client. Error content: %s',
+                http_response.status,
+                http_response.content
+            );
+            RAISE WARNING '%', warning_message;
+        END IF;
+
+    EXCEPTION WHEN OTHERS THEN
+        -- If Edge Function fails, log warning and continue with empty plain text
+        warning_message := format('Failed to call Edge Function convert_tiptap_to_plain for TipTap conversion: %s. Using plain text fields from client.', SQLERRM);
+        RAISE WARNING '%', warning_message;
+    END;
+
+    -- Return the converted plain text
+    RETURN QUERY SELECT
+        p_id as id,
+        converted_plain_title AS plain_title,
+        converted_plain_description AS plain_description,
+        warning_message;
 END;
 $$;
 
@@ -144,13 +155,41 @@ CREATE OR REPLACE FUNCTION update_data_component(
     -- Optional field for test runs should not be updatable
     -- p_test_run_id text DEFAULT NULL
 )
-RETURNS data_components
+-- RETURNS data_components
+RETURNS TABLE (
+    id INTEGER,
+    owner_id uuid,
+    version_number INTEGER,
+    editor_id uuid,
+    created_at TIMESTAMPTZ,
+    comment TEXT,
+    bytes_changed INTEGER,
+    version_type data_component_version_type,
+    version_rolled_back_to INTEGER,
+    title TEXT,
+    description TEXT,
+    label_ids INTEGER[],
+    value TEXT,
+    value_type data_component_value_type,
+    value_number_display_type data_component_value_number_display_type,
+    value_number_sig_figs SMALLINT,
+    datetime_range_start TIMESTAMPTZ,
+    datetime_range_end TIMESTAMPTZ,
+    datetime_repeat_every data_component_datetime_repeat_every,
+    units TEXT,
+    dimension_ids TEXT[],
+    plain_title TEXT,
+    plain_description TEXT,
+    test_run_id TEXT,
+    warning_message TEXT
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = 'public'
 AS $$
 DECLARE
     updated_row data_components;
+    converted_plain_text_result RECORD;
 BEGIN
     IF auth.role() <> 'authenticated' THEN
         -- This check is essential in stopping a non-authenticated user because
@@ -161,6 +200,15 @@ BEGIN
     -- IF p_editor_id IS DISTINCT FROM auth.uid() THEN
     --     RAISE EXCEPTION 'ERR08. editor_id must match your user id';
     -- END IF;
+
+    -- Call Edge Function to convert TipTap content to plain text
+    SELECT * FROM internal_functions.calculate_plain_text(
+        p_id,
+        p_title,
+        p_description,
+        p_plain_title,
+        p_plain_description
+    ) INTO converted_plain_text_result;
 
     UPDATE data_components
     SET
@@ -185,8 +233,163 @@ BEGIN
         units = p_units,
         dimension_ids = p_dimension_ids,
 
-        plain_title = p_plain_title,
-        plain_description = p_plain_description
+        plain_title = converted_plain_text_result.plain_title, -- Server-side converted plain text
+        plain_description = converted_plain_text_result.plain_description -- Server-side converted plain text
+    WHERE (
+        data_components.id = p_id AND data_components.version_number = p_version_number
+        AND (
+            data_components.owner_id = auth.uid() -- Ensure the owner is the editor
+            OR data_components.owner_id IS NULL -- Allow updates if original owner_id is NULL, i.e. is a wiki component
+        )
+    )
+    RETURNING * INTO updated_row;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'ERR09. Update failed: id % with version_number % not found or version mismatch.', p_id, p_version_number;
+    END IF;
+
+    RETURN QUERY SELECT
+        updated_row.id,
+        updated_row.owner_id,
+        updated_row.version_number,
+        updated_row.editor_id,
+        updated_row.created_at,
+        updated_row.comment,
+        updated_row.bytes_changed,
+        updated_row.version_type,
+        updated_row.version_rolled_back_to,
+        updated_row.title,
+        updated_row.description,
+        updated_row.label_ids,
+        updated_row.value,
+        updated_row.value_type,
+        updated_row.value_number_display_type,
+        updated_row.value_number_sig_figs,
+        updated_row.datetime_range_start,
+        updated_row.datetime_range_end,
+        updated_row.datetime_repeat_every,
+        updated_row.units,
+        updated_row.dimension_ids,
+        updated_row.plain_title,
+        updated_row.plain_description,
+        updated_row.test_run_id,
+        converted_plain_text_result.warning_message -- Include any warning message from Edge Function call
+    ;
+END;
+$$;
+
+
+
+CREATE OR REPLACE FUNCTION update_data_component(
+    p_id integer,
+
+    p_version_number integer,
+
+    p_title text,
+    p_description text,
+    p_plain_title text,
+    p_plain_description text,
+    p_bytes_changed integer,
+
+    p_comment text DEFAULT NULL,
+    p_version_type data_component_version_type DEFAULT NULL,
+    p_version_rolled_back_to integer DEFAULT NULL,
+
+    p_label_ids integer[] DEFAULT NULL,
+
+    p_value text DEFAULT NULL,
+    p_value_type data_component_value_type DEFAULT NULL,
+    p_value_number_display_type data_component_value_number_display_type DEFAULT NULL,
+    p_value_number_sig_figs smallint DEFAULT NULL,
+    p_datetime_range_start timestamptz DEFAULT NULL,
+    p_datetime_range_end timestamptz DEFAULT NULL,
+    p_datetime_repeat_every data_component_datetime_repeat_every DEFAULT NULL,
+    p_units text DEFAULT NULL,
+    p_dimension_ids text[] DEFAULT NULL
+
+    -- Optional field for test runs should not be updatable
+    -- p_test_run_id text DEFAULT NULL
+)
+-- RETURNS data_components
+RETURNS TABLE (
+    id INTEGER,
+    owner_id uuid,
+    version_number INTEGER,
+    editor_id uuid,
+    created_at TIMESTAMPTZ,
+    comment TEXT,
+    bytes_changed INTEGER,
+    version_type data_component_version_type,
+    version_rolled_back_to INTEGER,
+    title TEXT,
+    description TEXT,
+    label_ids INTEGER[],
+    value TEXT,
+    value_type data_component_value_type,
+    value_number_display_type data_component_value_number_display_type,
+    value_number_sig_figs SMALLINT,
+    datetime_range_start TIMESTAMPTZ,
+    datetime_range_end TIMESTAMPTZ,
+    datetime_repeat_every data_component_datetime_repeat_every,
+    units TEXT,
+    dimension_ids TEXT[],
+    plain_title TEXT,
+    plain_description TEXT,
+    test_run_id TEXT,
+    warning_message TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = 'public'
+AS $$
+DECLARE
+    updated_row data_components;
+    converted_plain_text_result RECORD;
+BEGIN
+    IF auth.role() <> 'authenticated' THEN
+        -- This check is essential in stopping a non-authenticated user because
+        -- the `GRANT EXECUTE ... TO authenticated` does not work at this level.
+        RAISE EXCEPTION 'ERR07. Must be authenticated';
+    END IF;
+
+    -- IF p_editor_id IS DISTINCT FROM auth.uid() THEN
+    --     RAISE EXCEPTION 'ERR08. editor_id must match your user id';
+    -- END IF;
+
+    -- Call Edge Function to convert TipTap content to plain text
+    SELECT * FROM internal_functions.calculate_plain_text(
+        p_id,
+        p_title,
+        p_description,
+        p_plain_title,
+        p_plain_description
+    ) INTO converted_plain_text_result;
+
+    UPDATE data_components
+    SET
+        version_number = p_version_number + 1,
+        editor_id = auth.uid(),
+        comment = p_comment,
+        bytes_changed = p_bytes_changed,
+        version_type = p_version_type,
+        version_rolled_back_to = p_version_rolled_back_to,
+
+        title = p_title,
+        description = p_description,
+        label_ids = p_label_ids,
+
+        value = p_value,
+        value_type = p_value_type,
+        value_number_display_type = p_value_number_display_type,
+        value_number_sig_figs = p_value_number_sig_figs,
+        datetime_range_start = p_datetime_range_start,
+        datetime_range_end = p_datetime_range_end,
+        datetime_repeat_every = p_datetime_repeat_every,
+        units = p_units,
+        dimension_ids = p_dimension_ids,
+
+        plain_title = converted_plain_text_result.plain_title, -- Server-side converted plain text
+        plain_description = converted_plain_text_result.plain_description -- Server-side converted plain text
     WHERE (
         id = p_id AND version_number = p_version_number
         AND (
@@ -200,7 +403,33 @@ BEGIN
         RAISE EXCEPTION 'ERR09. Update failed: id % with version_number % not found or version mismatch.', p_id, p_version_number;
     END IF;
 
-    RETURN updated_row;
+    RETURN QUERY SELECT
+        updated_row.id,
+        updated_row.owner_id,
+        updated_row.version_number,
+        updated_row.editor_id,
+        updated_row.created_at,
+        updated_row.comment,
+        updated_row.bytes_changed,
+        updated_row.version_type,
+        updated_row.version_rolled_back_to,
+        updated_row.title,
+        updated_row.description,
+        updated_row.label_ids,
+        updated_row.value,
+        updated_row.value_type,
+        updated_row.value_number_display_type,
+        updated_row.value_number_sig_figs,
+        updated_row.datetime_range_start,
+        updated_row.datetime_range_end,
+        updated_row.datetime_repeat_every,
+        updated_row.units,
+        updated_row.dimension_ids,
+        updated_row.plain_title,
+        updated_row.plain_description,
+        updated_row.test_run_id,
+        converted_plain_text_result.warning_message -- Include any warning message from Edge Function call
+    ;
 END;
 $$;
 
@@ -338,6 +567,8 @@ $$;
 -- SELECT * FROM search_data_components('grav', 0, 10, 0);
 
 
+-- TODO remove this once we have improved integration test to allow logging in/out
+-- with different users.
 CREATE OR REPLACE FUNCTION __testing_insert_test_data(
     p_id INTEGER,
     p_test_run_id TEXT

@@ -95,7 +95,8 @@ describe("can init, insert, update, and search wiki data components", () =>
             .then(({ data, error }) =>
             {
                 if (error) return { data: null, error }
-                else return { data: convert_from_db_row(data), error: null }
+                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from insert, expected 1 got ${data.length}`) }
+                else return { data: convert_from_db_row(data[0]!), error: null }
             })
         expect(response2.error).to.have.property("message").includes("Could not find the function public.insert_data_component")
     })
@@ -206,8 +207,8 @@ describe("can init, insert, update, and search wiki data components", () =>
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
-            plain_title: "Some other title",
-            plain_description: "Some other description",
+            plain_title: "",
+            plain_description: "",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
@@ -242,9 +243,9 @@ describe("can init, insert, update, and search wiki data components", () =>
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
-            // Should be set by the convert_to_db_row function
+            // Should be set by the server (edge function)
             plain_title: "Test Title",
-            // Should be set by the convert_to_db_row function
+            // Should be set by the server (edge function)
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
         }
@@ -303,7 +304,8 @@ describe("can init, insert, update, and search wiki data components", () =>
             .then(({ data, error }) =>
             {
                 if (error) return { data: null, error }
-                else return { data: convert_from_db_row(data), error: null }
+                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
+                else return { data: convert_from_db_row(data[0]!), error: null }
             })
         expect(response2.error).to.have.property("message").includes("Could not find the function public.update_data_component")
     })
@@ -316,7 +318,7 @@ describe("can init, insert, update, and search wiki data components", () =>
         const data_component = {
             ...updated_data_component,
             title: "<p>Test Second Title</p>",
-            plain_title: "Test Second Title",
+            plain_title: "",
         }
 
         const response = await update_data_component(get_supabase, data_component)
@@ -333,6 +335,7 @@ describe("can init, insert, update, and search wiki data components", () =>
 
             // The title and plain_title should have been updated
             title: "<p>Test Second Title</p>",
+            // Should be updated by the server (edge function)
             plain_title: "Test Second Title",
             test_run_id: data_component.test_run_id,
 
@@ -566,8 +569,8 @@ describe("can init, insert, update, and search personal data components", () =>
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
-            plain_title: "Test Personal Component (which is public not private)",
-            plain_description: "Some other description",
+            plain_title: "",
+            plain_description: "",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
@@ -598,9 +601,9 @@ describe("can init, insert, update, and search personal data components", () =>
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
-            // Should be set by the convert_to_db_row function
+            // Should be set by the server (edge function)
             plain_title: "Test Personal Component (which is public not private)",
-            // Should be set by the convert_to_db_row function
+            // Should be set by the server (edge function)
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
         }
@@ -636,7 +639,8 @@ describe("can init, insert, update, and search personal data components", () =>
             .then(({ data, error }) =>
             {
                 if (error) return { data: null, error }
-                else return { data: convert_from_db_row(data), error: null }
+                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
+                else return { data: convert_from_db_row(data[0]!), error: null }
             })
         if (response.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         // `update_data_component` function does not accept p_owner_id as a
@@ -653,7 +657,7 @@ describe("can init, insert, update, and search personal data components", () =>
         const data_component = {
             ...inserted_personal_data_component,
             title: "<p>Test Updated Personal Component (which is public not private)</p>",
-            plain_title: "Test Updated Personal Component (which is public not private)",
+            plain_title: "",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
@@ -668,6 +672,7 @@ describe("can init, insert, update, and search personal data components", () =>
             id: new IdAndVersion(-1, 2),
             // The title and plain_title should have been updated
             title: "<p>Test Updated Personal Component (which is public not private)</p>",
+            // Should be updated by the server (edge function)
             plain_title: "Test Updated Personal Component (which is public not private)",
             // The test_run_id should remain the same
             test_run_id: inserted_personal_data_component.test_run_id!,
@@ -709,6 +714,9 @@ describe("can init, insert, update, and search personal data components", () =>
 
     it("ERR12 should disallow updating data component belonging to another user", async function ()
     {
+        // TODO replace this with ability to just log out of this current user,
+        // log in as another user, make this change, then log back in as the
+        // original user.
         const response1 = await get_supabase().rpc("__testing_insert_test_data", {
             p_id: -10,
             p_test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
@@ -731,7 +739,8 @@ describe("can init, insert, update, and search personal data components", () =>
             .then(({ data, error }) =>
             {
                 if (error) return { data: null, error }
-                else return { data: convert_from_db_row(data), error: null }
+                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
+                else return { data: convert_from_db_row(data[0]!), error: null }
             })
         if (response2.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response2)}`)
         // `update_data_component` function does not accept owner_id as a

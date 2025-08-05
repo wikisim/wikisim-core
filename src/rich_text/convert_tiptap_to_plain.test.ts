@@ -1,10 +1,10 @@
 import { expect } from "chai"
 
-import { convert_tiptap_text_to_plain_text } from "./convert_tiptap_to_plain"
+import { browser_convert_tiptap_to_plain } from "./convert_tiptap_to_plain"
 
 
 
-describe("convert_tiptap_text_to_plain_text", () =>
+describe("convert_tiptap_to_plain", () =>
 {
     const tiptap_text = `
         <h2>Some description</h2>
@@ -14,7 +14,7 @@ describe("convert_tiptap_text_to_plain_text", () =>
 
     it("should convert tiptap text to plain text", () =>
     {
-        const plain_text = convert_tiptap_text_to_plain_text(tiptap_text)
+        const plain_text = browser_convert_tiptap_to_plain(tiptap_text)
         expect(plain_text).equals("Some description This is a multiline description with some markdown triggered formatting saved as html. This @Some label 20 million homes can become 25 million (+25%) homes . Item 1 Item 2 Item 3")
     })
 })

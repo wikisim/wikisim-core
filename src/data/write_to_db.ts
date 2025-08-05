@@ -1,4 +1,5 @@
 import { PostgrestError } from "@supabase/supabase-js"
+
 import type {
     DBDataComponentInsertArgs,
     DBDataComponentUpdateArgs,
@@ -91,7 +92,8 @@ export function insert_data_component (get_supabase: GetSupabase, data_component
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            else return { data: convert_from_db_row(data), error: null }
+            else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from insert, expected 1 got ${data.length}`) }
+            else return { data: convert_from_db_row(data[0]!), error: null }
         })
 }
 
@@ -105,6 +107,7 @@ export function update_data_component (get_supabase: GetSupabase, data_component
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            else return { data: convert_from_db_row(data), error: null }
+            else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
+            else return { data: convert_from_db_row(data[0]!), error: null }
         })
 }
