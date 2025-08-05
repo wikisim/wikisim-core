@@ -1,4 +1,4 @@
-import { convert_tiptap_text_to_plain_text } from "../rich_text/editor"
+import { convert_tiptap_text_to_plain_text } from "../rich_text/convert_tiptap_to_plain"
 import { DBDataComponentRow } from "../supabase"
 import { IdAndVersion, parse_id } from "./id"
 import { DataComponent, NewDataComponent } from "./interface"
@@ -36,6 +36,8 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
             ? data_component.dimension_ids.map(d => d.to_str())
             : null,
 
+        // Will be overwritted by the server-side conversion but included here
+        // for consistency
         plain_title: convert_tiptap_text_to_plain_text(data_component.title),
         plain_description: convert_tiptap_text_to_plain_text(data_component.description),
     }

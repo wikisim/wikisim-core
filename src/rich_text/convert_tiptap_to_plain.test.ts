@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { convert_tiptap_text_to_plain_text } from "./editor"
+import { convert_tiptap_text_to_plain_text } from "./convert_tiptap_to_plain"
 
 
 
