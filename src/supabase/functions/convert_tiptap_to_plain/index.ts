@@ -1,4 +1,4 @@
-import { deno_convert_tiptap_text_to_plain_text } from "./deno_convert_tiptap_text_to_plain_text.ts"
+import { deno_convert_tiptap_text_to_plain_text } from "./convert_tiptap_text_to_plain_text.deno.ts"
 
 
 Deno.serve(async (req) =>
