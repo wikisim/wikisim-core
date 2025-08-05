@@ -1,3 +1,5 @@
+// This file is part of WikiSim Supabase so it uses generic non-node specific
+// types which are compatible with the Deno environment.
 interface GenericNode {
     nodeType: number;
     textContent: string | null;

@@ -1,5 +1,4 @@
-
-import { shared_convert_tiptap_text_to_plain_text } from "../supabase/functions/_shared/convert_tiptap_to_plain"
+import { shared_convert_tiptap_text_to_plain_text } from "./shared_convert_tiptap_to_plain"
 
 
 export function browser_convert_tiptap_to_plain (tiptap_text: string): string
