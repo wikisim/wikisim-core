@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from "chai"
 
-import { __testing__, get_supabase } from "../supabase"
+import {
+    __testing__,
+    DBDataComponentInsertArgs,
+    DBDataComponentUpdateArgs,
+    get_supabase,
+} from "../supabase"
 import { deep_equals } from "../utils/deep_equals"
 import { convert_from_db_row } from "./convert_between_db"
 import {
     request_archived_data_components,
     request_data_components,
-    search_data_components
+    search_data_components,
 } from "./fetch_from_db"
 import { IdAndVersion, IdOnly } from "./id"
 import { DataComponent } from "./interface"
@@ -17,7 +22,7 @@ import {
     prepare_data_component_for_db_insert,
     prepare_data_component_for_db_update,
     update_data_component,
-    UpsertDataComponentResponse
+    UpsertDataComponentResponse,
 } from "./write_to_db"
 
 
@@ -69,6 +74,8 @@ describe("can init, insert, update, and search wiki data components", () =>
 
     it("should allow inserting new data component and ignore editor_id, and use that of user logged in", async function ()
     {
+        this.timeout(5000)
+
         const data_component = {
             ...data_component_fixture,
             editor_id: OTHER_USER_ID,
@@ -90,15 +97,47 @@ describe("can init, insert, update, and search wiki data components", () =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ;(db_data_component as any).p_editor_id = OTHER_USER_ID
 
-        const response2 = await get_supabase()
-            .rpc("insert_data_component", db_data_component)
-            .then(({ data, error }) =>
-            {
-                if (error) return { data: null, error }
-                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from insert, expected 1 got ${data.length}`) }
-                else return { data: convert_from_db_row(data[0]!), error: null }
-            })
+        const response2 = await low_level_insert_data_component(db_data_component)
         expect(response2.error).to.have.property("message").includes("Could not find the function public.insert_data_component")
+    })
+
+
+    it("should compute fields using edge function on insert and update", async function ()
+    {
+        this.timeout(5000)
+
+        const data_component = {
+            ...data_component_fixture,
+            title: "<p>Some Title</p>",
+            description: "<p>Some Description</p>",
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        const db_data_component1 = prepare_data_component_for_db_insert(data_component)
+        expect(db_data_component1.p_plain_title).equals("Some Title")
+        expect(db_data_component1.p_plain_description).equals("Some Description")
+        db_data_component1.p_plain_title = "" // Explicitly set to empty string to test edge function sets it
+        db_data_component1.p_plain_description = "" // Explicitly set to empty string to test edge function sets it
+
+        const response1 = await low_level_insert_data_component(db_data_component1)
+        if (response1.error) expect.fail(`Should have inserted data component with edge function computing fields, but got response: ${JSON.stringify(response1)}`)
+        expect(response1.data.plain_title).equals("Some Title", "Edge function should have computed plain_title on insert")
+        expect(response1.data.plain_description).equals("Some Description", "Edge function should have computed plain_description on insert")
+
+        // Check update also calls edge function and computes the fields
+        data_component.title = "<p>Some Other Title</p>"
+        data_component.description = "<p>Some Other Description</p>"
+        const db_data_component2 = prepare_data_component_for_db_update(data_component)
+        db_data_component2.p_plain_title = "" // Explicitly set to empty string to test edge function sets it
+        db_data_component2.p_plain_description = "" // Explicitly set to empty string to test edge function sets it
+
+        const response2 = await low_level_update_data_component(db_data_component2)
+        if (response2.error) expect.fail(`Should have inserted data component with edge function computing fields, but got response: ${JSON.stringify(response2)}`)
+        expect(response2.data.plain_title).equals("Some Other Title", "Edge function should have computed plain_title on update")
+        expect(response2.data.plain_description).equals("Some Other Description", "Edge function should have computed plain_description on update")
+
+        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components")
     })
 
 
@@ -299,14 +338,7 @@ describe("can init, insert, update, and search wiki data components", () =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ;(db_data_component as any).p_editor_id = OTHER_USER_ID
 
-        const response2 = await get_supabase()
-            .rpc("update_data_component", db_data_component)
-            .then(({ data, error }) =>
-            {
-                if (error) return { data: null, error }
-                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
-                else return { data: convert_from_db_row(data[0]!), error: null }
-            })
+        const response2 = await low_level_update_data_component(db_data_component)
         expect(response2.error).to.have.property("message").includes("Could not find the function public.update_data_component")
     })
 
@@ -634,14 +666,7 @@ describe("can init, insert, update, and search personal data components", () =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ;(db_data_component as any).p_owner_id = OTHER_USER_ID // Attempt to change owner_id in the DB row
 
-        const response = await get_supabase()
-            .rpc("update_data_component", db_data_component)
-            .then(({ data, error }) =>
-            {
-                if (error) return { data: null, error }
-                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
-                else return { data: convert_from_db_row(data[0]!), error: null }
-            })
+        const response = await low_level_update_data_component(db_data_component)
         if (response.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         // `update_data_component` function does not accept p_owner_id as a
         // parameter otherwise ERR11 should be raised and returned here.
@@ -734,14 +759,7 @@ describe("can init, insert, update, and search personal data components", () =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ;(db_data_component as any).p_owner_id = OTHER_USER_ID // Attempt to change owner_id in the DB row
 
-        const response2 = await get_supabase()
-            .rpc("update_data_component", db_data_component)
-            .then(({ data, error }) =>
-            {
-                if (error) return { data: null, error }
-                else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
-                else return { data: convert_from_db_row(data[0]!), error: null }
-            })
+        const response2 = await low_level_update_data_component(db_data_component)
         if (response2.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response2)}`)
         // `update_data_component` function does not accept owner_id as a
         // parameter otherwise ERR12 should be raised and returned here.
@@ -877,6 +895,33 @@ async function delete_test_data_in_db(table_name: TABLE_NAME, data_count?: numbe
     if (response.error) {
         expect.fail(`Failed to delete test rows from "${table_name}": ${response.error.message}`)
     }
+}
+
+
+
+async function low_level_insert_data_component(db_data_component: DBDataComponentInsertArgs): Promise<UpsertDataComponentResponse>
+{
+    return await get_supabase()
+        .rpc("insert_data_component", db_data_component)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from insert, expected 1 got ${data.length}`) }
+            else return { data: convert_from_db_row(data[0]!), error: null }
+        })
+}
+
+
+async function low_level_update_data_component(db_data_component: DBDataComponentUpdateArgs): Promise<UpsertDataComponentResponse>
+{
+    return await get_supabase()
+        .rpc("update_data_component", db_data_component)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
+            else return { data: convert_from_db_row(data[0]!), error: null }
+        })
 }
 
 
