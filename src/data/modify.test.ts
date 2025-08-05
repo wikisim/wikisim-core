@@ -31,6 +31,8 @@ describe("changes_made function", () => {
 
     const original: DataComponent = init_data_component()
     const modified: DataComponent = init_data_component({
+        owner_id: "owner_2", // In practice this field should and will never be changed
+
         editor_id: "editor_1",
         created_at: new Date("2025-07-30T00:00:00Z"),
         comment: "Another comment",
@@ -85,6 +87,9 @@ describe("changes_made function", () => {
         // Not sure we want to compare these fields yet
         "editor_id",
         "created_at",
+
+        // We should not compare owner_id as it is not allowed to be changed
+        "owner_id",
 
         // These fields are derived or special and should not be compared
         "plain_title",

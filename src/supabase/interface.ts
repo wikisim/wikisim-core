@@ -33,6 +33,7 @@ export type Database = {
           editor_id: string
           id: number
           label_ids: number[] | null
+          owner_id: string | null
           plain_description: string
           // plain_search_text: string | null
           plain_title: string
@@ -68,6 +69,7 @@ export type Database = {
           editor_id: string
           id?: number
           label_ids?: number[] | null
+          owner_id?: string | null
           plain_description: string
           // plain_search_text?: string | null
           plain_title: string
@@ -103,6 +105,7 @@ export type Database = {
           editor_id?: string
           id?: number
           label_ids?: number[] | null
+          owner_id?: string | null
           plain_description?: string
           // plain_search_text?: string | null
           plain_title?: string
@@ -141,6 +144,7 @@ export type Database = {
           editor_id: string
           id: number
           label_ids: number[] | null
+          owner_id: string | null
           plain_description: string
           plain_title: string
           test_run_id: string | null
@@ -174,6 +178,7 @@ export type Database = {
           editor_id: string
           id: number
           label_ids?: number[] | null
+          owner_id?: string | null
           plain_description: string
           plain_title: string
           test_run_id?: string | null
@@ -207,6 +212,7 @@ export type Database = {
           editor_id?: string
           id?: number
           label_ids?: number[] | null
+          owner_id?: string | null
           plain_description?: string
           plain_title?: string
           test_run_id?: string | null
@@ -256,16 +262,56 @@ export type Database = {
       }
     }
     Views: {
+      [_ in never]: never
     }
     Functions: {
+      __testing_insert_test_data: {
+        Args: { p_id: number; p_test_run_id: string }
+        Returns: {
+          bytes_changed: number
+          comment: string | null
+          created_at: string
+          datetime_range_end: string | null
+          datetime_range_start: string | null
+          datetime_repeat_every:
+            | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+            | null
+          description: string
+          dimension_ids: string[] | null
+          editor_id: string
+          id: number
+          label_ids: number[] | null
+          owner_id: string | null
+          plain_description: string
+          // plain_search_text: string | null
+          plain_title: string
+          // search_vector: unknown | null
+          test_run_id: string | null
+          title: string
+          units: string | null
+          value: string | null
+          value_number_display_type:
+            | Database["public"]["Enums"]["data_component_value_number_display_type"]
+            | null
+          value_number_sig_figs: number | null
+          value_type:
+            | Database["public"]["Enums"]["data_component_value_type"]
+            | null
+          version_number: number
+          version_rolled_back_to: number | null
+          version_type:
+            | Database["public"]["Enums"]["data_component_version_type"]
+            | null
+        }
+      }
       insert_data_component: {
         Args: {
-          p_editor_id: string
           p_title: string
           p_description: string
           p_plain_title: string
           p_plain_description: string
           p_bytes_changed: number
+          p_owner_id?: string
           p_comment?: string
           p_version_type?: Database["public"]["Enums"]["data_component_version_type"]
           p_version_rolled_back_to?: number
@@ -296,6 +342,7 @@ export type Database = {
           editor_id: string
           id: number
           label_ids: number[] | null
+          owner_id: string | null
           plain_description: string
           // plain_search_text: string | null
           plain_title: string
@@ -333,6 +380,7 @@ export type Database = {
         }
         Returns: {
           id: number
+          owner_id: string
           version_number: number
           editor_id: string
           created_at: string
@@ -363,7 +411,6 @@ export type Database = {
         Args: {
           p_id: number
           p_version_number: number
-          p_editor_id: string
           p_title: string
           p_description: string
           p_plain_title: string
@@ -397,6 +444,7 @@ export type Database = {
           editor_id: string
           id: number
           label_ids: number[] | null
+          owner_id: string | null
           plain_description: string
           // plain_search_text: string | null
           plain_title: string
@@ -441,6 +489,7 @@ export type Database = {
       data_component_version_type: "minor" | "rollback"
     }
     CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

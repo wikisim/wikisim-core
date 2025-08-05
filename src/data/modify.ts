@@ -9,6 +9,8 @@ export function init_data_component(partial: Partial<DataComponent> = {}): DataC
     return {
         id: new IdAndVersion(-1, 1), // Use a negative ID for test data
 
+        owner_id: undefined,
+
         editor_id: "",
         created_at: new Date(),
         bytes_changed: 0,
@@ -74,4 +76,7 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         // || component_1.test_run_id !== component_2.test_run_id
         // || component_1.editor_id !== component_2.editor_id
         // || component_1.created_at.getTime() !== component_2.created_at.getTime()
+
+        // We do not allow changing owner_id at the moment.
+        // || component_1.owner_id !== component_2.owner_id
 }

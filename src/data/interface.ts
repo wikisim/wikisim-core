@@ -12,6 +12,9 @@ export const NUMBER_DISPLAY_TYPES_OBJ = Object.values(NUMBER_DISPLAY_TYPES).redu
 
 interface DataComponentFields
 {
+    // For managing personal / private data
+    owner_id?: string
+
     // For managing versions
     editor_id: string
     created_at: Date

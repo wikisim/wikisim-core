@@ -1,11 +1,11 @@
 CREATE OR REPLACE FUNCTION insert_data_component(
-    p_editor_id uuid,
-
     p_title text,
     p_description text,
     p_plain_title text,
     p_plain_description text,
     p_bytes_changed integer,
+
+    p_owner_id uuid DEFAULT NULL, -- Optional owner ID for personal data
 
     p_comment text DEFAULT NULL,
     p_version_type data_component_version_type DEFAULT NULL,
@@ -42,9 +42,9 @@ BEGIN
         RAISE EXCEPTION 'ERR03. Must be authenticated';
     END IF;
 
-    IF p_editor_id IS DISTINCT FROM auth.uid() THEN
-        RAISE EXCEPTION 'ERR04. editor_id must match your user id';
-    END IF;
+    -- IF p_editor_id IS DISTINCT FROM auth.uid() THEN
+    --     RAISE EXCEPTION 'ERR04. editor_id must match your user id';
+    -- END IF;
 
     IF p_id IS NULL THEN
         p_id := nextval('data_components_id_seq'); -- Use sequence for new IDs
@@ -54,7 +54,12 @@ BEGIN
         RAISE EXCEPTION 'ERR06. p_test_run_id must be provided for test runs with negative id of %, but got %', p_id, p_test_run_id;
     END IF;
 
+    IF p_owner_id IS NOT NULL AND p_owner_id <> auth.uid() THEN
+        RAISE EXCEPTION 'ERR10. owner_id must match your user id or be NULL';
+    END IF;
+
     INSERT INTO data_components (
+        owner_id,
         version_number,
         editor_id,
         comment,
@@ -78,8 +83,9 @@ BEGIN
         test_run_id,
         id
     ) VALUES (
+        p_owner_id,
         1, -- initial version number
-        p_editor_id,
+        auth.uid(),
         p_comment,
         p_bytes_changed,
         p_version_type,
@@ -112,7 +118,6 @@ CREATE OR REPLACE FUNCTION update_data_component(
     p_id integer,
 
     p_version_number integer,
-    p_editor_id uuid,
 
     p_title text,
     p_description text,
@@ -153,14 +158,14 @@ BEGIN
         RAISE EXCEPTION 'ERR07. Must be authenticated';
     END IF;
 
-    IF p_editor_id IS DISTINCT FROM auth.uid() THEN
-        RAISE EXCEPTION 'ERR08. editor_id must match your user id';
-    END IF;
+    -- IF p_editor_id IS DISTINCT FROM auth.uid() THEN
+    --     RAISE EXCEPTION 'ERR08. editor_id must match your user id';
+    -- END IF;
 
     UPDATE data_components
     SET
         version_number = p_version_number + 1,
-        editor_id = p_editor_id,
+        editor_id = auth.uid(),
         comment = p_comment,
         bytes_changed = p_bytes_changed,
         version_type = p_version_type,
@@ -182,7 +187,13 @@ BEGIN
 
         plain_title = p_plain_title,
         plain_description = p_plain_description
-    WHERE id = p_id AND version_number = p_version_number
+    WHERE (
+        id = p_id AND version_number = p_version_number
+        AND (
+            owner_id = auth.uid() -- Ensure the owner is the editor
+            OR owner_id IS NULL -- Allow updates if original owner_id is NULL, i.e. is a wiki component
+        )
+    )
     RETURNING * INTO updated_row;
 
     IF NOT FOUND THEN
@@ -203,6 +214,7 @@ CREATE OR REPLACE FUNCTION search_data_components(
 )
 RETURNS TABLE (
     id INT,
+    owner_id uuid,
     version_number INTEGER,
     editor_id uuid,
     created_at TIMESTAMPTZ,
@@ -238,11 +250,18 @@ AS $$
 WITH params AS (
     SELECT
         LEAST(GREATEST(limit_n, 1), 20) AS final_limit,  -- clamp to [1, 20]
-        LEAST(GREATEST(offset_n, 0), 500) AS final_offset  -- clamp to [0, 500]
+        LEAST(GREATEST(offset_n, 0), 500) AS final_offset,  -- clamp to [0, 500]
+        (
+            query LIKE '%"%'
+            OR query LIKE '% OR %'
+            OR query LIKE '% AND %'
+            OR query LIKE '% -%'
+        ) as use_websearch
 )
 
 SELECT
     d.id,
+    d.owner_id,
     d.version_number,
     d.editor_id,
     d.created_at,
@@ -273,24 +292,36 @@ FROM (
         combined.score,
         combined.method
     FROM (
-        -- Full-text search
+        -- Full-text search using websearch_to_tsquery (for queries with quotes/operators)
         SELECT
             id,
-            ts_rank(search_vector, websearch_to_tsquery('english', query)) AS score,
+            ts_rank_cd(search_vector, websearch_to_tsquery('english', query), 32) AS score,
             1 AS method
-        FROM data_components
-        WHERE search_vector @@ websearch_to_tsquery('english', query)
+        FROM data_components, params
+        WHERE params.use_websearch
+        AND search_vector @@ websearch_to_tsquery('english', query)
 
         UNION ALL
 
-        -- Trigram similarity on plain_search_text
+        -- Trigram similarity (for queries without quotes/operators)
         SELECT
             id,
-            similarity(plain_search_text, query) AS score,
+            extension_pg_trgm.similarity(plain_search_text, query) AS score,
             2 AS method
-        FROM data_components
-        WHERE similarity(plain_search_text, query) > similarity_threshold
-        LIMIT (SELECT final_limit FROM params)
+        FROM data_components, params
+        WHERE NOT params.use_websearch
+        AND extension_pg_trgm.similarity(plain_search_text, query) > similarity_threshold
+
+        UNION ALL
+
+        -- Full-text search (as backup method)
+        SELECT
+            id,
+            ts_rank_cd(search_vector, websearch_to_tsquery('english', query), 32) AS score,
+            1 AS method
+        FROM data_components, params
+        WHERE NOT params.use_websearch
+        AND search_vector @@ websearch_to_tsquery('english', query)
 
     ) AS combined
     ORDER BY id
@@ -305,3 +336,59 @@ OFFSET (SELECT final_offset FROM params);
 $$;
 -- Example usage:
 -- SELECT * FROM search_data_components('grav', 0, 10, 0);
+
+
+CREATE OR REPLACE FUNCTION __testing_insert_test_data(
+    p_id INTEGER,
+    p_test_run_id TEXT
+)
+RETURNS data_components
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = 'public'
+AS $$
+DECLARE
+    new_row data_components;
+BEGIN
+    IF auth.role() <> 'authenticated' THEN
+        -- This check is essential in stopping a non-authenticated user because
+        -- the `GRANT EXECUTE ... TO authenticated` does not work at this level.
+        RAISE EXCEPTION 'ERR07. Must be authenticated';
+    END IF;
+
+    IF p_id IS NULL OR p_test_run_id IS NULL THEN
+        RAISE EXCEPTION 'Must provide p_id and p_test_run_id';
+    END IF;
+
+    IF p_id >= 0 THEN
+        RAISE EXCEPTION 'Must give negative id for test data';
+    END IF;
+
+    INSERT INTO data_components (
+        id,
+        owner_id,
+        version_number,
+        editor_id,
+        bytes_changed,
+        title,
+        description,
+        plain_title,
+        plain_description,
+        test_run_id
+    ) VALUES (
+        p_id,
+        -- Hard code to AJPtest2 user id
+        'c3b9d96b-dc5c-4f5f-9698-32eaf601b7f2',
+        1, -- initial version number
+        auth.uid(),
+        0,
+        '',
+        '',
+        '',
+        '',
+        p_test_run_id
+    ) RETURNING * INTO new_row;
+
+    RETURN new_row;
+END;
+$$;

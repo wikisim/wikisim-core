@@ -5,6 +5,9 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
 {
     const default_row: DBDataComponentRow = {
         id: -1,
+
+        owner_id: null, // A Wiki component
+
         version_number: 1,
         // AJPtest2 user id:
         editor_id: "c3b9d96b-dc5c-4f5f-9698-32eaf601b7f2",

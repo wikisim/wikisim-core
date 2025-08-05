@@ -26,6 +26,28 @@ export function get_supabase (): SupabaseClient<Database>
     return supabase
 }
 
+export const __testing__ = {
+    get_supabase_not_signed_in: (): SupabaseClient<Database> =>
+    {
+        const store: { data: {[key: string]: string} } = { data: {}}
+        const empty_storage = {
+            getItem: (key: string) => store.data[key] || null,
+            setItem: (key: string, value: string) => { store.data[key] = value },
+            removeItem: (key: string) => { delete store.data[key] },
+            clear: () => { store.data = {} },
+        }
+
+        return createClient<Database>(supabase_url, supabase_anon_key, {
+            auth: {
+                storage: empty_storage,
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true,
+            },
+        })
+    }
+}
+
 export type DBDataComponentRow = Database["public"]["Tables"]["data_components"]["Row"]
 export type DBDataComponentInsertRow = Database["public"]["Tables"]["data_components"]["Insert"]
 export type DBDataComponentUpdateRow = Database["public"]["Tables"]["data_components"]["Update"]

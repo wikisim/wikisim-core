@@ -15,6 +15,9 @@ CREATE TABLE data_components
 (
     id SERIAL PRIMARY KEY,
 
+    -- For managing personal / private data
+    owner_id uuid NULL, -- The user who owns this component
+
     -- For managing versions
     version_number INTEGER NOT NULL,
     editor_id uuid NOT NULL,
@@ -46,6 +49,7 @@ CREATE TABLE data_components
 
     test_run_id TEXT, -- Optional field for test runs
 
+    CONSTRAINT data_components_owner_id_fk FOREIGN KEY (owner_id) REFERENCES auth.users(id),
     CONSTRAINT data_components_editor_id_fk FOREIGN KEY (editor_id) REFERENCES auth.users(id),
     CONSTRAINT data_components_test_data_id_and_run_id_consistency
     CHECK (
@@ -55,16 +59,16 @@ CREATE TABLE data_components
     )
 );
 
--- -- Alternatively we could add the search_vector column referencing
--- -- plain_search_text column to DRY the code a but but not sure if it is
--- -- worth it.
--- ALTER TABLE data_components
--- ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (to_tsvector('english', plain_search_text)) STORED;
 
 -- Create search indices for data_components
 CREATE INDEX idx_data_components_search_vector ON data_components USING GIN (search_vector);
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- Create extension_pg_trgm schema if not exists
+CREATE SCHEMA IF NOT EXISTS extension_pg_trgm;
+GRANT USAGE ON SCHEMA extension_pg_trgm TO authenticated, anon;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA extension_pg_trgm TO authenticated, anon;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm SET SCHEMA extension_pg_trgm;
 CREATE INDEX idx_data_components_plain_search_text_trgm
   ON data_components USING GIN (plain_search_text gin_trgm_ops);
 
@@ -73,6 +77,9 @@ CREATE INDEX idx_data_components_plain_search_text_trgm
 CREATE TABLE data_components_archive
 (
     id INTEGER NOT NULL, -- This is the ID of the data component, not the version
+
+    -- For managing personal / private data
+    owner_id uuid NULL, -- The user who owns this component
 
     -- For managing versions
     version_number INTEGER NOT NULL,
@@ -104,6 +111,7 @@ CREATE TABLE data_components_archive
 
     CONSTRAINT data_components_archive_pkey PRIMARY KEY (id, version_number),
     CONSTRAINT data_components_archive_id_fkey FOREIGN KEY (id) REFERENCES data_components(id),
+    CONSTRAINT data_components_archive_owner_id_fk FOREIGN KEY (owner_id) REFERENCES auth.users(id),
     CONSTRAINT data_components_archive_editor_id_fk FOREIGN KEY (editor_id) REFERENCES auth.users(id),
     CONSTRAINT data_components_archive_test_data_id_and_run_id_consistency
     CHECK (

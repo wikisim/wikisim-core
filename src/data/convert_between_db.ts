@@ -7,6 +7,8 @@ import { DataComponent, NewDataComponent } from "./interface"
 export function flatten_data_component_for_db(data_component: DataComponent | NewDataComponent)
 {
     return {
+        owner_id: data_component.owner_id ?? null,
+
         editor_id: data_component.editor_id,
         created_at: data_component.created_at.toISOString(),
         comment: data_component.comment ?? null,
@@ -43,6 +45,8 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
 export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id" | "version_number" | "test_run_id">)
 {
     return {
+        owner_id: row.owner_id ?? undefined,
+
         editor_id: row.editor_id,
         created_at: new Date(row.created_at),
         comment: row.comment ?? undefined,

@@ -29,7 +29,7 @@ export function prepare_data_component_for_db_insert (data_component: DataCompon
 
 
     const args: DBDataComponentInsertArgs = {
-        p_editor_id: row.editor_id,
+        p_owner_id: row.owner_id ?? undefined,
         p_comment: row.comment ?? undefined,
         p_bytes_changed: row.bytes_changed,
         p_version_type: row.version_type ?? undefined,
@@ -61,7 +61,7 @@ export function prepare_data_component_for_db_update (data_component: DataCompon
 {
     const {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        p_test_run_id, p_id,
+        p_test_run_id, p_id, p_owner_id,
         ...insert_args
     } = prepare_data_component_for_db_insert(data_component)
 
