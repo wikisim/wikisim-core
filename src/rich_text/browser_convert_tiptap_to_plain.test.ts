@@ -1,10 +1,10 @@
 import { expect } from "chai"
 
-import { browser_convert_tiptap_to_plain } from "./convert_tiptap_to_plain"
+import { browser_convert_tiptap_to_plain } from "./browser_convert_tiptap_to_plain"
 
 
 
-describe("convert_tiptap_to_plain", () =>
+describe("browser_convert_tiptap_to_plain", () =>
 {
     const tiptap_text = `
         <h2>Some description</h2>

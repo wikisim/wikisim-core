@@ -1,4 +1,4 @@
-import { browser_convert_tiptap_to_plain } from "../rich_text/convert_tiptap_to_plain"
+import { browser_convert_tiptap_to_plain } from "../rich_text/browser_convert_tiptap_to_plain"
 import { DBDataComponentRow } from "../supabase"
 import { IdAndVersion, parse_id } from "./id"
 import { DataComponent, NewDataComponent } from "./interface"
