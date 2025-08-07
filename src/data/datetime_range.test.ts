@@ -188,4 +188,28 @@ describe("DatetimeRange", () =>
             expect(entries[1]).to.deep.equal(new Date("2123-04-05T00:00:00Z"))
         })
     })
+
+    describe("get_index_of", () =>
+    {
+        it("should return correct index for existing date", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const end = new Date("2023-01-05T00:00:00Z")
+            const range = new DatetimeRange(start, end, "day")
+
+            const entries = range.get_entries()
+            expect(range.get_index_of(entries[0]!)).to.equal(0)
+            expect(range.get_index_of(entries[2]!)).to.equal(2)
+        })
+
+        it("should throw error for non-existing date", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const end = new Date("2023-01-05T00:00:00Z")
+            const range = new DatetimeRange(start, end, "day")
+
+            expect(() => range.get_index_of([][0]!)).to.throw(DATETIME_RANGE_ERRORS.UNDEFINED_DATE_ARG_FOR_GET_INDEX)
+            expect(() => range.get_index_of(new Date("2023-01-06T00:00:00Z"))).to.throw(DATETIME_RANGE_ERRORS.DATETIME_NOT_IN_RANGE)
+        })
+    })
 })

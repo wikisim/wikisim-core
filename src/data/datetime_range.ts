@@ -1,3 +1,4 @@
+import { binary_search } from "../utils/binary_search"
 import { DatetimeRangeRepeatEvery, IDatetimeRange } from "./interface"
 
 
@@ -7,7 +8,9 @@ export const DATETIME_RANGE_ERRORS = {
     MISSING_REPEAT_EVERY: "DatetimeRange requires repeat_every.",
     START_AFTER_END: "DatetimeRange requires start date be before end date.",
     NOT_DIVISIBLE_BY_REPEAT_EVERY: "DatetimeRange requires difference between start and end dates to be divisible by repeat_every.",
-    UNKNOWN_REPEAT_EVERY: "Unknown repeat_every value: "
+    UNKNOWN_REPEAT_EVERY: "Unknown repeat_every value: ",
+    UNDEFINED_DATE_ARG_FOR_GET_INDEX: "DatetimeRange get_index_of requires a defined date argument.",
+    DATETIME_NOT_IN_RANGE: "Datetime not in range.",
 }
 
 export class DatetimeRange implements IDatetimeRange
@@ -15,6 +18,8 @@ export class DatetimeRange implements IDatetimeRange
     start: Date
     end: Date
     repeat_every: DatetimeRangeRepeatEvery
+
+    private time_stamps: number[] | undefined = undefined
 
     constructor(start?: Date, end?: Date, repeat_every?: DatetimeRangeRepeatEvery)
     {
@@ -30,10 +35,11 @@ export class DatetimeRange implements IDatetimeRange
         this.repeat_every = repeat_every
     }
 
-    get_entries(): Date[]
-    {
-        const entries: Date[] = []
 
+    get_time_stamps(): number[]
+    {
+        if (this.time_stamps) return this.time_stamps
+        this.time_stamps = []
 
         let increment_date: (current: Date) => void
         switch (this.repeat_every)
@@ -70,11 +76,35 @@ export class DatetimeRange implements IDatetimeRange
         const current = new Date(this.start)
         while (current < this.end)
         {
-            entries.push(new Date(current))
+            this.time_stamps.push(current.getTime())
             increment_date(current) // mutate current date
         }
 
-        return entries
+        return this.time_stamps
+    }
+
+
+    get_entries(): Date[]
+    {
+        if (this.time_stamps) return this.time_stamps.map(ts => new Date(ts))
+        const time_stamps = this.get_time_stamps()  // Will also populate this.time_stamps
+
+        return time_stamps.map(ts => new Date(ts))
+    }
+
+
+    get_index_of(date: Date): number
+    {
+        // Because we haved assert in the tests that a date is present when
+        // passing to this function then maybe this same error might happen in
+        // consuming code so we catch and explicitly raise this error.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!date) throw new Error(DATETIME_RANGE_ERRORS.UNDEFINED_DATE_ARG_FOR_GET_INDEX)
+
+        const time_stamps = this.get_time_stamps()
+        const index = binary_search(time_stamps, date.getTime(), (a, b) => a - b)
+        if (index === -1) throw new Error(DATETIME_RANGE_ERRORS.DATETIME_NOT_IN_RANGE)
+        return index
     }
 }
 
