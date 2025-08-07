@@ -3,23 +3,44 @@ export interface ILatLon
 {
     lat: number
     lon: number
+    to_str(): string
+    from_str(str: string): ILatLon
 }
 
 
 export class LatLon implements ILatLon
 {
+    static from_str(str: string): ILatLon
+    {
+        const [lat_str, lon_str] = str.split(",")
+        if (!lat_str || !lon_str) throw new Error(`Invalid LatLon string: ${str}`)
+        return new LatLon({ lat: parseFloat(lat_str), lon: parseFloat(lon_str) })
+    }
+
     lat: number
     lon: number
 
-    constructor(lat: number, lon: number)
+    constructor(args: { lat: number, lon: number })
     {
-        this.lat = lat
-        this.lon = lon
+        this.lat = args.lat
+        this.lon = args.lon
     }
 
     clone(): LatLon
     {
-        return new LatLon(this.lat, this.lon)
+        return new LatLon(this)
+    }
+
+    private str: string | null = null
+    to_str(): string
+    {
+        if (this.str === null) this.str = `${this.lat},${this.lon}`
+        return this.str
+    }
+
+    from_str(str: string): ILatLon
+    {
+        return LatLon.from_str(str)
     }
 }
 
@@ -34,7 +55,7 @@ export class LatLonDataSeries
         this.data = [...initial_data]
         Object.freeze(this.data) // Ensure data is immutable
         initial_data.forEach((lat_lon, index) => {
-            this.index.set(`${lat_lon.lat},${lat_lon.lon}`, index)
+            this.index.set(lat_lon.to_str(), index)
         })
     }
 
