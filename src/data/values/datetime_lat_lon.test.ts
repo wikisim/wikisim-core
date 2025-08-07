@@ -4,7 +4,7 @@ import { describe } from "mocha"
 import { DataSeries } from "./DataSeries"
 import { DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys, factory_get_index_for_datetime_range_lat_lon } from "./datetime_lat_lon"
 import { DatetimeRange } from "./DatetimeRange"
-import { LatLonDataSeries } from "./LatLon"
+import { LatLon, LatLonDataSeries } from "./LatLon"
 
 
 describe("factory_get_index method", () =>
@@ -16,9 +16,9 @@ describe("factory_get_index method", () =>
     )
 
     const lat_lon_series = new LatLonDataSeries([
-        { lat: 10, lon: 20 },
-        { lat: 30, lon: 40 },
-        { lat: 50, lon: 60 },
+        new LatLon({ lat: 10, lon: 20 }),
+        new LatLon({ lat: 30, lon: 40 }),
+        new LatLon({ lat: 50, lon: 60 }),
     ])
 
 
@@ -51,7 +51,7 @@ describe("factory_get_index method", () =>
     function tests(initial_data: number[], lat_lon_first: boolean)
     {
         const get_index = factory_get_index_for_datetime_range_lat_lon(datetime_range, lat_lon_series, lat_lon_first)
-        const series = new DataSeries<number, DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>(initial_data, get_index)
+        const series = new DataSeries<DatetimeRangeLatLonKey, number, DatetimeRangeLatLonMultipleKeys>(initial_data, get_index)
 
         const datetimes = datetime_range.get_entries()
         const lat_lons = lat_lon_series.get_entries()

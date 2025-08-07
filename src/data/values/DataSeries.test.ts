@@ -4,8 +4,12 @@ import { describe } from "mocha"
 
 import { DataSeries } from "./DataSeries"
 import { DatetimeRange } from "./DatetimeRange"
-import { LatLonDataSeries } from "./LatLon"
-import { DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys, factory_get_index_for_datetime_range_lat_lon } from "./datetime_lat_lon"
+import { LatLon, LatLonDataSeries } from "./LatLon"
+import {
+    DatetimeRangeLatLonKey,
+    DatetimeRangeLatLonMultipleKeys,
+    factory_get_index_for_datetime_range_lat_lon,
+} from "./datetime_lat_lon"
 
 
 describe("DataSeries", () =>
@@ -58,9 +62,9 @@ describe("DataSeries", () =>
             )
 
             const lat_lon_series = new LatLonDataSeries([
-                { lat: 10, lon: 20 },
-                { lat: 30, lon: 40 },
-                { lat: 50, lon: 60 },
+                new LatLon({ lat: 10, lon: 20 }),
+                new LatLon({ lat: 30, lon: 40 }),
+                new LatLon({ lat: 50, lon: 60 }),
             ])
 
             // One-dimensional DataSeries of 4 datetimes x 3 lat/lon pairs
