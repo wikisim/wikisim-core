@@ -17,11 +17,13 @@ describe("LatLon", () =>
 
 describe("LatLonDataSeries", () =>
 {
-    it("should return the correct index for a given LatLon", () =>
+    it("should return the correct size and correct index for a given LatLon", () =>
     {
         const lat_lon1 = new LatLon(34.0522, -118.2437)
         const lat_lon2 = new LatLon(40.7128, -74.0060)
         const series = new LatLonDataSeries([lat_lon1, lat_lon2])
+
+        expect(series.size()).to.equal(2)
 
         expect(series.get_index_of(lat_lon1)).to.equal(0)
         expect(series.get_index_of(lat_lon2)).to.equal(1)

@@ -32,9 +32,20 @@ export class LatLonDataSeries
     constructor(initial_data: ILatLon[])
     {
         this.data = [...initial_data]
+        Object.freeze(this.data) // Ensure data is immutable
         initial_data.forEach((lat_lon, index) => {
             this.index.set(`${lat_lon.lat},${lat_lon.lon}`, index)
         })
+    }
+
+    size(): number
+    {
+        return this.data.length
+    }
+
+    get_entries(): ILatLon[]
+    {
+        return this.data // Can return as is because data is shallow frozen
     }
 
     get_index_of(lat_lon: ILatLon): number

@@ -1,5 +1,5 @@
-import { binary_search } from "../utils/binary_search"
-import { DatetimeRangeRepeatEvery, IDatetimeRange } from "./interface"
+import { binary_search } from "../../utils/binary_search"
+import { DatetimeRangeRepeatEvery, IDatetimeRange } from "../interface"
 
 
 export const DATETIME_RANGE_ERRORS = {
@@ -33,6 +33,15 @@ export class DatetimeRange implements IDatetimeRange
         this.start = start
         this.end = end
         this.repeat_every = repeat_every
+    }
+
+
+    size(): number
+    {
+        if (this.time_stamps) return this.time_stamps.length
+
+        const time_stamps = this.get_time_stamps()  // Will also populate this.time_stamps
+        return time_stamps.length
     }
 
 
