@@ -1,19 +1,18 @@
-export interface IDataSeries<V, I, IM>
+export interface IDataSeries<I, V, IM=I>
 {
     get(index: I): V | undefined
     get_multiple(index: IM): V[]
     get_entries(): V[]
-    // set(index: I, value: V): void
-    clone(): DataSeries<V, I, IM>
+    clone(): IDataSeries<I, V, IM>
 }
 
 
-export class DataSeries<V, I, IM=I> implements IDataSeries<V, I, IM>
+export class DataSeries<I, V, IndexMultiple=I> implements IDataSeries<I, V, IndexMultiple>
 {
     private data: V[]
-    private get_index: (key: I | IM) => number | number[] | { start: number, end: number }
+    private get_index: (key: I | IndexMultiple) => number | number[] | { start: number, end: number }
 
-    constructor(initial_data: V[], get_index: ((key: I | IM) => number | number[] | { start: number, end: number }) = (key: I | IM) => key as unknown as number)
+    constructor(initial_data: V[], get_index: ((key: I | IndexMultiple) => number | number[] | { start: number, end: number }))
     {
         this.data = [...initial_data]
         Object.freeze(this.data) // Ensure data is immutable
@@ -27,7 +26,7 @@ export class DataSeries<V, I, IM=I> implements IDataSeries<V, I, IM>
         return this.data[mapped_index]
     }
 
-    get_multiple(indices: IM): V[]
+    get_multiple(indices: IndexMultiple): V[]
     {
         const mapped_indices = this.get_index(indices)
         if (typeof mapped_indices === "number") throw new Error("get_multiple expects multiple indices")
@@ -44,13 +43,8 @@ export class DataSeries<V, I, IM=I> implements IDataSeries<V, I, IM>
         return this.data
     }
 
-    // set(index: I, value: V): void
-    // {
-    //     this.data.set(index, value)
-    // }
-
-    clone(): DataSeries<V, I, IM>
+    clone(): DataSeries<I, V, IndexMultiple>
     {
-        return new DataSeries(this.get_entries())
+        return new DataSeries(this.get_entries(), this.get_index)
     }
 }
