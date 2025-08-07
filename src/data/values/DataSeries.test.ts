@@ -5,7 +5,7 @@ import { describe } from "mocha"
 import { DataSeries } from "./DataSeries"
 import { DatetimeRange } from "./DatetimeRange"
 import { LatLonDataSeries } from "./LatLon"
-import { DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys, factory_get_index } from "./datetime_lat_lon"
+import { DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys, factory_get_index_for_datetime_range_lat_lon } from "./datetime_lat_lon"
 
 
 describe("DataSeries", () =>
@@ -68,7 +68,7 @@ describe("DataSeries", () =>
                 8, 9, 10, 11,
             ]
 
-            const get_index = factory_get_index(datetime_range, lat_lon_series)
+            const get_index = factory_get_index_for_datetime_range_lat_lon(datetime_range, lat_lon_series, false)
             const series = new DataSeries<number, DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>(initial_data, get_index)
 
             const datetimes = datetime_range.get_entries()
