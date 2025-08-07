@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha"
 
-import { DATETIME_RANGE_ERRORS, DatetimeRange } from "./datetime_range"
+import { DATETIME_RANGE_ERRORS, DatetimeRange } from "./DatetimeRange"
 import { DatetimeRangeRepeatEvery, IDatetimeRange } from "./interface"
 
 
