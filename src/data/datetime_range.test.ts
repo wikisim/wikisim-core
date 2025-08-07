@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha"
 
-import { DatatimeRange, DATETIME_RANGE_ERRORS } from "./datetime_range"
+import { DATETIME_RANGE_ERRORS, DatetimeRange } from "./datetime_range"
 import { DatetimeRangeRepeatEvery, IDatetimeRange } from "./interface"
 
 
@@ -15,7 +15,7 @@ describe("DatetimeRange", () =>
             const end = new Date("2023-01-02T00:00:00Z")
             const repeat_every: DatetimeRangeRepeatEvery = "day"
 
-            const range: IDatetimeRange = new DatatimeRange(start, end, repeat_every)
+            const range: IDatetimeRange = new DatetimeRange(start, end, repeat_every)
 
             expect(range.start).equals(start)
             expect(range.end).equals(end)
@@ -28,9 +28,9 @@ describe("DatetimeRange", () =>
             const end = new Date("2023-01-02T00:00:00Z")
             const repeat_every: DatetimeRangeRepeatEvery = "day"
 
-            expect(() => new DatatimeRange(undefined, end, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.MISSING_START_DATE)
-            expect(() => new DatatimeRange(start, undefined, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.MISSING_END_DATE)
-            expect(() => new DatatimeRange(start, end, undefined)).to.throw(DATETIME_RANGE_ERRORS.MISSING_REPEAT_EVERY)
+            expect(() => new DatetimeRange(undefined, end, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.MISSING_START_DATE)
+            expect(() => new DatetimeRange(start, undefined, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.MISSING_END_DATE)
+            expect(() => new DatetimeRange(start, end, undefined)).to.throw(DATETIME_RANGE_ERRORS.MISSING_REPEAT_EVERY)
         })
 
         it("should reject start being equal to or coming after end", () =>
@@ -39,8 +39,8 @@ describe("DatetimeRange", () =>
             const start_minus_1_second = new Date(start.getTime() - 1000) // 1 second before start
             const repeat_every: DatetimeRangeRepeatEvery = "day"
 
-            expect(() => new DatatimeRange(start, start, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.START_AFTER_END)
-            expect(() => new DatatimeRange(start, start_minus_1_second, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.START_AFTER_END)
+            expect(() => new DatetimeRange(start, start, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.START_AFTER_END)
+            expect(() => new DatetimeRange(start, start_minus_1_second, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.START_AFTER_END)
         })
 
         it("should only accept start and end dates divisible by repeat_every", () =>
@@ -75,9 +75,9 @@ describe("DatetimeRange", () =>
 
             test_cases.forEach(({ end, repeat_every }) =>
             {
-                expect(() => new DatatimeRange(start, end, repeat_every)).to.not.throw()
+                expect(() => new DatetimeRange(start, end, repeat_every)).to.not.throw()
                 const end_plus_1 = new Date(end.getTime() + 1) // 1 millisecond
-                expect(() => new DatatimeRange(start, end_plus_1, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.NOT_DIVISIBLE_BY_REPEAT_EVERY)
+                expect(() => new DatetimeRange(start, end_plus_1, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.NOT_DIVISIBLE_BY_REPEAT_EVERY)
             })
         })
     })
@@ -89,7 +89,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-01-01T00:00:01Z")
             const end = new Date("2023-01-01T00:00:03Z")
 
-            const range = new DatatimeRange(start, end, "second")
+            const range = new DatetimeRange(start, end, "second")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(2)
@@ -102,7 +102,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-01-01T00:01:00Z")
             const end = new Date("2023-01-01T00:04:00Z")
 
-            const range = new DatatimeRange(start, end, "minute")
+            const range = new DatetimeRange(start, end, "minute")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(3)
@@ -115,7 +115,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-01-01T01:00:00Z")
             const end = new Date("2023-01-01T05:00:00Z")
 
-            const range = new DatatimeRange(start, end, "hour")
+            const range = new DatetimeRange(start, end, "hour")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(4)
@@ -128,7 +128,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-01-01T00:00:00Z")
             const end = new Date("2023-01-06T00:00:00Z")
 
-            const range = new DatatimeRange(start, end, "day")
+            const range = new DatetimeRange(start, end, "day")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(5)
@@ -141,7 +141,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-01-01T00:00:00Z")
             const end = new Date("2023-07-01T00:00:00Z")
 
-            const range = new DatatimeRange(start, end, "month")
+            const range = new DatetimeRange(start, end, "month")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(6)
@@ -154,7 +154,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-04-05T00:00:00Z")
             const end = new Date("2030-04-05T00:00:00Z")
 
-            const range = new DatatimeRange(start, end, "year")
+            const range = new DatetimeRange(start, end, "year")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(7)
@@ -167,7 +167,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-04-05T00:00:00Z")
             const end = new Date("2043-04-05T00:00:00Z")
 
-            const range = new DatatimeRange(start, end, "decade")
+            const range = new DatetimeRange(start, end, "decade")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(2)
@@ -180,7 +180,7 @@ describe("DatetimeRange", () =>
             const start = new Date("2023-04-05T00:00:00Z")
             const end = new Date("2223-04-05T00:00:00Z")
 
-            const range = new DatatimeRange(start, end, "century")
+            const range = new DatetimeRange(start, end, "century")
             const entries = range.get_entries()
 
             expect(entries.length).to.equal(2)

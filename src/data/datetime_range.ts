@@ -10,7 +10,7 @@ export const DATETIME_RANGE_ERRORS = {
     UNKNOWN_REPEAT_EVERY: "Unknown repeat_every value: "
 }
 
-export class DatatimeRange implements IDatetimeRange
+export class DatetimeRange implements IDatetimeRange
 {
     start: Date
     end: Date
