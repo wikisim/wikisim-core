@@ -10,6 +10,21 @@ export const NUMBER_DISPLAY_TYPES_OBJ = Object.values(NUMBER_DISPLAY_TYPES).redu
     return o
 }, {} as Record<NumberDisplayType, NumberDisplayType>)
 
+
+export type DatetimeRangeRepeatEvery = DBEnums["data_component_datetime_repeat_every"]
+export const DATETIME_RANGE_REPEAT_EVERY = Constants.public.Enums.data_component_datetime_repeat_every
+export const DATETIME_RANGE_REPEAT_EVERY_OBJ = Object.values(DATETIME_RANGE_REPEAT_EVERY).reduce((o, k) => {
+    o[k] = k
+    return o
+}, {} as Record<DatetimeRangeRepeatEvery, DatetimeRangeRepeatEvery>)
+export interface IDatetimeRange
+{
+    start: Date
+    end: Date
+    repeat_every: DatetimeRangeRepeatEvery
+}
+
+
 interface DataComponentFields
 {
     // For managing personal / private data
@@ -33,7 +48,7 @@ interface DataComponentFields
     value_number_sig_figs?: number
     datetime_range_start?: Date
     datetime_range_end?: Date
-    datetime_repeat_every?: DBEnums["data_component_datetime_repeat_every"]
+    datetime_repeat_every?: DatetimeRangeRepeatEvery
     units?: string
     // Dimension IDs & version numbers parsed from format: `5678v2`
     dimension_ids?: IdAndVersion[]

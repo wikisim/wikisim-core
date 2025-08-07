@@ -1,0 +1,191 @@
+import { expect } from "chai"
+import { describe } from "mocha"
+
+import { DatatimeRange, DATETIME_RANGE_ERRORS } from "./datetime_range"
+import { DatetimeRangeRepeatEvery, IDatetimeRange } from "./interface"
+
+
+describe("DatetimeRange", () =>
+{
+    describe("init DatetimeRange instance", () =>
+    {
+        it("should accept valid fields", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const end = new Date("2023-01-02T00:00:00Z")
+            const repeat_every: DatetimeRangeRepeatEvery = "day"
+
+            const range: IDatetimeRange = new DatatimeRange(start, end, repeat_every)
+
+            expect(range.start).equals(start)
+            expect(range.end).equals(end)
+            expect(range.repeat_every).equals(repeat_every)
+        })
+
+        it("should reject missing fields", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const end = new Date("2023-01-02T00:00:00Z")
+            const repeat_every: DatetimeRangeRepeatEvery = "day"
+
+            expect(() => new DatatimeRange(undefined, end, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.MISSING_START_DATE)
+            expect(() => new DatatimeRange(start, undefined, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.MISSING_END_DATE)
+            expect(() => new DatatimeRange(start, end, undefined)).to.throw(DATETIME_RANGE_ERRORS.MISSING_REPEAT_EVERY)
+        })
+
+        it("should reject start being equal to or coming after end", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const start_minus_1_second = new Date(start.getTime() - 1000) // 1 second before start
+            const repeat_every: DatetimeRangeRepeatEvery = "day"
+
+            expect(() => new DatatimeRange(start, start, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.START_AFTER_END)
+            expect(() => new DatatimeRange(start, start_minus_1_second, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.START_AFTER_END)
+        })
+
+        it("should only accept start and end dates divisible by repeat_every", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+
+            // const test_cases = Object.values(DATETIME_RANGE_REPEAT_EVERY).map(k =>
+            const test_cases = (["decade"] as DatetimeRangeRepeatEvery[]).map(k =>
+            {
+                let seconds = start.getUTCSeconds()
+                let minutes = start.getUTCMinutes()
+                let hours = start.getUTCHours()
+                let days = start.getUTCDate()
+                let months = start.getUTCMonth()
+                let years = start.getUTCFullYear()
+
+                if (k === "second") seconds += 1
+                else if (k === "minute") minutes += 1
+                else if (k === "hour") hours += 1
+                else if (k === "day") days += 1
+                else if (k === "month") months += 1
+                else if (k === "year") years += 1
+                else if (k === "decade") years += 10
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                else if (k === "century") years += 100
+                else throw new Error(`Unhandled repeat_every value: ${k}`)
+
+                const end = new Date(Date.UTC(years, months, days, hours, minutes, seconds))
+
+                return { repeat_every: k, end }
+            })
+
+            test_cases.forEach(({ end, repeat_every }) =>
+            {
+                expect(() => new DatatimeRange(start, end, repeat_every)).to.not.throw()
+                const end_plus_1 = new Date(end.getTime() + 1) // 1 millisecond
+                expect(() => new DatatimeRange(start, end_plus_1, repeat_every)).to.throw(DATETIME_RANGE_ERRORS.NOT_DIVISIBLE_BY_REPEAT_EVERY)
+            })
+        })
+    })
+
+    describe("get_entries", () =>
+    {
+        it("should return correct entries for second repeat", () =>
+        {
+            const start = new Date("2023-01-01T00:00:01Z")
+            const end = new Date("2023-01-01T00:00:03Z")
+
+            const range = new DatatimeRange(start, end, "second")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(2)
+            expect(entries[0]).to.deep.equal(new Date("2023-01-01T00:00:01Z"))
+            expect(entries[1]).to.deep.equal(new Date("2023-01-01T00:00:02Z"))
+        })
+
+        it("should return correct entries for minute repeat", () =>
+        {
+            const start = new Date("2023-01-01T00:01:00Z")
+            const end = new Date("2023-01-01T00:04:00Z")
+
+            const range = new DatatimeRange(start, end, "minute")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(3)
+            expect(entries[0]).to.deep.equal(new Date("2023-01-01T00:01:00Z"))
+            expect(entries[2]).to.deep.equal(new Date("2023-01-01T00:03:00Z"))
+        })
+
+        it("should return correct entries for hour repeat", () =>
+        {
+            const start = new Date("2023-01-01T01:00:00Z")
+            const end = new Date("2023-01-01T05:00:00Z")
+
+            const range = new DatatimeRange(start, end, "hour")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(4)
+            expect(entries[0]).to.deep.equal(new Date("2023-01-01T01:00:00Z"))
+            expect(entries[3]).to.deep.equal(new Date("2023-01-01T04:00:00Z"))
+        })
+
+        it("should return correct entries for day repeat", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const end = new Date("2023-01-06T00:00:00Z")
+
+            const range = new DatatimeRange(start, end, "day")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(5)
+            expect(entries[0]).to.deep.equal(new Date("2023-01-01T00:00:00Z"))
+            expect(entries[4]).to.deep.equal(new Date("2023-01-05T00:00:00Z"))
+        })
+
+        it("should return correct entries for month repeat", () =>
+        {
+            const start = new Date("2023-01-01T00:00:00Z")
+            const end = new Date("2023-07-01T00:00:00Z")
+
+            const range = new DatatimeRange(start, end, "month")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(6)
+            expect(entries[0]).to.deep.equal(new Date("2023-01-01T00:00:00Z"))
+            expect(entries[5]).to.deep.equal(new Date("2023-06-01T00:00:00Z"))
+        })
+
+        it("should return correct entries for year repeat", () =>
+        {
+            const start = new Date("2023-04-05T00:00:00Z")
+            const end = new Date("2030-04-05T00:00:00Z")
+
+            const range = new DatatimeRange(start, end, "year")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(7)
+            expect(entries[0]).to.deep.equal(new Date("2023-04-05T00:00:00Z"))
+            expect(entries[6]).to.deep.equal(new Date("2029-04-05T00:00:00Z"))
+        })
+
+        it("should return correct entries for decade repeat", () =>
+        {
+            const start = new Date("2023-04-05T00:00:00Z")
+            const end = new Date("2043-04-05T00:00:00Z")
+
+            const range = new DatatimeRange(start, end, "decade")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(2)
+            expect(entries[0]).to.deep.equal(new Date("2023-04-05T00:00:00Z"))
+            expect(entries[1]).to.deep.equal(new Date("2033-04-05T00:00:00Z"))
+        })
+
+        it("should return correct entries for century repeat", () =>
+        {
+            const start = new Date("2023-04-05T00:00:00Z")
+            const end = new Date("2223-04-05T00:00:00Z")
+
+            const range = new DatatimeRange(start, end, "century")
+            const entries = range.get_entries()
+
+            expect(entries.length).to.equal(2)
+            expect(entries[0]).to.deep.equal(new Date("2023-04-05T00:00:00Z"))
+            expect(entries[1]).to.deep.equal(new Date("2123-04-05T00:00:00Z"))
+        })
+    })
+})
