@@ -85,17 +85,4 @@ describe("DataSeries", () =>
             expect(series.get_entries()).to.deep.equal(initial_data)
         })
     })
-
-
-    describe("clone method", () =>
-    {
-        it("should create a clone of the DataSeries with the same entries", () =>
-        {
-            const initial_data = ["a", "b"]
-            const series = new DataSeries<number, string>(initial_data, get_index)
-            const clone = series.clone()
-            expect(clone.get_entries()).to.deep.equal(initial_data)
-            expect(clone).to.not.equal(series) // Ensure it's a different instance
-        })
-    })
 })

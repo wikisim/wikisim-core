@@ -3,7 +3,6 @@ export interface IDataSeries<I, V, IM=I>
     get(index: I): V | undefined
     get_multiple(index: IM): V[]
     get_entries(): V[]
-    clone(): IDataSeries<I, V, IM>
 }
 
 
@@ -41,10 +40,5 @@ export class DataSeries<I, V, IndexMultiple=I> implements IDataSeries<I, V, Inde
     get_entries(): V[]
     {
         return this.data
-    }
-
-    clone(): DataSeries<I, V, IndexMultiple>
-    {
-        return new DataSeries(this.get_entries(), this.get_index)
     }
 }
