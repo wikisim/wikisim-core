@@ -1,10 +1,10 @@
 import { IIndexManager } from "./DataSeries"
 import { DatetimeRange } from "./DatetimeRange"
-import { ILatLonOnly, LatLonDataSeries } from "./LatLon"
+import { ILatLon, LatLonDataSeries } from "./LatLon"
 
 
-export type DatetimeRangeLatLonKey = { datetime: Date, lat_lon: ILatLonOnly }
-export type DatetimeRangeLatLonMultipleKeys = { datetime: Date, lat_lon?: undefined } | { datetime?: undefined, lat_lon: ILatLonOnly }
+export type DatetimeRangeLatLonKey = { datetime: Date, lat_lon: ILatLon }
+export type DatetimeRangeLatLonMultipleKeys = { datetime: Date, lat_lon?: undefined } | { datetime?: undefined, lat_lon: ILatLon }
 
 export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range: DatetimeRange, lat_lon_series: LatLonDataSeries, lat_lon_first: boolean = true): IIndexManager<DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>
 {
