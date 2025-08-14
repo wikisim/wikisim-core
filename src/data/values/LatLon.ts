@@ -81,7 +81,7 @@ export class LatLonDataSeries
     get_index_of(lat_lon: ILatLonOnly): number
     {
         const index = this.index.get(`${lat_lon.lat},${lat_lon.lon}`)
-        if (index === undefined) throw new Error(LAT_LON_SERIES_ERRORS.LAT_LON_NOT_IN_DATA_SERIES)
+        if (index === undefined) throw new Error(LAT_LON_SERIES_ERRORS.LAT_LON_NOT_IN_DATA_SERIES + `: ${lat_lon.lat},${lat_lon.lon}`)
         return index
     }
 }

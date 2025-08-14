@@ -91,6 +91,6 @@ describe("factory_get_index method", () =>
             datetime: datetime_range.start,
             lat_lon: new LatLon({ lat: 100, lon: 20 })
         }))
-            .to.throw("LatLon not in DataSeries")
+            .to.throw("LatLon not in DataSeries.: 100,20")
     })
 })
