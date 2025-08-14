@@ -15,6 +15,21 @@ export const DATETIME_RANGE_ERRORS = {
 
 export class DatetimeRange implements IDatetimeRange
 {
+    static factory_change_date(repeat_every: DatetimeRangeRepeatEvery, change_by_steps: number): (date: Date) => void
+    {
+        if (repeat_every === "second") return (date: Date) => date.setUTCSeconds(date.getUTCSeconds() + change_by_steps)
+        if (repeat_every === "minute") return (date: Date) => date.setUTCMinutes(date.getUTCMinutes() + change_by_steps)
+        if (repeat_every === "hour") return (date: Date) => date.setUTCHours(date.getUTCHours() + change_by_steps)
+        if (repeat_every === "day") return (date: Date) => date.setUTCDate(date.getUTCDate() + change_by_steps)
+        if (repeat_every === "month") return (date: Date) => date.setUTCMonth(date.getUTCMonth() + change_by_steps)
+        if (repeat_every === "year") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + change_by_steps)
+        if (repeat_every === "decade") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + (10 * change_by_steps))
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (repeat_every === "century") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + (100 * change_by_steps))
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        throw new Error(DATETIME_RANGE_ERRORS.UNKNOWN_REPEAT_EVERY + repeat_every)
+    }
+
     start: Date
     end: Date
     repeat_every: DatetimeRangeRepeatEvery
@@ -50,43 +65,13 @@ export class DatetimeRange implements IDatetimeRange
         if (this.time_stamps) return this.time_stamps
         this.time_stamps = []
 
-        let increment_date: (current: Date) => void
-        switch (this.repeat_every)
-        {
-            case "second":
-                increment_date = c => c.setUTCSeconds(c.getUTCSeconds() + 1)
-                break
-            case "minute":
-                increment_date = c => c.setUTCMinutes(c.getUTCMinutes() + 1)
-                break
-            case "hour":
-                increment_date = c => c.setUTCHours(c.getUTCHours() + 1)
-                break
-            case "day":
-                increment_date = c => c.setUTCDate(c.getUTCDate() + 1)
-                break
-            case "month":
-                increment_date = c => c.setUTCMonth(c.getUTCMonth() + 1)
-                break
-            case "year":
-                increment_date = c => c.setUTCFullYear(c.getUTCFullYear() + 1)
-                break
-            case "decade":
-                increment_date = c => c.setUTCFullYear(c.getUTCFullYear() + 10)
-                break
-            case "century":
-                increment_date = c => c.setUTCFullYear(c.getUTCFullYear() + 100)
-                break
-            default:
-                // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                throw new Error(DATETIME_RANGE_ERRORS.UNKNOWN_REPEAT_EVERY + this.repeat_every)
-        }
+        const change_date = DatetimeRange.factory_change_date(this.repeat_every, 1)
 
         const current = new Date(this.start)
         while (current < this.end)
         {
             this.time_stamps.push(current.getTime())
-            increment_date(current) // mutate current date
+            change_date(current) // mutate current date
         }
 
         return this.time_stamps

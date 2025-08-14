@@ -82,6 +82,68 @@ describe("DatetimeRange", () =>
         })
     })
 
+    describe("factory_change_date", () =>
+    {
+        function apply_change_date(
+            repeat_every: DatetimeRangeRepeatEvery,
+            change_by_steps: number,
+        ): Date
+        {
+            const date = new Date("2023-01-01T00:00:00Z")
+            const change_date = DatetimeRange.factory_change_date(repeat_every, change_by_steps)
+            change_date(date)
+            return date
+        }
+
+        it("should mutate date by seconds", () =>
+        {
+            expect(apply_change_date("second", 120)).deep.equal(new Date("2023-01-01T00:02:00Z"))
+            expect(apply_change_date("second", -120)).deep.equal(new Date("2022-12-31T23:58:00Z"))
+        })
+
+        it("should mutate date by minutes", () =>
+        {
+            expect(apply_change_date("minute", 120)).deep.equal(new Date("2023-01-01T02:00:00Z"))
+            expect(apply_change_date("minute", -120)).deep.equal(new Date("2022-12-31T22:00:00Z"))
+        })
+
+        it("should mutate date by hours", () =>
+        {
+            expect(apply_change_date("hour", 120)).deep.equal(new Date("2023-01-06T00:00:00Z"))
+            expect(apply_change_date("hour", -120)).deep.equal(new Date("2022-12-27T00:00:00Z"))
+        })
+
+        it("should mutate date by days", () =>
+        {
+            expect(apply_change_date("day", 120)).deep.equal(new Date("2023-05-01T00:00:00.00Z"))
+            expect(apply_change_date("day", -120)).deep.equal(new Date("2022-09-03T00:00:00.00Z"))
+        })
+
+        it("should mutate date by months", () =>
+        {
+            expect(apply_change_date("month", 120)).deep.equal(new Date("2033-01-01T00:00:00Z"))
+            expect(apply_change_date("month", -120)).deep.equal(new Date("2013-01-01T00:00:00Z"))
+        })
+
+        it("should mutate date by years", () =>
+        {
+            expect(apply_change_date("year", 120)).deep.equal(new Date("2143-01-01T00:00:00Z"))
+            expect(apply_change_date("year", -120)).deep.equal(new Date("1903-01-01T00:00:00Z"))
+        })
+
+        it("should mutate date by decades", () =>
+        {
+            expect(apply_change_date("decade", 120)).deep.equal(new Date("3223-01-01T00:00:00Z"))
+            expect(apply_change_date("decade", -120)).deep.equal(new Date("0823-01-01T00:00:00Z"))
+        })
+
+        it("should mutate date by centurys", () =>
+        {
+            expect(apply_change_date("century", 20)).deep.equal(new Date("4023-01-01T00:00:00Z"))
+            expect(apply_change_date("century", -20)).deep.equal(new Date("0023-01-01T00:00:00Z"))
+        })
+    })
+
     describe("get_entries", () =>
     {
         it("should return correct entries for second repeat", () =>
