@@ -1,14 +1,31 @@
+import { IIndexManager } from "./DataSeries"
 import { DatetimeRange } from "./DatetimeRange"
-import { ILatLon, LatLonDataSeries } from "./LatLon"
+import { ILatLonOnly, LatLonDataSeries } from "./LatLon"
 
 
+export type DatetimeRangeLatLonKey = { datetime: Date, lat_lon: ILatLonOnly }
+export type DatetimeRangeLatLonMultipleKeys = { datetime: Date, lat_lon?: undefined } | { datetime?: undefined, lat_lon: ILatLonOnly }
 
-export type DatetimeRangeLatLonKey = { date: Date, lat_lon: ILatLon }
-export type DatetimeRangeLatLonMultipleKeys = { date: Date, lat_lon: undefined } | { date: undefined, lat_lon: ILatLon }
-
-export function factory_get_index_for_datetime_range_lat_lon (datetime_range: DatetimeRange, lat_lon_series: LatLonDataSeries, lat_lon_first: boolean = true)
+export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range: DatetimeRange, lat_lon_series: LatLonDataSeries, lat_lon_first: boolean = true): IIndexManager<DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>
 {
-    let get_index = ({ date, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
+    const validate = (data_count: number) =>
+    {
+        const errors: string[] = []
+
+        if (data_count % datetime_range.size() !== 0)
+        {
+            errors.push("DataSeries length must be a multiple of the datetime range size")
+        }
+        if (data_count % lat_lon_series.size() !== 0)
+        {
+            errors.push("DataSeries length must be a multiple of the lat_lon series size")
+        }
+
+        return errors
+    }
+
+
+    let get_index = ({ datetime: date, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
     {
         if (date === undefined)
         {
@@ -35,10 +52,10 @@ export function factory_get_index_for_datetime_range_lat_lon (datetime_range: Da
         }
     }
 
-    if (lat_lon_first) return get_index
+    if (lat_lon_first) return { validate, get_index }
 
 
-    get_index = ({ date, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
+    get_index = ({ datetime: date, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
     {
         if (date === undefined)
         {
@@ -64,5 +81,5 @@ export function factory_get_index_for_datetime_range_lat_lon (datetime_range: Da
         }
     }
 
-    return get_index
+    return { validate, get_index }
 }

@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { describe } from "mocha"
 
-import { LatLon, LatLonDataSeries } from "./LatLon"
+import { LAT_LON_SERIES_ERRORS, LatLon, LatLonDataSeries } from "./LatLon"
 
 
 describe("LatLon", () =>
@@ -27,6 +27,15 @@ describe("LatLonDataSeries", () =>
 
         expect(series.get_index_of(lat_lon1)).to.equal(0)
         expect(series.get_index_of(lat_lon2)).to.equal(1)
-        expect(series.get_index_of(new LatLon({ lat: 0, lon: 0 }))).to.equal(-1) // Not in series
+    })
+
+
+    it("should raise an error when trying to get index of a LatLon not in the series", () =>
+    {
+        const lat_lon1 = new LatLon({ lat: 34.0522, lon: -118.2437 })
+        const series = new LatLonDataSeries([lat_lon1])
+
+        expect(() => series.get_index_of(new LatLon({ lat: 0, lon: 0 })))
+            .to.throw(LAT_LON_SERIES_ERRORS.LAT_LON_NOT_IN_DATA_SERIES)
     })
 })

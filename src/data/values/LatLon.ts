@@ -1,5 +1,11 @@
 
-export interface ILatLon
+export interface ILatLonOnly
+{
+    lat: number
+    lon: number
+}
+
+export interface ILatLon extends ILatLonOnly
 {
     lat: number
     lon: number
@@ -44,6 +50,9 @@ export class LatLon implements ILatLon
     }
 }
 
+export const LAT_LON_SERIES_ERRORS = {
+    LAT_LON_NOT_IN_DATA_SERIES: "LatLon not in DataSeries.",
+}
 
 export class LatLonDataSeries
 {
@@ -69,8 +78,10 @@ export class LatLonDataSeries
         return this.data // Can return as is because data is shallow frozen
     }
 
-    get_index_of(lat_lon: ILatLon): number
+    get_index_of(lat_lon: ILatLonOnly): number
     {
-        return this.index.get(`${lat_lon.lat},${lat_lon.lon}`) ?? -1
+        const index = this.index.get(`${lat_lon.lat},${lat_lon.lon}`)
+        if (index === undefined) throw new Error(LAT_LON_SERIES_ERRORS.LAT_LON_NOT_IN_DATA_SERIES)
+        return index
     }
 }
