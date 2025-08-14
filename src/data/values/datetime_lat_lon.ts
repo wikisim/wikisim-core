@@ -3,8 +3,8 @@ import { DatetimeRange } from "./DatetimeRange"
 import { ILatLon, LatLonDataSeries } from "./LatLon"
 
 
-export type DatetimeRangeLatLonKey = { datetime: Date, lat_lon: ILatLon }
-export type DatetimeRangeLatLonMultipleKeys = { datetime: Date, lat_lon?: undefined } | { datetime?: undefined, lat_lon: ILatLon }
+export type DatetimeRangeLatLonKey = { datetime_ms: number, lat_lon: ILatLon }
+export type DatetimeRangeLatLonMultipleKeys = { datetime_ms: number, lat_lon?: undefined } | { datetime_ms?: undefined, lat_lon: ILatLon }
 
 export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range: DatetimeRange, lat_lon_series: LatLonDataSeries, lat_lon_first: boolean = true): IIndexManager<DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>
 {
@@ -25,9 +25,9 @@ export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range:
     }
 
 
-    let get_index = ({ datetime: date, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
+    let get_index = ({ datetime_ms, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
     {
-        if (date === undefined)
+        if (datetime_ms === undefined)
         {
             const lat_lon_index = lat_lon_series.get_index_of(lat_lon)
             const lat_lon_series_size = lat_lon_series.size()
@@ -38,7 +38,7 @@ export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range:
             return time_stamp_indicies.map(i => (i * lat_lon_series_size) + lat_lon_index)
         }
 
-        const date_index = datetime_range.get_index_of(date)
+        const date_index = datetime_range.get_index_of(datetime_ms)
         if (lat_lon === undefined)
         {
             const lat_lon_series_size = lat_lon_series.size()
@@ -55,9 +55,9 @@ export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range:
     if (lat_lon_first) return { validate, get_index }
 
 
-    get_index = ({ datetime: date, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
+    get_index = ({ datetime_ms, lat_lon }: DatetimeRangeLatLonKey | DatetimeRangeLatLonMultipleKeys): number | number[] | { start: number, end: number } =>
     {
-        if (date === undefined)
+        if (datetime_ms === undefined)
         {
             const lat_lon_index = lat_lon_series.get_index_of(lat_lon)
             const datetime_range_size = datetime_range.size()
@@ -65,7 +65,7 @@ export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range:
             return { start: lat_lon_index_offset, end: lat_lon_index_offset + datetime_range_size }
         }
 
-        const date_index = datetime_range.get_index_of(date)
+        const date_index = datetime_range.get_index_of(datetime_ms)
         if (lat_lon === undefined)
         {
             const datetime_range_size = datetime_range.size()

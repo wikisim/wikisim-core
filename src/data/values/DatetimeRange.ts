@@ -102,16 +102,16 @@ export class DatetimeRange implements IDatetimeRange
     }
 
 
-    get_index_of(date: Date): number
+    get_index_of(datetime_ms: number): number
     {
         // Because we haved assert in the tests that a date is present when
         // passing to this function then maybe this same error might happen in
         // consuming code so we catch and explicitly raise this error.
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!date) throw new Error(DATETIME_RANGE_ERRORS.UNDEFINED_DATE_ARG_FOR_GET_INDEX)
+        if (datetime_ms === undefined) throw new Error(DATETIME_RANGE_ERRORS.UNDEFINED_DATE_ARG_FOR_GET_INDEX)
 
         const time_stamps = this.get_time_stamps()
-        const index = binary_search(time_stamps, date.getTime(), (a, b) => a - b)
+        const index = binary_search(time_stamps, datetime_ms, (a, b) => a - b)
         if (index === -1) throw new Error(DATETIME_RANGE_ERRORS.DATETIME_NOT_IN_RANGE)
         return index
     }

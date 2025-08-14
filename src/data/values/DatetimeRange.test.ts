@@ -197,7 +197,7 @@ describe("DatetimeRange", () =>
             const end = new Date("2023-01-05T00:00:00Z")
             const range = new DatetimeRange(start, end, "day")
 
-            const entries = range.get_entries()
+            const entries = range.get_time_stamps()
             expect(range.get_index_of(entries[0]!)).to.equal(0)
             expect(range.get_index_of(entries[2]!)).to.equal(2)
         })
@@ -209,7 +209,7 @@ describe("DatetimeRange", () =>
             const range = new DatetimeRange(start, end, "day")
 
             expect(() => range.get_index_of([][0]!)).to.throw(DATETIME_RANGE_ERRORS.UNDEFINED_DATE_ARG_FOR_GET_INDEX)
-            expect(() => range.get_index_of(new Date("2023-01-06T00:00:00Z"))).to.throw(DATETIME_RANGE_ERRORS.DATETIME_NOT_IN_RANGE)
+            expect(() => range.get_index_of(new Date("2023-01-06T00:00:00Z").getTime())).to.throw(DATETIME_RANGE_ERRORS.DATETIME_NOT_IN_RANGE)
         })
     })
 })

@@ -64,11 +64,11 @@ describe("factory_get_index method", () =>
         const index_manager = factory_IndexManager_for_datetime_range_lat_lon(datetime_range, lat_lon_series, lat_lon_first)
         const series = new DataSeries<DatetimeRangeLatLonKey, number, DatetimeRangeLatLonMultipleKeys>(initial_data, index_manager)
 
-        const datetimes = datetime_range.get_entries()
+        const datetimes_ms = datetime_range.get_time_stamps()
         const lat_lons = lat_lon_series.get_entries()
-        expect(series.get({ datetime: datetimes[1]!, lat_lon: lat_lons[1]! })).to.deep.equal(5)
-        expect(series.get_multiple({ datetime: datetimes[1]!, lat_lon: undefined })).to.deep.equal([1, 5, 9])
-        expect(series.get_multiple({ datetime: undefined, lat_lon: lat_lons[1]! })).to.deep.equal([4, 5, 6, 7])
+        expect(series.get({ datetime_ms: datetimes_ms[1]!, lat_lon: lat_lons[1]! })).to.deep.equal(5)
+        expect(series.get_multiple({ datetime_ms: datetimes_ms[1]!, lat_lon: undefined })).to.deep.equal([1, 5, 9])
+        expect(series.get_multiple({ datetime_ms: undefined, lat_lon: lat_lons[1]! })).to.deep.equal([4, 5, 6, 7])
         expect(series.get_entries()).to.deep.equal(initial_data)
     }
 
@@ -82,13 +82,13 @@ describe("factory_get_index method", () =>
 
         expect(() => series.get({
             // datetime_range end is exclusive so will not be in range
-            datetime: datetime_range.end,
+            datetime_ms: datetime_range.end.getTime(),
             lat_lon: new LatLon({ lat: 10, lon: 20 })
         }))
             .to.throw("Datetime not in range")
 
         expect(() => series.get({
-            datetime: datetime_range.start,
+            datetime_ms: datetime_range.start.getTime(),
             lat_lon: new LatLon({ lat: 100, lon: 20 })
         }))
             .to.throw("LatLon not in DataSeries.: 100,20")
