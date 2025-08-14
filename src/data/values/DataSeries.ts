@@ -62,3 +62,34 @@ export class DataSeries<I, V, IndexMultiple=I> implements IDataSeries<I, V, Inde
         return this.data
     }
 }
+
+
+// export function combine_data_series<I, V, IM>(
+//     series_list: IDataSeries<I, V, IM>[],
+// ): IDataSeries<I, V, IM>
+// {
+//     return {
+//         get: (key: I) =>
+//         {
+//             let error: Error | undefined = undefined
+//             for (const series of series_list)
+//             {
+//                 try { return series.get(key) }
+//                 catch (e)
+//                 {
+//                     if (e instanceof Error) error = e
+//                     else error = new Error(String(e))
+//                 }
+//             }
+//             throw error!
+//         },
+//         get_multiple: (keys: IM) =>
+//         {
+//             return series_list.flatMap(series => series.get_multiple(keys))
+//         },
+//         get_entries: () =>
+//         {
+//             return series_list.flatMap(series => series.get_entries())
+//         }
+//     }
+// }
