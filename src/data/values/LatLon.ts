@@ -5,6 +5,11 @@ export interface ILatLon
     lon: number
 }
 
+export interface ILatLonWithIsOnshore extends ILatLon
+{
+    is_onshore: boolean
+}
+
 
 export class LatLon implements ILatLon
 {
@@ -32,6 +37,29 @@ export class LatLon implements ILatLon
     clone(): LatLon
     {
         return new LatLon(this)
+    }
+}
+
+export class LatLonWithIsOnshore extends LatLon implements ILatLonWithIsOnshore
+{
+    static from_str(str: string): ILatLonWithIsOnshore
+    {
+        const lat_lon = LatLon.from_str(str)
+        const [_a, _b, is_onshore_str] = str.split(",")
+        const is_onshore = is_onshore_str === "T"
+        return new LatLonWithIsOnshore({ lat: lat_lon.lat, lon: lat_lon.lon, is_onshore })
+    }
+
+    static to_str(lat_lon: ILatLonWithIsOnshore): string
+    {
+        return `${lat_lon.lat},${lat_lon.lon},${lat_lon.is_onshore ? "T" : "F"}`
+    }
+
+    is_onshore: boolean
+    constructor(args: { lat: number, lon: number, is_onshore: boolean })
+    {
+        super({ lat: args.lat, lon: args.lon })
+        this.is_onshore = args.is_onshore
     }
 }
 
