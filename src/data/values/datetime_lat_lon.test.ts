@@ -27,11 +27,11 @@ function fixture_lat_lon_then_datetime_data()
 
 describe("factory_get_index method", () =>
 {
-    const datetime_range = new DatetimeRange(
-        new Date("2023-01-01T00:00:00Z"),
-        new Date("2023-01-05T00:00:00Z"),
-        "day"
-    )
+    const datetime_range = new DatetimeRange({
+        start: new Date("2023-01-01T00:00:00Z"),
+        end: new Date("2023-01-05T00:00:00Z"),
+        repeat_every: "day",
+    })
 
     const lat_lon_series = new LatLonDataSeries([
         new LatLon({ lat: 10, lon: 20 }),

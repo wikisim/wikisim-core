@@ -3,9 +3,6 @@ import { DatetimeRangeRepeatEvery, IDatetimeRange } from "../interface"
 
 
 export const DATETIME_RANGE_ERRORS = {
-    MISSING_START_DATE: "DatetimeRange requires start date.",
-    MISSING_END_DATE: "DatetimeRange requires end date.",
-    MISSING_REPEAT_EVERY: "DatetimeRange requires repeat_every.",
     START_AFTER_END: "DatetimeRange requires start date be before end date.",
     NOT_DIVISIBLE_BY_REPEAT_EVERY: "DatetimeRange requires difference between start and end dates to be divisible by repeat_every.",
     UNKNOWN_REPEAT_EVERY: "Unknown repeat_every value: ",
@@ -36,18 +33,15 @@ export class DatetimeRange implements IDatetimeRange
 
     private time_stamps: number[] | undefined = undefined
 
-    constructor(start?: Date, end?: Date, repeat_every?: DatetimeRangeRepeatEvery)
+    constructor(args: { start: Date, end: Date, repeat_every: DatetimeRangeRepeatEvery })
     {
-        if (!start) throw new Error(DATETIME_RANGE_ERRORS.MISSING_START_DATE)
-        if (!end) throw new Error(DATETIME_RANGE_ERRORS.MISSING_END_DATE)
-        if (!repeat_every) throw new Error(DATETIME_RANGE_ERRORS.MISSING_REPEAT_EVERY)
-        if (start >= end) throw new Error(DATETIME_RANGE_ERRORS.START_AFTER_END)
+        if (args.start >= args.end) throw new Error(DATETIME_RANGE_ERRORS.START_AFTER_END)
 
-        check_start_end_divisible_by_repeat_every(start, end, repeat_every)
+        check_start_end_divisible_by_repeat_every(args.start, args.end, args.repeat_every)
 
-        this.start = start
-        this.end = end
-        this.repeat_every = repeat_every
+        this.start = args.start
+        this.end = args.end
+        this.repeat_every = args.repeat_every
     }
 
 
