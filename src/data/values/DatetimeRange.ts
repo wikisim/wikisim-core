@@ -12,17 +12,17 @@ export const DATETIME_RANGE_ERRORS = {
 
 export class DatetimeRange implements IDatetimeRange
 {
-    static factory_change_date(repeat_every: DatetimeRangeRepeatEvery, change_by_steps: number): (date: Date) => void
+    static factory_change_date(repeat_every: DatetimeRangeRepeatEvery, change_by: number): (date: Date) => void
     {
-        if (repeat_every === "second") return (date: Date) => date.setUTCSeconds(date.getUTCSeconds() + change_by_steps)
-        if (repeat_every === "minute") return (date: Date) => date.setUTCMinutes(date.getUTCMinutes() + change_by_steps)
-        if (repeat_every === "hour") return (date: Date) => date.setUTCHours(date.getUTCHours() + change_by_steps)
-        if (repeat_every === "day") return (date: Date) => date.setUTCDate(date.getUTCDate() + change_by_steps)
-        if (repeat_every === "month") return (date: Date) => date.setUTCMonth(date.getUTCMonth() + change_by_steps)
-        if (repeat_every === "year") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + change_by_steps)
-        if (repeat_every === "decade") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + (10 * change_by_steps))
+        if (repeat_every === "second") return (date: Date) => date.setUTCSeconds(date.getUTCSeconds() + change_by)
+        if (repeat_every === "minute") return (date: Date) => date.setUTCMinutes(date.getUTCMinutes() + change_by)
+        if (repeat_every === "hour") return (date: Date) => date.setUTCHours(date.getUTCHours() + change_by)
+        if (repeat_every === "day") return (date: Date) => date.setUTCDate(date.getUTCDate() + change_by)
+        if (repeat_every === "month") return (date: Date) => date.setUTCMonth(date.getUTCMonth() + change_by)
+        if (repeat_every === "year") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + change_by)
+        if (repeat_every === "decade") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + (10 * change_by))
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (repeat_every === "century") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + (100 * change_by_steps))
+        if (repeat_every === "century") return (date: Date) => date.setUTCFullYear(date.getUTCFullYear() + (100 * change_by))
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         throw new Error(DATETIME_RANGE_ERRORS.UNKNOWN_REPEAT_EVERY + repeat_every)
     }
