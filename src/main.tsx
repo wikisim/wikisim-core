@@ -15,6 +15,13 @@ function App()
     const state = core_store()
 
     const can_request_registration = get_can_request_sign_in_with_OTP(state)
+    if (can_request_registration.allowed && document.location.hostname === "localhost" && document.location.port !== "5173")
+    {
+        // If we are running on localhost, we allow to request registration / sign in
+        // with OTP but only if the port is not 5173 (which is the default for Vite dev server).
+        can_request_registration.allowed = false
+        can_request_registration.reason = "Running on localhost is fine to register / sign in with OTP but must be on port 5173 otherwise OTP links will not redirect to here."
+    }
 
     // History of authentication status changes
     const potential_new_status_history = {
