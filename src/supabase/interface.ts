@@ -265,7 +265,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      __testing_insert_test_data: {
+      __testing_insert_test_data_component: {
         Args: { p_id: number; p_test_run_id: string }
         Returns: {
           bytes_changed: number

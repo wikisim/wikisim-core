@@ -742,11 +742,11 @@ describe("can init, insert, update, and search personal data components", () =>
         // TODO replace this with ability to just log out of this current user,
         // log in as another user, make this change, then log back in as the
         // original user.
-        const response1 = await get_supabase().rpc("__testing_insert_test_data", {
+        const response1 = await get_supabase().rpc("__testing_insert_test_data_component", {
             p_id: -10,
             p_test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         })
-        if (response1.error) expect.fail(`Should have run __testing_insert_test_data without error to insert a test data component with editor_id who is different to logged in user, but got response: ${JSON.stringify(response1)}`)
+        if (response1.error) expect.fail(`Should have run __testing_insert_test_data_component without error to insert a test data component with editor_id who is different to logged in user, but got response: ${JSON.stringify(response1)}`)
         expect(response1.data.owner_id).equals(OTHER_USER_ID)
 
         const data_component = {
