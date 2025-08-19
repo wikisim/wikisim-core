@@ -23,7 +23,7 @@ export function browser_convert_tiptap_to_javascript (tiptap_text: string, data_
                 if (data_id_and_version)
                 {
                     const component_value = data_component_by_id_and_version[data_id_and_version]?.result_value
-                    return component_value || `"${data_id_and_version} is undefined"`
+                    return component_value || `"component ${data_id_and_version} is undefined"`
                 }
             }
 

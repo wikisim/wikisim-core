@@ -18,4 +18,11 @@ describe("browser_convert_tiptap_to_javascript", () =>
         // expect(plain_text).equals("d1003v1 = 25400000\nd1003v1 + 2")
         expect(plain_text).equals("25400000 +2")
     })
+
+    it("should not convert undefined data components into strings that can be parsed as a float", () =>
+    {
+        const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
+        expect(plain_text).equals(`"component 1003v1 is undefined" +2`)
+        expect(parseFloat(plain_text)).deep.equals(NaN)
+    })
 })
