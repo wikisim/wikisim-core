@@ -20,7 +20,8 @@ describe("prepare_data_component_for_db_insert", function ()
             title: "<p>Test Title</p>",
             description: "<p>Test Description</p>",
             label_ids: [-3, -4],
-            value: "123",
+            input_value: "123",
+            result_value: "123",
             value_type: "number",
             value_number_display_type: "bare",
             value_number_sig_figs: 2,
@@ -54,7 +55,8 @@ describe("prepare_data_component_for_db_insert", function ()
         expect(result).to.have.property("p_title", data_component.title)
         expect(result).to.have.property("p_description", data_component.description)
         expect(result).to.have.property("p_label_ids").that.deep.equals(data_component.label_ids)
-        expect(result).to.have.property("p_value", data_component.value)
+        expect(result).to.have.property("p_input_value", data_component.input_value)
+        expect(result).to.have.property("p_result_value", data_component.result_value)
         expect(result).to.have.property("p_value_type", data_component.value_type)
         expect(result).to.have.property("p_datetime_range_start", data_component.datetime_range_start!.toISOString())
         expect(result).to.have.property("p_datetime_range_end", data_component.datetime_range_end!.toISOString())
@@ -85,7 +87,8 @@ describe("prepare_data_component_for_db_insert", function ()
         expect(result).to.have.property("p_title", data_component.title)
         expect(result).to.have.property("p_description", data_component.description)
         expect(result).to.have.property("p_label_ids").that.deep.equals(data_component.label_ids)
-        expect(result).to.have.property("p_value", data_component.value)
+        expect(result).to.have.property("p_input_value", data_component.input_value)
+        expect(result).to.have.property("p_result_value", data_component.result_value)
         expect(result).to.have.property("p_value_type", data_component.value_type)
         expect(result).to.have.property("p_datetime_range_start", data_component.datetime_range_start!.toISOString())
         expect(result).to.have.property("p_datetime_range_end", data_component.datetime_range_end!.toISOString())

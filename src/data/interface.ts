@@ -42,7 +42,8 @@ interface DataComponentFields
     description: string
     label_ids?: number[]
 
-    value?: string
+    input_value?: string
+    result_value?: string
     value_type?: DBEnums["data_component_value_type"]
     value_number_display_type?: NumberDisplayType
     value_number_sig_figs?: number

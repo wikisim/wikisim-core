@@ -20,7 +20,8 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
         description: data_component.description,
         label_ids: data_component.label_ids ?? null,
 
-        value: data_component.value ?? null,
+        input_value: data_component.input_value ?? null,
+        result_value: data_component.result_value ?? null,
         value_type: data_component.value_type ?? null,
         value_number_display_type: data_component.value_number_display_type ?? null,
         value_number_sig_figs: data_component.value_number_sig_figs ?? null,
@@ -61,7 +62,8 @@ export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id
         description: row.description,
         label_ids: row.label_ids ?? undefined,
 
-        value: row.value ?? undefined,
+        input_value: row.input_value ?? undefined,
+        result_value: row.result_value ?? undefined,
         value_type: row.value_type ?? undefined,
         value_number_display_type: row.value_number_display_type ?? undefined,
         value_number_sig_figs: row.value_number_sig_figs ?? undefined,
