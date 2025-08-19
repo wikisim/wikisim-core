@@ -90,7 +90,7 @@ export async function request_archived_data_components(
     const { from, to } = get_range_from_options(options)
 
     let supa = get_supabase()
-        .from("data_components_archive")
+        .from("data_components_history")
         .select("*")
 
     const or_clauses: string[] = []

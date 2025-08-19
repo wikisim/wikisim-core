@@ -28,7 +28,7 @@ import {
 
 // AJPtest2 user id:
 const OTHER_USER_ID = "c3b9d96b-dc5c-4f5f-9698-32eaf601b7f2"
-type TABLE_NAME = "data_components_archive" | "data_components"
+type TABLE_NAME = "data_components_history" | "data_components"
 
 describe("can init, insert, update, and search wiki data components", () =>
 {
@@ -38,7 +38,7 @@ describe("can init, insert, update, and search wiki data components", () =>
     after(async () =>
     {
         // Clean up test data after all tests have run
-        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
     })
 
@@ -89,7 +89,7 @@ describe("can init, insert, update, and search wiki data components", () =>
         }
         expect(response1.data).to.have.property("editor_id", user_id)
 
-        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
 
         // Check insert_data_component rpc call would fail if editor_id is given
@@ -136,7 +136,7 @@ describe("can init, insert, update, and search wiki data components", () =>
         expect(response2.data.plain_title).equals("Some Other Title", "Edge function should have computed plain_title on update")
         expect(response2.data.plain_description).equals("Some Other Description", "Edge function should have computed plain_description on update")
 
-        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
     })
 
@@ -178,7 +178,7 @@ describe("can init, insert, update, and search wiki data components", () =>
             dimension_ids: undefined,
         })
 
-        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
     })
 
@@ -295,9 +295,9 @@ describe("can init, insert, update, and search wiki data components", () =>
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_archive = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response], "Fetched data components should match expected")
-        compare_data_component_lists(row_from_data_components_archive.data!, [expected_response], "Fetched data components history fetched should match expected")
+        compare_data_component_lists(row_from_data_components_history.data!, [expected_response], "Fetched data components history fetched should match expected")
     })
 
 
@@ -401,10 +401,10 @@ describe("can init, insert, update, and search wiki data components", () =>
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_archive = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
-        expect(row_from_data_components_archive.data!.length).equals(3, "Should now have 3 rows in the archive table")
-        compare_data_components(row_from_data_components_archive.data![0]!, expected_response)
+        expect(row_from_data_components_history.data!.length).equals(3, "Should now have 3 rows in the archive table")
+        compare_data_components(row_from_data_components_history.data![0]!, expected_response)
     })
 
 
@@ -424,7 +424,7 @@ describe("can init, insert, update, and search wiki data components", () =>
         expect(response.error).to.have.property("message").that.equals("ERR09. Update failed: id -1 with version_number 4 not found or version mismatch.")
 
         // This version number does exist in the DB but only in the
-        // data_components_archive table and so it is the wrong value for updating
+        // data_components_history table and so it is the wrong value for updating
         data_component.id.version -= 2
         expect(data_component.id.version).to.equal(2, "Version number should be 2 for this test")
 
@@ -544,7 +544,7 @@ describe("can init, insert, update, and search personal data components", () =>
     after(async () =>
     {
         // Clean up test data after all tests have run
-        await delete_test_data_in_db("data_components_archive")
+        await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
     })
 
@@ -646,9 +646,9 @@ describe("can init, insert, update, and search personal data components", () =>
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_archive = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response], "Fetched data components should match expected")
-        compare_data_component_lists(row_from_data_components_archive.data!, [expected_response], "Fetched data components history fetched should match expected")
+        compare_data_component_lists(row_from_data_components_history.data!, [expected_response], "Fetched data components history fetched should match expected")
     })
 
 
@@ -730,10 +730,10 @@ describe("can init, insert, update, and search personal data components", () =>
         // Double check that the data component was inserted correctly into
         // both the main table and archive table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_archive = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
-        expect(row_from_data_components_archive.data!.length).equals(2, "Should now have 2 rows in the archive table")
-        compare_data_components(row_from_data_components_archive.data![0]!, expected_response)
+        expect(row_from_data_components_history.data!.length).equals(2, "Should now have 2 rows in the archive table")
+        compare_data_components(row_from_data_components_history.data![0]!, expected_response)
     })
 
 
@@ -858,7 +858,7 @@ async function check_no_test_data_in_db_and_delete_if_present(): Promise<void>
 {
     const supabase = get_supabase()
 
-    const table_names: TABLE_NAME[] = ["data_components_archive", "data_components"]
+    const table_names: TABLE_NAME[] = ["data_components_history", "data_components"]
     let rows_found = 0
     for (const table_name of table_names)
     {

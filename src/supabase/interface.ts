@@ -129,7 +129,7 @@ export type Database = {
         }
         Relationships: []
       }
-      data_components_archive: {
+      data_components_history: {
         Row: {
           bytes_changed: number
           comment: string | null
@@ -234,7 +234,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "data_components_archive_id_fkey"
+            foreignKeyName: "data_components_history_id_fkey"
             columns: ["id"]
             isOneToOne: false
             referencedRelation: "data_components"

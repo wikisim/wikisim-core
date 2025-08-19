@@ -54,4 +54,4 @@ export type DBDataComponentUpdateRow = Database["public"]["Tables"]["data_compon
 export type DBDataComponentInsertArgs = Database["public"]["Functions"]["insert_data_component"]["Args"]
 export type DBDataComponentUpdateArgs = Database["public"]["Functions"]["update_data_component"]["Args"]
 
-export type DBDataComponentArchiveRow = Database["public"]["Tables"]["data_components_archive"]["Row"]
+// export type DBDataComponentHistoryRow = Database["public"]["Tables"]["data_components_history"]["Row"]
