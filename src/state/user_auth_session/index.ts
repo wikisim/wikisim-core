@@ -74,10 +74,10 @@ export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase
 
             get_supabase().auth.signOut().then(() =>
             {
-                console.log("Supabase sign out succeeded")
+                console .log("Supabase sign out succeeded")
             }).catch(error =>
             {
-                console.error("Supabase sign out error:", error)
+                console .error("Supabase sign out error:", error)
                 set(root_state =>
                 {
                     root_state.user_auth_session.error = error
@@ -112,7 +112,7 @@ function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, 
 
     const OTP_sign_in_request_made = () => set(root_state =>
     {
-        console.log("Supabase OTP_sign_in request (signInWithOtp) succeeded:")
+        console .log("Supabase OTP_sign_in request (signInWithOtp) succeeded:")
         transition_status(root_state.user_auth_session, "logged_out__OTP_sign_in_request_made")
         root_state.user_auth_session.error = undefined
         return root_state
@@ -120,7 +120,7 @@ function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, 
 
     const OTP_sign_in_request_errored = (error: AuthError | any) => set(root_state =>
     {
-        console.log("Supabase OTP_sign_in request (signInWithOtp) error:", error)
+        console .log("Supabase OTP_sign_in request (signInWithOtp) error:", error)
         transition_status(root_state.user_auth_session, "logged_out__OTP_sign_in_request_errored")
         root_state.user_auth_session.error = error
         return root_state
