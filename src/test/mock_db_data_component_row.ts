@@ -21,7 +21,8 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
         description: "<p>This is a mock data component for testing purposes.</p>",
         label_ids: null,
 
-        value: null,
+        input_value: null,
+        result_value: null,
         value_type: null,
         value_number_display_type: null,
         value_number_sig_figs: null,

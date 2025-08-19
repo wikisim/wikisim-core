@@ -57,7 +57,8 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         || component_1.description !== component_2.description
         || JSON.stringify(component_1.label_ids) !== JSON.stringify(component_2.label_ids)
 
-        || component_1.value !== component_2.value
+        || component_1.input_value !== component_2.input_value
+        || component_1.result_value !== component_2.result_value
         || component_1.value_type !== component_2.value_type
         || component_1.value_number_display_type !== component_2.value_number_display_type
         || component_1.value_number_sig_figs !== component_2.value_number_sig_figs

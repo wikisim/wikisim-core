@@ -44,7 +44,8 @@ describe("changes_made function", () => {
         description: "<p>Modified Description</p>",
         label_ids: [-2, -3],
 
-        value: "Modified Value",
+        input_value: "Modified Value",
+        result_value: "Modified Value",
         value_type: "number",
         value_number_display_type: "scientific",
         value_number_sig_figs: 3,
@@ -65,7 +66,8 @@ describe("changes_made function", () => {
         "description",
         "label_ids",
 
-        "value",
+        "input_value",
+        "result_value",
         "value_type",
         "value_number_display_type",
         "value_number_sig_figs",
