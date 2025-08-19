@@ -12,7 +12,7 @@ import { get_supabase } from "./supabase"
 
 function App()
 {
-    const state = core_store().getState()
+    const state = core_store()
 
     const can_request_registration = get_can_request_sign_in_with_OTP(state)
 
