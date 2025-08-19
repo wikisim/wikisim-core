@@ -1,3 +1,4 @@
+import { DEFAULTS } from "../defaults"
 import { DataComponent, NewDataComponent } from "../interface"
 import { format_number_to_string } from "./format_number_to_string"
 
@@ -8,8 +9,8 @@ export function format_data_component_value_to_string (data_component: DataCompo
         // input_value = "",
         result_value = "",
         // value_type,
-        value_number_display_type = "bare",
-        value_number_sig_figs = 2,
+        value_number_display_type = DEFAULTS.value_number_display_type,
+        value_number_sig_figs = DEFAULTS.value_number_sig_figs,
     } = data_component
 
     const value_as_number = parseFloat(result_value)
