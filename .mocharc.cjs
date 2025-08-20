@@ -3,7 +3,7 @@
 
 function is_test_file(arg)
 {
-    return arg.match(/\.[jt]sx?$/)
+    return arg.match(/\.test\.[jt]sx?$/)
 }
 // const allTestFiles = './src/**/?(*.)+(spec|test).[jt]s?(x)';
 const spec = "src/**/*.test.ts"  // all test files
