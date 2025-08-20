@@ -70,7 +70,7 @@ export async function request_data_components(
 }
 
 
-export async function request_archived_data_components(
+export async function request_historical_data_components(
     get_supabase: GetSupabase,
     /**
      * Must provide at least one IdAndVersion or IdOnly

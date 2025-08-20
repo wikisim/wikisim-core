@@ -10,8 +10,8 @@ import {
 import { deep_equals } from "../utils/deep_equals"
 import { convert_from_db_row } from "./convert_between_db"
 import {
-    request_archived_data_components,
     request_data_components,
+    request_historical_data_components,
     search_data_components,
 } from "./fetch_from_db"
 import { IdAndVersion, IdOnly } from "./id"
@@ -296,9 +296,9 @@ describe("can init, insert, update, and search wiki data components", () =>
         inserted_data_component = response.data
 
         // Double check that the data component was inserted correctly into
-        // both the main table and archive table
+        // both the main table and historical table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_historical_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response], "Fetched data components should match expected")
         compare_data_component_lists(row_from_data_components_history.data!, [expected_response], "Fetched data components history fetched should match expected")
     })
@@ -403,11 +403,11 @@ describe("can init, insert, update, and search wiki data components", () =>
         updated_data_component = response.data
 
         // Double check that the data component was inserted correctly into
-        // both the main table and archive table
+        // both the main table and historical table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_historical_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
-        expect(row_from_data_components_history.data!.length).equals(3, "Should now have 3 rows in the archive table")
+        expect(row_from_data_components_history.data!.length).equals(3, "Should now have 3 rows in the historical table")
         compare_data_components(row_from_data_components_history.data![0]!, expected_response)
     })
 
@@ -475,9 +475,9 @@ describe("can init, insert, update, and search wiki data components", () =>
         const ids_only = [id_1.as_IdOnly(), id_2.as_IdOnly()]
         const data_components_page_1 = await request_data_components(get_supabase, { page: 0, size: 1, ids: ids_only })
         const data_components_page_2 = await request_data_components(get_supabase, { page: 1, size: 1, ids: ids_only })
-        const archived_data_component_1_page_1 = await request_archived_data_components(get_supabase, [id_1.as_IdOnly()], { page: 0, size: 1 })
-        const archived_data_component_1_page_2 = await request_archived_data_components(get_supabase, [id_1.as_IdOnly()], { page: 1, size: 1 })
-        const archived_data_component_2 = await request_archived_data_components(get_supabase, [id_2.as_IdOnly()], { page: 0, size: 2 })
+        const historical_data_component_1_page_1 = await request_historical_data_components(get_supabase, [id_1.as_IdOnly()], { page: 0, size: 1 })
+        const historical_data_component_1_page_2 = await request_historical_data_components(get_supabase, [id_1.as_IdOnly()], { page: 1, size: 1 })
+        const historical_data_component_2 = await request_historical_data_components(get_supabase, [id_2.as_IdOnly()], { page: 0, size: 2 })
 
         expect(data_components_page_1.data, "Expected data to be an array").to.be.an("array")
         deep_equals(
@@ -496,21 +496,21 @@ describe("can init, insert, update, and search wiki data components", () =>
             "Expected second page of data"
         )
 
-        expect(archived_data_component_1_page_1.data, "Expected archived data to be an array").to.be.an("array")
+        expect(historical_data_component_1_page_1.data, "Expected historical data to be an array").to.be.an("array")
         deep_equals(
-            get_ids_and_versions(archived_data_component_1_page_1.data!),
+            get_ids_and_versions(historical_data_component_1_page_1.data!),
             [{ id: id_1.id, version_number: 3 }],
-            "Expected first page of archived data for component 1"
+            "Expected first page of historical data for component 1"
         )
         deep_equals(
-            get_ids_and_versions(archived_data_component_1_page_2.data!),
+            get_ids_and_versions(historical_data_component_1_page_2.data!),
             [{ id: id_1.id, version_number: 2 }],
-            "Expected second page of archived data for component 1"
+            "Expected second page of historical data for component 1"
         )
         deep_equals(
-            get_ids_and_versions(archived_data_component_2.data!),
+            get_ids_and_versions(historical_data_component_2.data!),
             [{ id: id_2.id, version_number: 2 }, { id: id_2.id, version_number: 1 }],
-            "Expected page of archived data for component 2"
+            "Expected page of historical data for component 2"
         )
     })
 
@@ -650,9 +650,9 @@ describe("can init, insert, update, and search personal data components", () =>
         inserted_personal_data_component = response.data
 
         // Double check that the data component was inserted correctly into
-        // both the main table and archive table
+        // both the main table and historical table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_historical_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response], "Fetched data components should match expected")
         compare_data_component_lists(row_from_data_components_history.data!, [expected_response], "Fetched data components history fetched should match expected")
     })
@@ -735,11 +735,11 @@ describe("can init, insert, update, and search personal data components", () =>
         updated_personal_data_component = response.data
 
         // Double check that the data component was inserted correctly into
-        // both the main table and archive table
+        // both the main table and historical table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
-        const row_from_data_components_history = await request_archived_data_components(get_supabase, [new IdOnly(-1)])
+        const row_from_data_components_history = await request_historical_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
-        expect(row_from_data_components_history.data!.length).equals(2, "Should now have 2 rows in the archive table")
+        expect(row_from_data_components_history.data!.length).equals(2, "Should now have 2 rows in the historical table")
         compare_data_components(row_from_data_components_history.data![0]!, expected_response)
     })
 
@@ -797,7 +797,7 @@ describe("can init, insert, update, and search personal data components", () =>
 
         const data_components_1 = await request_data_components(get_supabase, { __only_test_data: true })
         const ids = [inserted_wiki_data_component.id.as_IdOnly(), inserted_personal_data_component.id.as_IdOnly()]
-        const archived_data_component_1 = await request_archived_data_components(get_supabase, ids)
+        const historical_data_component_1 = await request_historical_data_components(get_supabase, ids)
         const data_components_1_with_owner = await request_data_components(get_supabase, { owner_id: user_id, __only_test_data: true })
 
         expect(data_components_1.data, "Expected data to be an array").to.be.an("array")
@@ -807,13 +807,13 @@ describe("can init, insert, update, and search personal data components", () =>
             "Expected data components"
         )
         deep_equals(
-            get_ids_and_versions(archived_data_component_1.data!),
+            get_ids_and_versions(historical_data_component_1.data!),
             get_ids_and_versions([
                 updated_personal_data_component,
                 inserted_wiki_data_component,
                 inserted_personal_data_component,
             ]),
-            "Expected archived data components"
+            "Expected historical data components"
         )
         deep_equals(
             get_ids_and_versions(data_components_1_with_owner.data!),
@@ -821,7 +821,7 @@ describe("can init, insert, update, and search personal data components", () =>
                 inserted_wiki_data_component,
                 updated_personal_data_component,
             ]),
-            "Expected archived data components"
+            "Expected historical data components"
         )
     })
 
