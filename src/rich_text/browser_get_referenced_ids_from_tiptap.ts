@@ -1,7 +1,8 @@
+import { IdAndMaybeVersion, parse_id } from "../data/id"
 import { GenericNode } from "./generic_interface"
 
 
-export function browser_get_referenced_ids_from_tiptap (tiptap_text: string): Set<string>
+export function browser_get_referenced_ids_from_tiptap (tiptap_text: string): IdAndMaybeVersion[]
 {
     const parser = new DOMParser()
     const doc = parser.parseFromString(tiptap_text, "text/html")
@@ -27,5 +28,5 @@ export function browser_get_referenced_ids_from_tiptap (tiptap_text: string): Se
     }
 
     find_ids(doc.body)
-    return ids
+    return Array.from(ids).map(id_str => parse_id(id_str))
 }

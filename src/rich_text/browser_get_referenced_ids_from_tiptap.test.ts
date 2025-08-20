@@ -1,5 +1,6 @@
 import { expect } from "chai"
 
+import { IdAndVersion } from "../data/id"
 import { browser_get_referenced_ids_from_tiptap } from "./browser_get_referenced_ids_from_tiptap"
 
 
@@ -11,6 +12,6 @@ describe("browser_get_referenced_ids_from_tiptap", () =>
     it("should get data component ids from tiptap text", () =>
     {
         const ids = browser_get_referenced_ids_from_tiptap(tiptap_text)
-        expect(ids).deep.equals(new Set(["1003v1"]))
+        expect(ids).deep.equals([new IdAndVersion(1003, 1)])
     })
 })
