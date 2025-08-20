@@ -1,6 +1,5 @@
-import { create, UseBoundStore } from "zustand"
+import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import { StoreApi } from "zustand/vanilla"
 
 import { get_supabase, GetSupabase } from "../supabase"
 // import * as data_components from "./data_components"
@@ -8,7 +7,7 @@ import type { RootCoreState } from "./interface"
 import * as user_auth_session from "./user_auth_session"
 
 
-export type CoreStore = UseBoundStore<StoreApi<RootCoreState>>
+export type CoreStore = ReturnType<typeof get_new_core_store>
 
 export interface CoreStoreDependencies
 {

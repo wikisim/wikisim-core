@@ -215,6 +215,5 @@ async function load_user_info(store: CoreStore, user_id: string, get_supabase: G
     store.setState(root_state =>
     {
         root_state.user_auth_session.user_name = user_name
-        return root_state
     })
 }
