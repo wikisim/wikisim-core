@@ -3,7 +3,6 @@ import { expect } from "chai"
 import { browser_convert_tiptap_to_plain } from "./browser_convert_tiptap_to_plain"
 
 
-
 describe("browser_convert_tiptap_to_plain", () =>
 {
     const tiptap_text = `

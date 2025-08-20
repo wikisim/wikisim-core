@@ -1,5 +1,4 @@
 import { DataComponent } from "../data/interface"
-
 import { GenericNode } from "./generic_interface"
 
 

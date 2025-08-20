@@ -5,7 +5,6 @@ import { init_data_component } from "../data/modify"
 import { browser_convert_tiptap_to_javascript } from "./browser_convert_tiptap_to_javascript"
 
 
-
 describe("browser_convert_tiptap_to_javascript", () =>
 {
     const tiptap_text = `
