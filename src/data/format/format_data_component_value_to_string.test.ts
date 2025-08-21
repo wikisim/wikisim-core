@@ -51,6 +51,7 @@ describe("format_data_component_value_to_string", () =>
         })
     })
 
+
     it("should include units", () =>
     {
         const data_component = init_data_component({
@@ -62,5 +63,19 @@ describe("format_data_component_value_to_string", () =>
 
         const result = format_data_component_value_to_string(data_component)
         expect(result).equals("12.3 million Homes")
+    })
+
+
+    it("should transform units with underscores into spaces", () =>
+    {
+        const data_component = init_data_component({
+            result_value: "169e3",
+            units: "trades_people",
+            value_number_sig_figs: 3,
+            value_number_display_type: "scaled",
+        })
+
+        const result = format_data_component_value_to_string(data_component)
+        expect(result).equals("169 thousand trades people")
     })
 })
