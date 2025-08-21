@@ -8,6 +8,7 @@ export function format_data_component_value_to_string (data_component: DataCompo
     const {
         // input_value = "",
         result_value = "",
+        units = "",
         // value_type,
         value_number_display_type = DEFAULTS.value_number_display_type,
         value_number_sig_figs = DEFAULTS.value_number_sig_figs,
@@ -15,5 +16,8 @@ export function format_data_component_value_to_string (data_component: DataCompo
 
     const value_as_number = parseFloat(result_value)
 
-    return format_number_to_string(value_as_number, value_number_sig_figs, value_number_display_type)
+    let num_as_str = format_number_to_string(value_as_number, value_number_sig_figs, value_number_display_type)
+    if (num_as_str === "") return ""
+
+    return units ? `${num_as_str} ${units}` : num_as_str
 }

@@ -1,3 +1,4 @@
+import { clamp } from "../../utils/clamp"
 import { round_to_max_significant_figures } from "../../utils/number"
 import { NUMBER_DISPLAY_TYPES_OBJ, NumberDisplayType } from "../interface"
 import { format_number_to_significant_figures } from "./format_number_to_significant_figures"
@@ -54,37 +55,38 @@ export function format_number_to_string (num: number, max_significant_figures: n
 }
 
 
+const SCALE_PREFIXES = ["", "thousand", "million", "billion", "trillion"]
 function scale_number (num: number, max_significant_figures: number): string
 {
-    const suffixes = ["", "thousand", "million", "billion", "trillion"]
-    let suffixIndex = 0
+    let prefix_index = 0
 
-    while (Math.abs(num) >= 1000 && suffixIndex < suffixes.length - 1)
+    while (Math.abs(num) >= 1000 && prefix_index < SCALE_PREFIXES.length - 1)
     {
         num /= 1000
-        suffixIndex++
+        prefix_index++
     }
 
     const minimised_significant_figures = minimise_significant_figures(num, max_significant_figures)
 
-    return format_number_to_significant_figures(num, minimised_significant_figures) + " " + suffixes[suffixIndex]
+    return format_number_to_significant_figures(num, minimised_significant_figures) + " " + SCALE_PREFIXES[prefix_index]
 }
 
 
+// https://en.wikipedia.org/wiki/Metric_prefix
+const ABBREVIATE_PREFIXES = ["a", "f", "p", "n", "μ", "m", "", "k", "M", "G", "T", "P", "E"]
 function abbreviate_number (num: number, max_significant_figures: number): string
 {
-    const suffixes = ["", "k", "m", "bn", "tn"]
-    let suffixIndex = 0
+    if (num === 0) return "0"
 
-    while (Math.abs(num) >= 1000 && suffixIndex < suffixes.length - 1)
-    {
-        num /= 1000
-        suffixIndex++
-    }
+    let prefix_index = Math.floor(Math.log10(Math.abs(num)) / 3)
+    prefix_index = clamp(prefix_index, -6, 6) // Limit to the range of prefixes we have
+    const offset_prefix_index = prefix_index + 6 // Offset to match the index of ABBREVIATE_PREFIXES
 
+    num /= Math.pow(10, prefix_index * 3)
+    const prefix = ABBREVIATE_PREFIXES[offset_prefix_index]
     const minimised_significant_figures = minimise_significant_figures(num, max_significant_figures)
 
-    return format_number_to_significant_figures(num, minimised_significant_figures) + " " + suffixes[suffixIndex]
+    return format_number_to_significant_figures(num, minimised_significant_figures) + " " + prefix
 }
 
 
