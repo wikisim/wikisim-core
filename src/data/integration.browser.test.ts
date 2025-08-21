@@ -184,7 +184,7 @@ describe("can init, insert, update, and search wiki data components", () =>
     })
 
 
-    it("ERR05 should disallowed inserting test data component when id >= 0 and test_run_id is set", async function ()
+    it("ERR05 should disallowed inserting test data component when id >= 0 (and test_run_id is set)", async function ()
     {
         const data_component: DataComponent = {
             ...data_component_fixture,
@@ -200,8 +200,29 @@ describe("can init, insert, update, and search wiki data components", () =>
             expect.fail(`Production data at risk of corruption.  Should have failed to insert data component with id >= 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
         expect(response.error).to.have.property("message").that.equals(`ERR05. p_id must be negative for test runs, got 0`)
-        // This error would be produced but we raise our own error in the function.
-        // Belt and braces approach.
+        // This error would be produced but we raise our own error ERR05 in the
+        // function as a belt and braces approach.
+        // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
+    })
+
+
+    it("ERR13 should disallowed inserting test data component when id < -20 (and test_run_id is set)", async function ()
+    {
+        const data_component: DataComponent = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            id: new IdAndVersion(-21, 1),
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.data)
+        {
+            expect.fail(`Should have failed to insert data component with id < -20 (and test_run_id set), but got response: ${JSON.stringify(response)}`)
+        }
+        expect(response.error).to.have.property("message").that.equals(`ERR13. p_id must be negative for test runs but no smaller than -20, got -21`)
+        // This error would be produced but we raise our own error ERR13 in the
+        // function as a belt and braces approach.
         // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
@@ -222,8 +243,8 @@ describe("can init, insert, update, and search wiki data components", () =>
         }
 
         expect(response.error).to.have.property("message").that.equals(`ERR06. p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
-        // This error would be produced but we raise our own error in the function.
-        // Belt and braces approach.
+        // This error would be produced but we raise our own error ERR06 in the
+        // function as a belt and braces approach.
         // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
