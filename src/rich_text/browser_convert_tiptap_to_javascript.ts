@@ -5,6 +5,7 @@ import { GenericNode } from "./generic_interface"
 export function browser_convert_tiptap_to_javascript (tiptap_text: string, data_component_by_id_and_version: Record<string, DataComponent>): string
 {
     const parser = new DOMParser()
+    tiptap_text = tiptap_text.replace(/<\/p><p>/g, "\n")
     const doc = parser.parseFromString(tiptap_text, "text/html")
 
     function extract_text(node: GenericNode): string

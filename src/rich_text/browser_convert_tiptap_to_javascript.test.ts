@@ -24,4 +24,13 @@ describe("browser_convert_tiptap_to_javascript", () =>
         expect(plain_text).equals(`"component 1003v1 is undefined" +2`)
         expect(parseFloat(plain_text)).deep.equals(NaN)
     })
+
+
+    it("should handle multiline", () =>
+    {
+        const tiptap_text = `<p>upgrading_piping = 7</p><p>heat_pump = 2</p><p>upgrading_piping + heat_pump</p>`
+        const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
+        expect(plain_text).equals(`upgrading_piping = 7\nheat_pump = 2\nupgrading_piping + heat_pump`)
+        expect(parseFloat(plain_text)).deep.equals(NaN)
+    })
 })
