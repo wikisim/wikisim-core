@@ -5,13 +5,14 @@ import { GenericNode } from "./generic_interface"
 export function browser_convert_tiptap_to_javascript (tiptap_text: string, data_component_by_id_and_version: Record<string, DataComponent>): string
 {
     const parser = new DOMParser()
-    tiptap_text = tiptap_text.replace(/<\/p><p>/g, "\n")
+    tiptap_text = tiptap_text.replace(/<\/p><p>/g, "\n").replace(/<br>/g, "\n")
     const doc = parser.parseFromString(tiptap_text, "text/html")
 
-    function extract_text(node: GenericNode): string
+    function extract_text(node: GenericNode): string | string[]
     {
         if (node.nodeType === 3) //Node.TEXT_NODE)
         {
+            if (node.textContent?.startsWith("\n")) return ["\n", node.textContent.trim()]
             return (node.textContent || "").trim()
         }
         if (node.nodeType === 1) //Node.ELEMENT_NODE)
@@ -27,12 +28,24 @@ export function browser_convert_tiptap_to_javascript (tiptap_text: string, data_
                 }
             }
 
-            const text = Array.from(node.childNodes).map(extract_text).filter(Boolean).join(" ")
+            const parts = Array.from(node.childNodes).map(extract_text).filter(Boolean).flat()
+            let text = ""
+            parts.forEach((part, i) =>
+            {
+                if (part === "\n") text += "\n"
+                else
+                {
+                    if (i > 0 && text && text[text.length - 1] !== "\n") text += " "
+                    text += part
+                }
+            })
             return text
         }
         return ""
     }
 
     // Extract text from body
-    return extract_text(doc.body).replace(/ +/g, " ").trim()
+    const extracted = extract_text(doc.body)
+    const extracted_string = Array.isArray(extracted) ? extracted.join("") : extracted
+    return extracted_string.replace(/ +/g, " ").trim()
 }

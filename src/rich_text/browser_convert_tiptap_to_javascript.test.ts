@@ -26,11 +26,37 @@ describe("browser_convert_tiptap_to_javascript", () =>
     })
 
 
-    it("should handle multiline", () =>
+    describe("handling multiline", () =>
     {
-        const tiptap_text = `<p>upgrading_piping = 7</p><p>heat_pump = 2</p><p>upgrading_piping + heat_pump</p>`
-        const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
-        expect(plain_text).equals(`upgrading_piping = 7\nheat_pump = 2\nupgrading_piping + heat_pump`)
-        expect(parseFloat(plain_text)).deep.equals(NaN)
+        it("should handle example 1", () =>
+        {
+            const tiptap_text = `<p>upgrading_piping = 7</p><p>heat_pump = 2</p><p>upgrading_piping + heat_pump</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
+            expect(plain_text).equals(`upgrading_piping = 7\nheat_pump = 2\nupgrading_piping + heat_pump`)
+            expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
+
+        it("should handle example 2", () =>
+        {
+            const tiptap_text = `<p>available_people = 0.8*<span class="mention-chip" data-type="customMention" data-id="1012v1" data-label="Number of people">@Number of people</span></p><p><span class="mention-chip" data-type="customMention" data-id="1010v2" data-label="Person days">@Person days</span></p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {
+                "1012v1": init_data_component({ id: new IdAndVersion(1012, 1), result_value: "100" }),
+                "1010v2": init_data_component({ id: new IdAndVersion(1010, 2), result_value: "200" }),
+            })
+            expect(plain_text).equals(`available_people = 0.8* 100\n200`)
+            expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
+
+        it("should handle <br>", () =>
+        {
+            const tiptap_text = `<p>person_days_required = <span class="mention-chip" data-type="customMention" data-id="1010v2" data-label="Person days">@Person days</span>*<span class="mention-chip" data-type="customMention" data-id="1002v5" data-label="Dwelling stock">@Dwelling stock</span><br>available_people = 0.8*<span class="mention-chip" data-type="customMention" data-id="1012v1" data-label="Number of people">@Number of people</span></p><p>person_days_required / available_people</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {
+                "1002v5": init_data_component({ id: new IdAndVersion(1002, 5), result_value: "30e6" }),
+                "1012v1": init_data_component({ id: new IdAndVersion(1012, 1), result_value: "100" }),
+                "1010v2": init_data_component({ id: new IdAndVersion(1010, 2), result_value: "200" }),
+            })
+            expect(plain_text).equals(`person_days_required = 200 * 30e6\navailable_people = 0.8* 100\nperson_days_required / available_people`)
+            expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
     })
 })
