@@ -36,10 +36,10 @@ To run the unit tests for debugging in VSCode you can:
 2. set a breakpoint and press F5 to run the test.
 
 To run the integration tests in the browser:
-* run `pnpm run dev --port 8080`
-* open the browser at `http://localhost:8080/` to see the demo of a minimal working example.
+* run `pnpm run dev --port 5173`
+* open the browser at `http://localhost:5173/` to see the demo of a minimal working example.
 * use that demo to sign in
-* open the browser at `http://localhost:8080/test/` to run the integration tests.
+* open the browser at `http://localhost:5173/test/` to run the integration tests.
 
 ### Pre-push Hook
 

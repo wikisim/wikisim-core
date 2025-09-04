@@ -52,7 +52,7 @@ export async function request_data_components(
         else supa = supa.lte("id", -1)
 
         // Unless owner_id is specified then for now we filter to exclude where
-        // there is an owner_id to ensure no "personal" data is shown to other
+        // there is an owner_id to ensure no "user owned" data is shown to other
         // users e.g. on the front page
         if (owner_id) supa = supa.or(`owner_id.is.null,owner_id.eq.${owner_id}`)
         else supa = supa.is("owner_id", null)
@@ -148,7 +148,7 @@ export async function search_data_components_v1(
         .select("*")
 
     // Unless owner_id is specified then for now we filter to exclude where
-    // there is an owner_id to ensure no "personal" data is shown to other
+    // there is an owner_id to ensure no "user owned" data is shown to other
     // users e.g. on browse/search page
     if (owner_id) supa = supa.or(`owner_id.is.null,owner_id.eq.${owner_id}`)
     else supa = supa.is("owner_id", null)

@@ -27,7 +27,7 @@ export interface IDatetimeRange
 
 interface DataComponentFields
 {
-    // For managing personal / private data
+    // For managing user owned (currently only public, maybe later private as well) data
     owner_id?: string
 
     // For managing versions

@@ -561,7 +561,7 @@ describe("can init, insert, update, and search wiki data components", () =>
 })
 
 
-describe("can init, insert, update, and search personal data components", () =>
+describe("can init, insert, update, and search user owned data components", () =>
 {
     const data_component_fixture: DataComponent = Object.freeze(init_data_component())
 
@@ -606,14 +606,14 @@ describe("can init, insert, update, and search personal data components", () =>
     })
 
 
-    let inserted_personal_data_component: DataComponent
-    it(`should allow inserting "personal" (which are public) data component to the database`, async function ()
+    let inserted_user_pages_data_component: DataComponent
+    it(`should allow inserting "user owned" (which are public) data component to the database`, async function ()
     {
         const data_component: DataComponent = {
             ...data_component_fixture,
             owner_id: user_id, // owner_id should match user logged in
             editor_id: user_id,
-            title: "<p>Test Personal Component (which is public not private)</p>",
+            title: "<p>Test User Owned Component (which is public not private)</p>",
             description: "<p>Test Description</p>",
             label_ids: [-1, -2],
             input_value: "123",
@@ -647,7 +647,7 @@ describe("can init, insert, update, and search personal data components", () =>
             bytes_changed: 0,
             version_type: undefined,
             version_rolled_back_to: undefined,
-            title: "<p>Test Personal Component (which is public not private)</p>",
+            title: "<p>Test User Owned Component (which is public not private)</p>",
             description: "<p>Test Description</p>",
             label_ids: [-1, -2],
             input_value: "123",
@@ -661,14 +661,14 @@ describe("can init, insert, update, and search personal data components", () =>
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             // Should be set by the server (edge function)
-            plain_title: "Test Personal Component (which is public not private)",
+            plain_title: "Test User Owned Component (which is public not private)",
             // Should be set by the server (edge function)
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
         }
 
         compare_data_components(response.data, expected_response, "Data component from insertion should match expected response")
-        inserted_personal_data_component = response.data
+        inserted_user_pages_data_component = response.data
 
         // Double check that the data component was inserted correctly into
         // both the main table and historical table
@@ -681,12 +681,12 @@ describe("can init, insert, update, and search personal data components", () =>
 
     it("ERR11 should disallow updating owner_id of data component", async function ()
     {
-        expect(inserted_personal_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        expect(inserted_user_pages_data_component, "This test is stateful and requires insertion from previous test").to.exist
 
         const data_component = {
-            ...inserted_personal_data_component,
+            ...inserted_user_pages_data_component,
             editor_id: user_id,
-            test_run_id: inserted_personal_data_component.test_run_id + ` - ${this.test?.title}`,
+            test_run_id: inserted_user_pages_data_component.test_run_id + ` - ${this.test?.title}`,
         }
 
         const db_data_component = prepare_data_component_for_db_update(data_component)
@@ -701,14 +701,14 @@ describe("can init, insert, update, and search personal data components", () =>
     })
 
 
-    let updated_personal_data_component: DataComponent
+    let updated_user_pages_data_component: DataComponent
     it("should update the test data component in the database", async function ()
     {
-        expect(inserted_personal_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        expect(inserted_user_pages_data_component, "This test is stateful and requires insertion from previous test").to.exist
 
         const data_component = {
-            ...inserted_personal_data_component,
-            title: "<p>Test Updated Personal Component (which is public not private)</p>",
+            ...inserted_user_pages_data_component,
+            title: "<p>Test Updated User Owned Component (which is public not private)</p>",
             plain_title: "",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
@@ -723,11 +723,11 @@ describe("can init, insert, update, and search personal data components", () =>
             // The version number should have been increased by the DB
             id: new IdAndVersion(-1, 2),
             // The title and plain_title should have been updated
-            title: "<p>Test Updated Personal Component (which is public not private)</p>",
+            title: "<p>Test Updated User Owned Component (which is public not private)</p>",
             // Should be updated by the server (edge function)
-            plain_title: "Test Updated Personal Component (which is public not private)",
+            plain_title: "Test Updated User Owned Component (which is public not private)",
             // The test_run_id should remain the same
-            test_run_id: inserted_personal_data_component.test_run_id!,
+            test_run_id: inserted_user_pages_data_component.test_run_id!,
 
             // All other fields should remain the same
             owner_id: user_id,
@@ -753,7 +753,7 @@ describe("can init, insert, update, and search personal data components", () =>
         }
 
         compare_data_components(response.data, expected_response)
-        updated_personal_data_component = response.data
+        updated_user_pages_data_component = response.data
 
         // Double check that the data component was inserted correctly into
         // both the main table and historical table
@@ -778,9 +778,9 @@ describe("can init, insert, update, and search personal data components", () =>
         expect(response1.data.owner_id).equals(OTHER_USER_ID)
 
         const data_component = {
-            ...inserted_personal_data_component,
+            ...inserted_user_pages_data_component,
             editor_id: user_id,
-            test_run_id: inserted_personal_data_component.test_run_id + ` - ${this.test?.title}`,
+            test_run_id: inserted_user_pages_data_component.test_run_id + ` - ${this.test?.title}`,
         }
 
         const db_data_component = prepare_data_component_for_db_update(data_component)
@@ -796,10 +796,10 @@ describe("can init, insert, update, and search personal data components", () =>
 
 
     let inserted_wiki_data_component: DataComponent
-    it(`until there are moderation tools we should not include "personal" (which are public) data by default on the home page unless specific owner_id is given`, async function ()
+    it(`until there are moderation tools we should not include "user owned" (which are public) data by default on the home page unless specific owner_id is given`, async function ()
     {
         this.timeout(5000)
-        expect(updated_personal_data_component, "This test is stateful and requires inserted and updated component from previous test").to.exist
+        expect(updated_user_pages_data_component, "This test is stateful and requires inserted and updated component from previous test").to.exist
         const response = await insert_data_component(get_supabase, {
             ...data_component_fixture,
             id: new IdAndVersion(-2, 1),
@@ -814,10 +814,10 @@ describe("can init, insert, update, and search personal data components", () =>
         inserted_wiki_data_component = response.data
         expect(inserted_wiki_data_component, "Inserted wiki data component should exist").to.exist
 
-        expect(inserted_personal_data_component.owner_id).equals(user_id, "Inserted data component should have owner_id set to user logged in")
+        expect(inserted_user_pages_data_component.owner_id).equals(user_id, "Inserted data component should have owner_id set to user logged in")
 
         const data_components_1 = await request_data_components(get_supabase, { __only_test_data: true })
-        const ids = [inserted_wiki_data_component.id.as_IdOnly(), inserted_personal_data_component.id.as_IdOnly()]
+        const ids = [inserted_wiki_data_component.id.as_IdOnly(), inserted_user_pages_data_component.id.as_IdOnly()]
         const historical_data_component_1 = await request_historical_data_components(get_supabase, ids)
         const data_components_1_with_owner = await request_data_components(get_supabase, { owner_id: user_id, __only_test_data: true })
 
@@ -830,9 +830,9 @@ describe("can init, insert, update, and search personal data components", () =>
         deep_equals(
             get_ids_and_versions(historical_data_component_1.data!),
             get_ids_and_versions([
-                updated_personal_data_component,
+                updated_user_pages_data_component,
                 inserted_wiki_data_component,
-                inserted_personal_data_component,
+                inserted_user_pages_data_component,
             ]),
             "Expected historical data components"
         )
@@ -840,18 +840,18 @@ describe("can init, insert, update, and search personal data components", () =>
             get_ids_and_versions(data_components_1_with_owner.data!),
             get_ids_and_versions([
                 inserted_wiki_data_component,
-                updated_personal_data_component,
+                updated_user_pages_data_component,
             ]),
             "Expected historical data components"
         )
     })
 
 
-    it(`should search over all data components including a users' "personal" (which are public) data components`, async function ()
+    it(`should search over all data components including a users' own "user owned" (which are public) data components`, async function ()
     {
-        expect(updated_personal_data_component, "This test is stateful and requires the insertion and update from previous test").to.exist
+        expect(updated_user_pages_data_component, "This test is stateful and requires the insertion and update from previous test").to.exist
 
-        const search_results = await search_data_components(get_supabase, `"Personal Component"`)
+        const search_results = await search_data_components(get_supabase, `"User Owned Component"`)
         if (search_results.error) expect.fail(`Error whilst searching for data components: ${JSON.stringify(search_results.error)}`)
 
         expect(search_results.data, "Expected search results to be an array").to.be.an("array")
@@ -859,9 +859,9 @@ describe("can init, insert, update, and search personal data components", () =>
             get_ids_and_versions(search_results.data),
             get_ids_and_versions([
                 // inserted_wiki_data_component,
-                updated_personal_data_component,
+                updated_user_pages_data_component,
             ]),
-            `Expected search results to match "personal" data component`
+            `Expected search results to match "user owned" data component`
         )
     })
 })
