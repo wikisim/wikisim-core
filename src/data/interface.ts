@@ -35,6 +35,16 @@ export interface IDatetimeRange
 }
 
 
+export interface FunctionArgument
+{
+    id: number // tempoary id, not stored to DB
+    name: string
+    description?: string
+    value_type: "number"// | "data_component_id" | "datetime_range" | "datetime" | "boolean" | "string"
+    default_value?: string
+}
+
+
 interface DataComponentFields
 {
     // For managing user owned (currently only public, maybe later private as well) data
@@ -54,7 +64,7 @@ interface DataComponentFields
 
     input_value?: string
     result_value?: string
-    value_type?: DBEnums["data_component_value_type"]
+    value_type?: ValueType
     value_number_display_type?: NumberDisplayType
     value_number_sig_figs?: number
     datetime_range_start?: Date
@@ -63,11 +73,15 @@ interface DataComponentFields
     units?: string
     // Dimension IDs & version numbers parsed from format: `5678v2`
     dimension_ids?: IdAndVersion[]
+    function_arguments?: FunctionArgument[]
+
     // // Not implementing yet until we get more use cases to check it against.
     // // For now we'll add these to the bottom of the description and when it's
     // // clearer what format of display, functionality (queries to make regarding
     // // references) and the corresponding data structure that is needed then
     // // we'll add references then.
+    // // We'll also want to support finding references where we have to show
+    // // attribution, e.g. for CC-BY licensed data etc.
     // references?: string[]
 
     // For indexing and searching

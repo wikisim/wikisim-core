@@ -1,7 +1,7 @@
 // TODO: rename this file
 
 import { IdAndVersion, TempId } from "./id"
-import { DataComponent, NewDataComponent } from "./interface"
+import { DataComponent, FunctionArgument, NewDataComponent } from "./interface"
 
 
 export function init_data_component(partial: Partial<DataComponent> = {}): DataComponent
@@ -67,6 +67,7 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         || component_1.datetime_repeat_every !== component_2.datetime_repeat_every
         || component_1.units !== component_2.units
         || JSON.stringify(component_1.dimension_ids) !== JSON.stringify(component_2.dimension_ids)
+        || function_arguments_changed(component_1.function_arguments, component_2.function_arguments)
 
     if (diff || !compare_meta_fields) return diff
 
@@ -80,4 +81,15 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
 
         // We do not allow changing owner_id at the moment.
         // || component_1.owner_id !== component_2.owner_id
+}
+
+
+function function_arguments_changed(args1: FunctionArgument[] = [], args2: FunctionArgument[] = []): boolean
+{
+    if (args1.length !== args2.length) return true
+
+    const args1_sans_id = args1.map(arg => ({ ...arg, id: null }))
+    const args2_sans_id = args2.map(arg => ({ ...arg, id: null }))
+
+    return JSON.stringify(args1_sans_id) !== JSON.stringify(args2_sans_id)
 }

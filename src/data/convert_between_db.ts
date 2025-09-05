@@ -1,7 +1,7 @@
 import { browser_convert_tiptap_to_plain } from "../rich_text/browser_convert_tiptap_to_plain"
 import { DBDataComponentRow } from "../supabase"
 import { IdAndVersion, parse_id } from "./id"
-import { DataComponent, NewDataComponent } from "./interface"
+import { DataComponent, FunctionArgument, NewDataComponent } from "./interface"
 
 
 export function flatten_data_component_for_db(data_component: DataComponent | NewDataComponent)
@@ -35,6 +35,9 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
         units: data_component.units ?? null,
         dimension_ids: data_component.dimension_ids
             ? data_component.dimension_ids.map(d => d.to_str())
+            : null,
+        function_arguments: data_component.function_arguments
+            ? JSON.stringify(data_component.function_arguments.map(({ id: _, ...args }) => args))
             : null,
 
         // Will be overwritted by the server-side (edge function) conversion but
@@ -72,9 +75,27 @@ export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
         units: row.units ?? undefined,
         dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => parse_id(id, true)) : undefined,
+        function_arguments: hydrate_function_arguments(row),
 
         plain_title: row.plain_title,
         plain_description: row.plain_description,
+    }
+}
+
+
+function hydrate_function_arguments(row: DBDataComponentRow): FunctionArgument[] | undefined
+{
+    if (!row.function_arguments) return undefined
+
+    try
+    {
+        const args = JSON.parse(row.function_arguments) as Omit<FunctionArgument, "id">[]
+        return args.map((arg, index) => ({ id: index, ...arg }))
+    }
+    catch (e)
+    {
+        console.error("Error parsing function_arguments from DB row:", e, row.function_arguments)
+        return undefined
     }
 }
 

@@ -5,8 +5,10 @@ import { DataComponent } from "./interface"
 import { changes_made, init_data_component } from "./modify"
 
 
-describe("can created a new data component", () => {
-    it("should create a new data component with default values", () => {
+describe("can create a new data component", () =>
+{
+    it("should create a new data component with default values", () =>
+    {
         const data_component: DataComponent = init_data_component()
         expect(data_component.id.to_str()).equals(`-1v1`)
         expect(data_component.id.id).equals(-1)
@@ -19,7 +21,8 @@ describe("can created a new data component", () => {
 })
 
 
-describe("changes_made function", () => {
+describe("changes_made function", () =>
+{
     it("should return false when no changes made to the data component", () =>
     {
         const original: DataComponent = init_data_component({ title: "Original Title", description: "Original Description" })
@@ -54,6 +57,14 @@ describe("changes_made function", () => {
         datetime_repeat_every: "day",
         units: "some units",
         dimension_ids: [ new IdAndVersion(-1, 1) ],
+        function_arguments: [
+            {
+                id: 1,
+                name: "arg1",
+                value_type: "number",
+                default_value: "123",
+            }
+        ],
 
         plain_title: "Modified Title",
         plain_description: "Modified Description",
@@ -76,6 +87,7 @@ describe("changes_made function", () => {
         "datetime_repeat_every",
         "units",
         "dimension_ids",
+        "function_arguments",
     ]
 
     const meta_fields: (keyof DataComponent)[] = [
