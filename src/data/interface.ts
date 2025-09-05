@@ -3,6 +3,16 @@ import { IdAndVersion, TempId } from "./id"
 
 
 type DBEnums = Database["public"]["Enums"]
+
+
+export type ValueType = DBEnums["data_component_value_type"]
+export const VALUE_TYPES = Constants.public.Enums.data_component_value_type
+export const VALUE_TYPES_OBJ = Object.values(VALUE_TYPES).reduce((o, k) => {
+    o[k] = k
+    return o
+}, {} as Record<ValueType, ValueType>)
+
+
 export type NumberDisplayType = DBEnums["data_component_value_number_display_type"]
 export const NUMBER_DISPLAY_TYPES = Constants.public.Enums.data_component_value_number_display_type
 export const NUMBER_DISPLAY_TYPES_OBJ = Object.values(NUMBER_DISPLAY_TYPES).reduce((o, k) => {
