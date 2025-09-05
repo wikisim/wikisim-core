@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { init_data_component } from "../modify"
+import { init_data_component, init_new_data_component } from "../modify"
 import { format_data_component_value_to_string } from "./format_data_component_value_to_string"
 
 
@@ -77,5 +77,18 @@ describe("format_data_component_value_to_string", () =>
 
         const result = format_data_component_value_to_string(data_component)
         expect(result).equals("169 thousand trades people")
+    })
+
+    describe("function value type", () =>
+    {
+        it("should return a formatted function", () =>
+        {
+            const data_component = init_new_data_component({
+                value_type: "function",
+                result_value: "(value, min = 0, max = 1) => Math.max(min, Math.min(max, value))",
+            })
+            const result = format_data_component_value_to_string(data_component)
+            expect(result).equals("(value, min = 0, max = 1) => Math.max(min, Math.min(max, value))", "should return the function as-is")
+        })
     })
 })

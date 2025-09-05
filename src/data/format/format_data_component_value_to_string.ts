@@ -9,10 +9,12 @@ export function format_data_component_value_to_string (data_component: DataCompo
         // input_value = "",
         result_value = "",
         units = "",
-        // value_type,
+        value_type,
         value_number_display_type = DEFAULTS.value_number_display_type,
         value_number_sig_figs = DEFAULTS.value_number_sig_figs,
     } = data_component
+
+    if (value_type === "function") return result_value
 
     const value_as_number = parseFloat(result_value)
 
