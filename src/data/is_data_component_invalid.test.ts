@@ -38,5 +38,38 @@ describe("is_data_component_invalid", () =>
             ]
             expect(is_data_component_invalid(component)).equals(`Input names must be unique but "min" is duplicated`)
         })
+
+        it("should return an error when a function input name does not start with a letter or underscore", () =>
+        {
+            const component = init_new_data_component()
+            ;[" 1min ", " -min "].forEach(name =>
+            {
+                component.function_arguments = [
+                    { id: 2, name, value_type: "number", description: "" },
+                ]
+                expect(is_data_component_invalid(component)).equals(`Input name must start with a letter or underscore but got "${name.trim()[0]}" as the first character of "${name.trim()}"`)
+            })
+        })
+
+        it("should return an error when a function input name contains characters other than letters, numbers and underscore", () =>
+        {
+            const component = init_new_data_component()
+            ;[" min imum ", " min-imum "].forEach(name =>
+            {
+                component.function_arguments = [
+                    { id: 2, name, value_type: "number", description: "" },
+                ]
+                expect(is_data_component_invalid(component)).equals(`Input name must only contain letters, numbers, and underscores but got "${name.trim()}"`)
+            })
+        })
+
+        it("should be valid when name contains underscore", () =>
+        {
+            const component = init_new_data_component()
+            component.function_arguments = [
+                { id: 1, name: " min_imum1", value_type: "number", description: "" },
+            ]
+            expect(is_data_component_invalid(component)).equals(false)
+        })
     })
 })
