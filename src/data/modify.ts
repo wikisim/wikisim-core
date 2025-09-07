@@ -68,6 +68,7 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         || component_1.units !== component_2.units
         || JSON.stringify(component_1.dimension_ids) !== JSON.stringify(component_2.dimension_ids)
         || function_arguments_changed(component_1.function_arguments, component_2.function_arguments)
+        || scenarios_changed(component_1.scenarios, component_2.scenarios)
 
     if (diff || !compare_meta_fields) return diff
 
@@ -92,4 +93,15 @@ function function_arguments_changed(args1: FunctionArgument[] = [], args2: Funct
     const args2_sans_id = args2.map(arg => ({ ...arg, id: null }))
 
     return JSON.stringify(args1_sans_id) !== JSON.stringify(args2_sans_id)
+}
+
+
+function scenarios_changed(scenarios1: DataComponent["scenarios"] = [], scenarios2: DataComponent["scenarios"] = []): boolean
+{
+    if (scenarios1.length !== scenarios2.length) return true
+
+    const scenarios1_sans_id = scenarios1.map(scenario => ({ ...scenario, id: null }))
+    const scenarios2_sans_id = scenarios2.map(scenario => ({ ...scenario, id: null }))
+
+    return JSON.stringify(scenarios1_sans_id) !== JSON.stringify(scenarios2_sans_id)
 }

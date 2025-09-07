@@ -1,7 +1,7 @@
 import { browser_convert_tiptap_to_plain } from "../rich_text/browser_convert_tiptap_to_plain"
 import { DBDataComponentRow } from "../supabase"
 import { IdAndVersion, parse_id } from "./id"
-import { DataComponent, FunctionArgument, NewDataComponent } from "./interface"
+import { DataComponent, FunctionArgument, NewDataComponent, Scenario } from "./interface"
 
 
 export function flatten_data_component_for_db(data_component: DataComponent | NewDataComponent)
@@ -38,6 +38,9 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
             : null,
         function_arguments: data_component.function_arguments
             ? JSON.stringify(data_component.function_arguments.map(({ id: _, ...args }) => args))
+            : null,
+        scenarios: data_component.scenarios
+            ? JSON.stringify(data_component.scenarios.map(({ id: _, ...args }) => args))
             : null,
 
         // Will be overwritted by the server-side (edge function) conversion but
@@ -76,6 +79,7 @@ export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id
         units: row.units ?? undefined,
         dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => parse_id(id, true)) : undefined,
         function_arguments: hydrate_function_arguments(row),
+        scenarios: hydrate_scenarios(row),
 
         plain_title: row.plain_title,
         plain_description: row.plain_description,
@@ -95,6 +99,23 @@ function hydrate_function_arguments(row: DBDataComponentRow): FunctionArgument[]
     catch (e)
     {
         console.error("Error parsing function_arguments from DB row:", e, row.function_arguments)
+        return undefined
+    }
+}
+
+
+function hydrate_scenarios(row: DBDataComponentRow): Scenario[] | undefined
+{
+    if (!row.scenarios) return undefined
+
+    try
+    {
+        const args = JSON.parse(row.scenarios) as Omit<Scenario, "id">[]
+        return args.map((arg, index) => ({ id: index, ...arg }))
+    }
+    catch (e)
+    {
+        console.error("Error parsing scenarios from DB row:", e, row.scenarios)
         return undefined
     }
 }

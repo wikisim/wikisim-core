@@ -45,6 +45,17 @@ export interface FunctionArgument
 }
 
 
+export type Scenario = InlineScenario
+
+export interface InlineScenario
+{
+    id: number // tempoary id, not stored to DB
+    description?: string
+    values: ScenarioValues
+}
+interface ScenarioValues { [argument_name: string]: string }
+
+
 interface DataComponentFields
 {
     // For managing user owned (currently only public, maybe later private as well) data
@@ -74,6 +85,7 @@ interface DataComponentFields
     // Dimension IDs & version numbers parsed from format: `5678v2`
     dimension_ids?: IdAndVersion[]
     function_arguments?: FunctionArgument[]
+    scenarios?: Scenario[]
 
     // // Not implementing yet until we get more use cases to check it against.
     // // For now we'll add these to the bottom of the description and when it's

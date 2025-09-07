@@ -65,6 +65,12 @@ describe("changes_made function", () =>
                 default_value: "123",
             }
         ],
+        scenarios: [
+            {
+                id: 1,
+                values: { arg1: "456" },
+            }
+        ],
 
         plain_title: "Modified Title",
         plain_description: "Modified Description",
@@ -88,6 +94,7 @@ describe("changes_made function", () =>
         "units",
         "dimension_ids",
         "function_arguments",
+        "scenarios",
     ]
 
     const meta_fields: (keyof DataComponent)[] = [
