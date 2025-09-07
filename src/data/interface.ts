@@ -53,7 +53,15 @@ export interface InlineScenario
     description?: string
     values: ScenarioValues
 }
-interface ScenarioValues { [argument_name: string]: string }
+export type ScenarioValueUsage = "as_is" | "iterate_over"
+interface ScenarioValues
+{
+    [argument_name: string]:
+    {
+        value: string
+        usage: ScenarioValueUsage
+    }
+}
 
 
 interface DataComponentFields
