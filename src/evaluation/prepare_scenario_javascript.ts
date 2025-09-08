@@ -22,6 +22,14 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     const function_inputs = request.component.function_arguments || []
     const scenario_inputs = request.scenario.values
 
+    // Temporarily restrict to one iterate_over input.  This could be changed in
+    // future to support multiple iterate_over inputs by using nested loops
+    const iterate_over_inputs = Object.values(scenario_inputs).filter(v => v.usage === "iterate_over")
+    if (iterate_over_inputs.length > 1)
+    {
+        throw new Error("Can only iterate over one input at a time")
+    }
+
     // Build argument list in order, using scenario value or undefined
     // if no scenario value
     // If usage is "iterate_over" then the argument will be filled in
@@ -39,7 +47,8 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
         if (scenario_value?.usage === "iterate_over")
         {
             javascript += indent(`// iterate over argument "${input.name}"\n`, indentation, indentation_level)
-            javascript += indent(`return ${scenario_value.value}.map(${input.name} =>\n{\n`, indentation, indentation_level)
+            javascript += indent(`labels = ${scenario_value.value}\n`, indentation, indentation_level)
+            javascript += indent(`results = labels.map(${input.name} =>\n{\n`, indentation, indentation_level)
             indentation_level++
 
             // Argument will be filled in by this iteration
@@ -61,7 +70,8 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
         if (scenario_value?.usage === "iterate_over")
         {
             indentation_level--
-            javascript += indent("\n});", indentation, indentation_level)
+            javascript += indent("\n});\n\n", indentation, indentation_level)
+            javascript += indent(`return { labels, results };`, indentation, indentation_level)
         }
     })
 

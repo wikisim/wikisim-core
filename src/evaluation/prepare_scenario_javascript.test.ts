@@ -49,10 +49,9 @@ describe("prepare_scenario_javascript", () =>
     })
 
 
-    it("should handle iteration", () =>
+    it("should handling iterating over one variable", () =>
     {
         const scenario = scenario_fixture()
-        scenario.values["min"] = { value: "[0, 2, 4]", usage: "iterate_over" }
         scenario.values["value"] = { value: "[1,2,3]", usage: "iterate_over" }
         const component = component_fixture(scenario)
 
@@ -62,19 +61,48 @@ describe("prepare_scenario_javascript", () =>
         {
             func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
 
-            // iterate over argument "min"
-            return [0, 2, 4].map(min =>
+            // iterate over argument "value"
+            labels = [1,2,3]
+            results = labels.map(value =>
             {
-                // iterate over argument "value"
-                return [1,2,3].map(value =>
-                {
-                    return func(min, value, undefined);
-                });
+                return func(undefined, value, undefined);
             });
+
+            return { labels, results };
         }
         calc();
         `)
 
         expect(javascript).equals(expected)
+    })
+
+
+    it("should reject iterating over two variables", () =>
+    {
+        const scenario = scenario_fixture()
+        scenario.values["min"] = { value: "[0, 2, 4]", usage: "iterate_over" }
+        scenario.values["value"] = { value: "[1,2,3]", usage: "iterate_over" }
+        const component = component_fixture(scenario)
+
+        expect(() => prepare_scenario_javascript({ component, scenario })).throws("Can only iterate over one input at a time")
+        // const expected = deindent(`
+        // function calc()
+        // {
+        //     func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
+
+        //     // iterate over argument "min"
+        //     return [0, 2, 4].map(min =>
+        //     {
+        //         // iterate over argument "value"
+        //         return [1,2,3].map(value =>
+        //         {
+        //             return func(min, value, undefined);
+        //         });
+        //     });
+        // }
+        // calc();
+        // `)
+
+        // expect(javascript).equals(expected)
     })
 })
