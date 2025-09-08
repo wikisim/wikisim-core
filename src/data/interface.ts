@@ -7,7 +7,8 @@ type DBEnums = Database["public"]["Enums"]
 
 export type ValueType = DBEnums["data_component_value_type"]
 export const VALUE_TYPES = Constants.public.Enums.data_component_value_type
-export const VALUE_TYPES_OBJ = Object.values(VALUE_TYPES).reduce((o, k) => {
+export const VALUE_TYPES_OBJ = Object.values(VALUE_TYPES).reduce((o, k) =>
+{
     o[k] = k
     return o
 }, {} as Record<ValueType, ValueType>)
@@ -15,7 +16,8 @@ export const VALUE_TYPES_OBJ = Object.values(VALUE_TYPES).reduce((o, k) => {
 
 export type NumberDisplayType = DBEnums["data_component_value_number_display_type"]
 export const NUMBER_DISPLAY_TYPES = Constants.public.Enums.data_component_value_number_display_type
-export const NUMBER_DISPLAY_TYPES_OBJ = Object.values(NUMBER_DISPLAY_TYPES).reduce((o, k) => {
+export const NUMBER_DISPLAY_TYPES_OBJ = Object.values(NUMBER_DISPLAY_TYPES).reduce((o, k) =>
+{
     o[k] = k
     return o
 }, {} as Record<NumberDisplayType, NumberDisplayType>)
@@ -23,7 +25,8 @@ export const NUMBER_DISPLAY_TYPES_OBJ = Object.values(NUMBER_DISPLAY_TYPES).redu
 
 export type DatetimeRangeRepeatEvery = DBEnums["data_component_datetime_repeat_every"]
 export const DATETIME_RANGE_REPEAT_EVERY = Constants.public.Enums.data_component_datetime_repeat_every
-export const DATETIME_RANGE_REPEAT_EVERY_OBJ = Object.values(DATETIME_RANGE_REPEAT_EVERY).reduce((o, k) => {
+export const DATETIME_RANGE_REPEAT_EVERY_OBJ = Object.values(DATETIME_RANGE_REPEAT_EVERY).reduce((o, k) =>
+{
     o[k] = k
     return o
 }, {} as Record<DatetimeRangeRepeatEvery, DatetimeRangeRepeatEvery>)
@@ -53,13 +56,12 @@ export interface InlineScenario
     description?: string
     values: ScenarioValues
 }
-export type ScenarioValueUsage = "as_is" | "iterate_over"
-interface ScenarioValues
+export interface ScenarioValues
 {
     [argument_name: string]:
     {
         value: string
-        usage: ScenarioValueUsage
+        iterate_over?: boolean
     }
 }
 

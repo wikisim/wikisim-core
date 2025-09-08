@@ -68,7 +68,7 @@ describe("changes_made function", () =>
         scenarios: [
             {
                 id: 1,
-                values: { arg1: { value: "456", usage: "as_is" } },
+                values: { arg1: { value: "456" } },
             }
         ],
 

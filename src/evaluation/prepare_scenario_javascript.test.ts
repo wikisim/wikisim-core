@@ -11,7 +11,7 @@ describe("prepare_scenario_javascript", () =>
     const scenario_fixture = (): Scenario => ({
         id: 1,
         description: "Test Scenario",
-        values: { value: { value: "5", usage: "as_is" } }
+        values: { value: { value: "5" } }
     })
 
     const component_fixture = (scenario: Scenario) => init_new_data_component({
@@ -52,7 +52,7 @@ describe("prepare_scenario_javascript", () =>
     it("should handling iterating over one variable", () =>
     {
         const scenario = scenario_fixture()
-        scenario.values["value"] = { value: "[1,2,3]", usage: "iterate_over" }
+        scenario.values["value"] = { value: "[1,2,3]", iterate_over: true }
         const component = component_fixture(scenario)
 
         const javascript = prepare_scenario_javascript({ component, scenario })
@@ -80,8 +80,8 @@ describe("prepare_scenario_javascript", () =>
     it("should reject iterating over two variables", () =>
     {
         const scenario = scenario_fixture()
-        scenario.values["min"] = { value: "[0, 2, 4]", usage: "iterate_over" }
-        scenario.values["value"] = { value: "[1,2,3]", usage: "iterate_over" }
+        scenario.values["min"] = { value: "[0, 2, 4]", iterate_over: true }
+        scenario.values["value"] = { value: "[1,2,3]", iterate_over: true }
         const component = component_fixture(scenario)
 
         expect(() => prepare_scenario_javascript({ component, scenario })).throws("Can only iterate over one input at a time")

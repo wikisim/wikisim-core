@@ -24,7 +24,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
 
     // Temporarily restrict to one iterate_over input.  This could be changed in
     // future to support multiple iterate_over inputs by using nested loops
-    const iterate_over_inputs = Object.values(scenario_inputs).filter(v => v.usage === "iterate_over")
+    const iterate_over_inputs = Object.values(scenario_inputs).filter(v => v.iterate_over)
     if (iterate_over_inputs.length > 1)
     {
         throw new Error("Can only iterate over one input at a time")
@@ -32,7 +32,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
 
     // Build argument list in order, using scenario value or undefined
     // if no scenario value
-    // If usage is "iterate_over" then the argument will be filled in
+    // If iterate_over flag is set to `true` then the argument will be filled in
     // by the iteration code below
     const args: string[] = []
 
@@ -41,10 +41,10 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
 
     let javascript = indent(`func = ${function_string};\n\n`, indentation, indentation_level)
     // Wrap in iteration if any inputs are marked as iterate_over
-    function_inputs.forEach((input, index) =>
+    function_inputs.forEach(input =>
     {
         const scenario_value = scenario_inputs[input.name]
-        if (scenario_value?.usage === "iterate_over")
+        if (scenario_value?.iterate_over)
         {
             javascript += indent(`// iterate over argument "${input.name}"\n`, indentation, indentation_level)
             javascript += indent(`labels = ${scenario_value.value}\n`, indentation, indentation_level)
@@ -67,7 +67,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     function_inputs.forEach((input) =>
     {
         const scenario_value = scenario_inputs[input.name]
-        if (scenario_value?.usage === "iterate_over")
+        if (scenario_value?.iterate_over)
         {
             indentation_level--
             javascript += indent("\n});\n\n", indentation, indentation_level)
