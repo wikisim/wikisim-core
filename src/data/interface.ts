@@ -56,6 +56,7 @@ export interface InlineScenario
     description?: string
     values: ScenarioValues
     expected_result?: string
+    expectation_met?: boolean
 }
 export interface ScenarioValues
 {
