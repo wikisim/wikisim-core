@@ -1,48 +1,29 @@
+import * as mathjs from "mathjs"
 
 
-
-export function format_number_to_significant_figures (num: number, significant_figures: number)
+export function format_number_to_significant_figures (num: number, significant_figures: number, trim_trailing_zeros = true)
 {
     if (num === 0) return "0"
 
-    const num_exponent = Math.floor(Math.log10(Math.abs(num)))
-    const exponent = num_exponent + 1 - significant_figures
-    const rounded_number = Math.round(num / Math.pow(10, exponent)) * Math.pow(10, exponent)
-    const rounded_number_string = rounded_number.toString()
+    const precision = Math.max(0, significant_figures - Math.floor(Math.log10(Math.abs(num))) - 1)
 
-    if (exponent >= 0)
-    {
-        return rounded_number_string
-    }
-    else
-    {
-        const decimal_index = rounded_number_string.indexOf(".")
-        const has_decimal = decimal_index !== -1
-        let rounded_number_string_padded_zeros = rounded_number_string + (has_decimal ? "" : ".")
+    const str = mathjs.format(num, { notation: "fixed", precision })
 
-        const length_of_significant_figures = ((Math.abs(num) >= 1
-            ? rounded_number_string_padded_zeros.length
-            : rounded_number_string_padded_zeros.length + num_exponent
-        )
-            - 1 // for decimal point
-            - (num < 0 ? 1 : 0) // for negative sign at beginning
-        )
-        let trailing_zeros_needed = significant_figures - length_of_significant_figures
-        trailing_zeros_needed = Math.max(0, trailing_zeros_needed) // guards against when number is coerced to 0.013000000000000001
-
-        rounded_number_string_padded_zeros += "0".repeat(trailing_zeros_needed)
-
-        // guards against when number is coerced to 0.013000000000000001
-        const expected_final_length = (
-            significant_figures +
-            // accounts initial zeros at the start of a number <1 and >-1 e.g. the 0.000 of 0.000123
-            (num_exponent < 0 ? -num_exponent : 0)
-            + 1 // for decimal point
-            + (num < 0 ? 1 : 0) // for negative sign at beginning
-        )
-        rounded_number_string_padded_zeros = rounded_number_string_padded_zeros.slice(0, expected_final_length)
+    return trim_trailing_zeros ? str.replace(/(\.\d*[^0])0+|\.0+$/, "$1") : str
+}
 
 
-        return rounded_number_string_padded_zeros
-    }
+export function format_number_to_scientific_notation (num: number, significant_figures: number, trim_trailing_zeros = true)
+{
+    if (num === 0) return "0"
+
+    const precision = Math.abs(num) < 1
+        ? significant_figures
+        : Math.max(significant_figures, significant_figures - Math.floor(Math.log10(Math.abs(num))) - 1)
+
+    let str = mathjs.format(num, { notation: "exponential", precision })
+        .replace("e+", "e")
+
+    // Optionally remove trailing zeros in mantissa
+    return trim_trailing_zeros ? str.replace(/\.?0+(e-?\d+)$/, "$1") : str
 }

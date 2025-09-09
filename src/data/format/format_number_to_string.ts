@@ -1,10 +1,10 @@
 import { clamp } from "../../utils/clamp"
-import { round_to_max_significant_figures } from "../../utils/number"
+import { round_to_significant_figures } from "../../utils/number"
 import { NUMBER_DISPLAY_TYPES_OBJ, NumberDisplayType } from "../interface"
-import { format_number_to_significant_figures } from "./format_number_to_significant_figures"
+import { format_number_to_scientific_notation, format_number_to_significant_figures } from "./format_number_to_significant_figures"
 
 
-export function format_number_to_string (num: number, max_significant_figures: number, display_type: NumberDisplayType): string
+export function format_number_to_string (num: number, significant_figures: number, display_type: NumberDisplayType): string
 {
     let formatted_number: string
 
@@ -13,36 +13,37 @@ export function format_number_to_string (num: number, max_significant_figures: n
         return ""
     }
 
-    max_significant_figures = Math.round(max_significant_figures)
-    max_significant_figures = max_significant_figures < 1 ? 1 : max_significant_figures
+    significant_figures = Math.round(significant_figures)
+    significant_figures = Math.max(1, significant_figures)
 
     if (display_type === NUMBER_DISPLAY_TYPES_OBJ.bare)
     {
-        const rounded_number = round_to_max_significant_figures(num, max_significant_figures)
+        const rounded_number = round_to_significant_figures(num, significant_figures)
         formatted_number = rounded_number.toString()
     }
     else if (display_type === NUMBER_DISPLAY_TYPES_OBJ.simple)
     {
-        const rounded_number = round_to_max_significant_figures(num, max_significant_figures)
+        const rounded_number = round_to_significant_figures(num, significant_figures)
         formatted_number = Math.abs(rounded_number) < 1 ? rounded_number.toString() : rounded_number.toLocaleString()
     }
     else if (display_type === NUMBER_DISPLAY_TYPES_OBJ.scaled)
     {
-        formatted_number = scale_number(num, max_significant_figures)
+        formatted_number = scale_number(num, significant_figures)
     }
     else if (display_type === NUMBER_DISPLAY_TYPES_OBJ.percentage)
     {
-        const rounded_number = round_to_max_significant_figures(num * 100, max_significant_figures)
+        const rounded_number = round_to_significant_figures(num * 100, significant_figures)
         formatted_number = rounded_number.toString() + "%"
     }
     else if (display_type === NUMBER_DISPLAY_TYPES_OBJ.abbreviated_scaled)
     {
-        formatted_number = abbreviate_number(num, max_significant_figures)
+        formatted_number = abbreviate_number(num, significant_figures)
     }
     else if (display_type === NUMBER_DISPLAY_TYPES_OBJ.scientific)
     {
-        const minimised_significant_figures = minimise_significant_figures(num, max_significant_figures)
-        formatted_number = num.toExponential(minimised_significant_figures - 1)
+        // const minimised_significant_figures = minimise_significant_figures(num, max_significant_figures)
+        // formatted_number = num.toExponential(minimised_significant_figures - 1)
+        formatted_number = format_number_to_scientific_notation(num, significant_figures)
     }
     else
     {

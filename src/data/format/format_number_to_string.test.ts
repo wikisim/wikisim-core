@@ -138,7 +138,7 @@ describe("run_number_to_string", () =>
         expect(formatted_number).equals("0", "abbreviated scaled number")
 
         formatted_number = format_number_to_string(0, 2, NUMBER_DISPLAY_TYPES_OBJ.scientific)
-        expect(formatted_number).equals("0e0", "scientific number")
+        expect(formatted_number).equals("0", "scientific number")
 
     })
 
@@ -178,9 +178,7 @@ describe("run_number_to_string", () =>
     {
         const cases = [
             { num: 1e-24, expected: "0.000001 a" },
-            // Don't know why there are trailing 0s here, suspect it is from a
-            // parseFloat floating point precision issue.
-            { num: 1e-21, expected: "0.00100 a" },
+            { num: 1e-21, expected: "0.001 a" },
             { num: 1e-18, expected: "1 a" },
             { num: 0.001, expected: "1 m" },
             { num: 0.999, expected: "999 m" },
