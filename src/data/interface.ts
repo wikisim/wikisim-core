@@ -40,7 +40,7 @@ export interface IDatetimeRange
 
 export interface FunctionArgument
 {
-    id: number // tempoary id, not stored to DB
+    id: number // temporary id, not stored to DB
     name: string
     description?: string
     value_type: "number"// | "data_component_id" | "datetime_range" | "datetime" | "boolean" | "string"
@@ -52,9 +52,10 @@ export type Scenario = InlineScenario
 
 export interface InlineScenario
 {
-    id: number // tempoary id, not stored to DB
+    id: number // temporary id, not stored to DB
     description?: string
     values: ScenarioValues
+    expected_result?: string
 }
 export interface ScenarioValues
 {
