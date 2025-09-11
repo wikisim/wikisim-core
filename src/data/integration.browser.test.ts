@@ -32,8 +32,12 @@ type TABLE_NAME = "data_components_history" | "data_components"
 
 describe("can init, insert, update, and search wiki data components", () =>
 {
-    const data_component_fixture: DataComponent = Object.freeze(init_data_component())
-
+    // We don't use the init_new_data_component because for testing when we want
+    // to insert into the DB we have to specify an ID and it has to be negative
+    // where as `init_new_data_component` does not generate an `.id` value and
+    // only adds a temporary_id value.
+    // const draft_data_component_fixture: NewDataComponent = Object.freeze(init_new_data_component({}, true))
+    const data_component_fixture: DataComponent = Object.freeze(init_data_component({}, true))
 
     after(async () =>
     {
@@ -563,7 +567,7 @@ describe("can init, insert, update, and search wiki data components", () =>
 
 describe("can init, insert, update, and search user owned data components", () =>
 {
-    const data_component_fixture: DataComponent = Object.freeze(init_data_component())
+    const data_component_fixture: DataComponent = Object.freeze(init_data_component({}, true))
 
 
     after(async () =>

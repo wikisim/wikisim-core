@@ -9,7 +9,7 @@ describe("can create a new data component", () =>
 {
     it("should create a new data component with default values", () =>
     {
-        const data_component: DataComponent = init_data_component()
+        const data_component: DataComponent = init_data_component({}, true)
         expect(data_component.id.to_str()).equals(`-1v1`)
         expect(data_component.id.id).equals(-1)
         expect(data_component.id.version).equals(1)
@@ -32,7 +32,7 @@ describe("changes_made function", () =>
         expect(changes_made(unchanged, original)).equals(false)
     })
 
-    const original: DataComponent = init_data_component()
+    const original: DataComponent = init_data_component({}, true)
     const modified: DataComponent = init_data_component({
         owner_id: "owner_2", // In practice this field should and will never be changed
 

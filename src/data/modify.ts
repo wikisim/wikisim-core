@@ -4,7 +4,7 @@ import { IdAndVersion, TempId } from "./id"
 import { DataComponent, FunctionArgument, NewDataComponent } from "./interface"
 
 
-export function init_data_component(partial: Partial<DataComponent> = {}): DataComponent
+export function init_data_component(partial: Partial<DataComponent> = {}, for_testing = false): DataComponent
 {
     return {
         id: new IdAndVersion(-1, 1), // Use a negative ID for test data
@@ -32,7 +32,8 @@ export function init_data_component(partial: Partial<DataComponent> = {}): DataC
         plain_title: "",
         plain_description: "",
 
-        test_run_id: `test_run_id_${new Date().toISOString()}`, // Default to current time for test runs
+        // Default to current time for test runs
+        test_run_id: for_testing ? `test_run_id_${new Date().toISOString()}` : undefined,
 
         ...partial,
     }
