@@ -1,5 +1,5 @@
-import { DBDataComponentRow } from "."
-import { DataComponentFields } from "../data/interface"
+import type { DBDataComponentRow } from "."
+import type { DataComponentFields } from "../data/interface"
 
 
 export interface InsertDataComponentV2Args
