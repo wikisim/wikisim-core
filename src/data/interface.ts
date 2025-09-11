@@ -68,7 +68,7 @@ export interface ScenarioValues
 }
 
 
-interface DataComponentFields
+export interface DataComponentFields
 {
     // For managing user owned (currently only public, maybe later private as well) data
     owner_id?: string

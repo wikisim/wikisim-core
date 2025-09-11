@@ -365,6 +365,49 @@ export type Database = {
           warning_message: string
         }[]
       }
+      insert_data_component_v2: {
+        Args: {
+          components: Database["public"]["CompositeTypes"]["data_component_insert_params"][]
+          server_secret: string
+        }
+        Returns: {
+          bytes_changed: number
+          comment: string | null
+          created_at: string
+          datetime_range_end: string | null
+          datetime_range_start: string | null
+          datetime_repeat_every:
+            | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+            | null
+          description: string
+          dimension_ids: string[] | null
+          editor_id: string
+          id: number
+          input_value: string | null
+          label_ids: number[] | null
+          owner_id: string | null
+          plain_description: string
+          plain_search_text: string | null
+          plain_title: string
+          result_value: string | null
+          search_vector: unknown | null
+          test_run_id: string | null
+          title: string
+          units: string | null
+          value_number_display_type:
+            | Database["public"]["Enums"]["data_component_value_number_display_type"]
+            | null
+          value_number_sig_figs: number | null
+          value_type:
+            | Database["public"]["Enums"]["data_component_value_type"]
+            | null
+          version_number: number
+          version_rolled_back_to: number | null
+          version_type:
+            | Database["public"]["Enums"]["data_component_version_type"]
+            | null
+        }[]
+      }
       search_data_components: {
         Args: {
           /**
@@ -479,11 +522,46 @@ export type Database = {
         | "abbreviated_scaled"
         | "percentage"
         | "scientific"
-      data_component_value_type: "number" | "datetime_range" | "number_array"
+      data_component_value_type:
+        | "number"
+        | "datetime_range"
+        | "number_array"
+        | "function"
       data_component_version_type: "minor" | "rollback"
     }
     CompositeTypes: {
-      [_ in never]: never
+      data_component_insert_params: {
+        p_title: string //| null
+        p_description: string //| null
+        p_plain_title: string //| null
+        p_plain_description: string //| null
+        p_bytes_changed: number //| null
+        p_owner_id: string | null
+        p_comment: string | null
+        p_version_type:
+          | Database["public"]["Enums"]["data_component_version_type"]
+          | null
+        p_version_rolled_back_to: number | null
+        p_label_ids: number[] | null
+        p_input_value: string | null
+        p_result_value: string | null
+        p_value_type:
+          | Database["public"]["Enums"]["data_component_value_type"]
+          | null
+        p_value_number_display_type:
+          | Database["public"]["Enums"]["data_component_value_number_display_type"]
+          | null
+        p_value_number_sig_figs: number | null
+        p_datetime_range_start: string | null
+        p_datetime_range_end: string | null
+        p_datetime_repeat_every:
+          | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+          | null
+        p_units: string | null
+        p_dimension_ids: string[] | null
+        p_test_run_id: string | null
+        p_id: number | null
+      }
     }
   }
 }
@@ -626,7 +704,12 @@ export const Constants = {
         "percentage",
         "scientific",
       ],
-      data_component_value_type: ["number", "datetime_range", "number_array"],
+      data_component_value_type: [
+        "number",
+        "datetime_range",
+        "number_array",
+        "function",
+      ],
       data_component_version_type: ["minor", "rollback"],
     },
   },
