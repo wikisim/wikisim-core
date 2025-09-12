@@ -9,13 +9,10 @@
   <div id="mocha"></div>
   <script src="https://unpkg.com/mocha@11.7.1/mocha.js"></script>
   <script>
-    mocha.setup("bdd");
-  </script>
-  <!-- Include your test files and source files here -->
-  <script type="module" src="../src/data/integration.browser.test.ts"></script>
-  <!-- Add more test files as needed -->
-  <script>
-    mocha.run();
+    mocha.setup("bdd")
+
+    import("../src/data/integration.browser.test.ts")
+    .then(() => mocha.run())
   </script>
 </body>
 </html>
