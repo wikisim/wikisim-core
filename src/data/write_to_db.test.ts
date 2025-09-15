@@ -2,21 +2,24 @@ import { expect } from "chai"
 
 import { IdAndVersion } from "./id"
 import { DataComponent } from "./interface"
-import { prepare_data_component_for_db_insert, prepare_data_component_for_db_update } from "./write_to_db"
+import {
+    prepare_data_component_for_db_insert,
+    prepare_data_component_for_db_update,
+} from "./write_to_db"
 
 
 describe("prepare_data_component_for_db_insert", function ()
 {
     function data_component_fixture(): DataComponent {
         return {
-            id: new IdAndVersion(-1, 1),
+            id: new IdAndVersion(-1, 3),
             owner_id: "owner-123",
             editor_id: "editor-123",
             created_at: new Date("2023-01-01T00:00:00Z"),
             comment: "Test comment",
             bytes_changed: 100,
-            version_type: undefined,
-            version_rolled_back_to: undefined,
+            version_type: "minor",
+            version_rolled_back_to: 1,
             title: "<p>Test Title</p>",
             description: "<p>Test Description</p>",
             label_ids: [-3, -4],
@@ -27,9 +30,11 @@ describe("prepare_data_component_for_db_insert", function ()
             value_number_sig_figs: 2,
             datetime_range_start: new Date("2023-01-01T00:00:00Z"),
             datetime_range_end: new Date("2023-01-02T00:00:00Z"),
-            datetime_repeat_every: undefined,
+            datetime_repeat_every: "day",
             units: "units",
             dimension_ids: [new IdAndVersion(-2, 1)],
+            function_arguments: [],
+            scenarios: [],
 
             plain_title: "",
             plain_description: "",
@@ -63,9 +68,11 @@ describe("prepare_data_component_for_db_insert", function ()
         expect(result).to.have.property("p_datetime_repeat_every", data_component.datetime_repeat_every)
         expect(result).to.have.property("p_units", data_component.units)
         expect(result).to.have.property("p_dimension_ids").that.deep.equals(data_component.dimension_ids!.map(d => d.to_str()))
-        expect(result).to.have.property("p_plain_title", "Test Title")
-        expect(result).to.have.property("p_plain_description", "Test Description")
-        expect(result).to.have.property("p_test_run_id", undefined)
+        expect(result).to.have.property("p_function_arguments").that.deep.equals(data_component.function_arguments)
+        expect(result).to.have.property("p_scenarios").that.deep.equals(data_component.scenarios)
+        expect(result).to.have.property("p_plain_title", "")
+        expect(result).to.have.property("p_plain_description", "")
+        expect(result).to.have.property("p_test_run_id", null)
     })
 
     it("should prepare data component for DB update", function ()
@@ -95,8 +102,10 @@ describe("prepare_data_component_for_db_insert", function ()
         expect(result).to.have.property("p_datetime_repeat_every", data_component.datetime_repeat_every)
         expect(result).to.have.property("p_units", data_component.units)
         expect(result).to.have.property("p_dimension_ids").that.deep.equals(data_component.dimension_ids!.map(d => d.to_str()))
-        expect(result).to.have.property("p_plain_title", "Test Title")
-        expect(result).to.have.property("p_plain_description", "Test Description")
-        expect(result).to.not.have.property("p_test_run_id", undefined)
+        expect(result).to.have.property("p_function_arguments").that.deep.equals(data_component.function_arguments)
+        expect(result).to.have.property("p_scenarios").that.deep.equals(data_component.scenarios)
+        expect(result).to.have.property("p_plain_title", "")
+        expect(result).to.have.property("p_plain_description", "")
+        expect(result).to.not.have.property("p_test_run_id", null)
     })
 })

@@ -1,4 +1,4 @@
-import { AuthError, Session } from "@supabase/supabase-js"
+import type { AuthError, Session } from "@supabase/supabase-js"
 
 
 export type UserAuthStatus = (

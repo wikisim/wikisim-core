@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-import { AuthError, Session } from "@supabase/supabase-js"
+import type { AuthError, Session } from "@supabase/supabase-js"
 
 import { GetSupabase } from "../../supabase"
 import { StateMachine } from "../../utils/state_machine"

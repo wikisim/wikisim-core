@@ -61,7 +61,6 @@ describe("changes_made function", () =>
             {
                 id: 1,
                 name: "arg1",
-                value_type: "number",
                 default_value: "123",
             }
         ],

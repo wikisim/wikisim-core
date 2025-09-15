@@ -7,7 +7,7 @@ import "./monkey_patch"
 import { core_store } from "./state/store"
 import { get_can_request_sign_in_with_OTP } from "./state/user_auth_session/accessor"
 import { UserAuthStatus } from "./state/user_auth_session/interface"
-import { get_supabase } from "./supabase"
+import { get_supabase } from "./supabase/browser"
 
 
 function App()

@@ -1,4 +1,4 @@
-import { PostgrestError } from "@supabase/supabase-js"
+import type { PostgrestError } from "@supabase/supabase-js"
 
 import { GetSupabase } from "../supabase"
 import { clamp } from "../utils/clamp"

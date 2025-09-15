@@ -14,5 +14,5 @@ export interface GenericDocument
 
 export interface GenericDOMParser
 {
-    parseFromString(text: string, mimeType: string): GenericDocument
+    parseFromString(text: string, mimeType: string): GenericDocument | null
 }

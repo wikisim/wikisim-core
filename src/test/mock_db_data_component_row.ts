@@ -31,6 +31,8 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
         datetime_repeat_every: null,
         units: null,
         dimension_ids: null,
+        function_arguments: null,
+        scenarios: null,
 
         plain_title: "Mock Data Component",
         plain_description: "This is a mock data component for testing purposes.",

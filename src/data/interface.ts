@@ -1,5 +1,5 @@
-import { Constants, Database } from "../supabase/interface"
-import { IdAndVersion, TempId } from "./id"
+import { Constants, Database } from "../supabase/interface.ts"
+import { IdAndVersion, TempId } from "./id.ts"
 
 
 type DBEnums = Database["public"]["Enums"]
@@ -38,33 +38,46 @@ export interface IDatetimeRange
 }
 
 
-export interface FunctionArgument
+export interface DBFunctionArgument
 {
-    id: number // temporary id, not stored to DB
     name: string
     description?: string
-    value_type: "number"// | "data_component_id" | "datetime_range" | "datetime" | "boolean" | "string"
+    // If we want to use value_type for asserting the type of value then we
+    // should either have a broader set of typescript types like "string", etc,
+    // or turn this into a text field and leverage typescript's type system.
+    // value_type: "number"// | "data_component_id" | "datetime_range" | "datetime" | "boolean" | "string"
     default_value?: string
+}
+export interface FunctionArgument extends DBFunctionArgument
+{
+    id: number // temporary id, not stored to DB
 }
 
 
-export type Scenario = InlineScenario
-
-export interface InlineScenario
+export interface ScenarioValue
 {
-    id: number // temporary id, not stored to DB
+    value: string
+    iterate_over?: boolean
+}
+export interface ScenarioValues
+{
+    [argument_name: string]: ScenarioValue
+}
+
+export type DBScenario = DBInlineScenario
+
+export interface DBInlineScenario
+{
     description?: string
     values: ScenarioValues
     expected_result?: string
     expectation_met?: boolean
 }
-export interface ScenarioValues
+
+export type Scenario = InlineScenario
+export interface InlineScenario extends DBInlineScenario
 {
-    [argument_name: string]:
-    {
-        value: string
-        iterate_over?: boolean
-    }
+    id: number // temporary id, not stored to DB
 }
 
 

@@ -31,6 +31,7 @@ export type Database = {
           description: string
           dimension_ids: string[] | null
           editor_id: string
+          function_arguments: Json | null
           id: number
           input_value: string | null
           label_ids: number[] | null
@@ -39,6 +40,7 @@ export type Database = {
           // plain_search_text: string | null
           plain_title: string
           result_value: string | null
+          scenarios: Json | null
           // search_vector: unknown | null
           test_run_id: string | null
           title: string
@@ -68,6 +70,7 @@ export type Database = {
           description: string
           dimension_ids?: string[] | null
           editor_id: string
+          function_arguments?: Json | null
           id?: number
           input_value?: string | null
           label_ids?: number[] | null
@@ -76,6 +79,7 @@ export type Database = {
           // plain_search_text?: string | null
           plain_title: string
           result_value?: string | null
+          scenarios?: Json | null
           // search_vector?: unknown | null
           test_run_id?: string | null
           title: string
@@ -105,6 +109,7 @@ export type Database = {
           description?: string
           dimension_ids?: string[] | null
           editor_id?: string
+          function_arguments?: Json | null
           id?: number
           input_value?: string | null
           label_ids?: number[] | null
@@ -113,6 +118,7 @@ export type Database = {
           // plain_search_text?: string | null
           plain_title?: string
           result_value?: string | null
+          scenarios?: Json | null
           // search_vector?: unknown | null
           test_run_id?: string | null
           title?: string
@@ -145,6 +151,7 @@ export type Database = {
           description: string
           dimension_ids: string[] | null
           editor_id: string
+          function_arguments: Json | null
           id: number
           input_value: string | null
           label_ids: number[] | null
@@ -152,6 +159,7 @@ export type Database = {
           plain_description: string
           plain_title: string
           result_value: string | null
+          scenarios: Json | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -180,6 +188,7 @@ export type Database = {
           description: string
           dimension_ids?: string[] | null
           editor_id: string
+          function_arguments?: Json | null
           id: number
           input_value?: string | null
           label_ids?: number[] | null
@@ -187,6 +196,7 @@ export type Database = {
           plain_description: string
           plain_title: string
           result_value?: string | null
+          scenarios?: Json | null
           test_run_id?: string | null
           title: string
           units?: string | null
@@ -215,6 +225,7 @@ export type Database = {
           description?: string
           dimension_ids?: string[] | null
           editor_id?: string
+          function_arguments?: Json | null
           id?: number
           input_value?: string | null
           label_ids?: number[] | null
@@ -222,6 +233,7 @@ export type Database = {
           plain_description?: string
           plain_title?: string
           result_value?: string | null
+          scenarios?: Json | null
           test_run_id?: string | null
           title?: string
           units?: string | null
@@ -285,6 +297,7 @@ export type Database = {
           description: string
           dimension_ids: string[] | null
           editor_id: string
+          function_arguments: Json | null
           id: number
           input_value: string | null
           label_ids: number[] | null
@@ -293,6 +306,7 @@ export type Database = {
           // plain_search_text: string | null
           plain_title: string
           result_value: string | null
+          scenarios: Json | null
           // search_vector: unknown | null
           test_run_id: string | null
           title: string
@@ -311,60 +325,6 @@ export type Database = {
             | null
         }
       }
-      insert_data_component: {
-        Args: {
-          p_bytes_changed: number
-          p_comment?: string
-          p_datetime_range_end?: string
-          p_datetime_range_start?: string
-          p_datetime_repeat_every?: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
-          p_description: string
-          p_dimension_ids?: string[]
-          p_id?: number
-          p_input_value?: string
-          p_label_ids?: number[]
-          p_owner_id?: string
-          p_plain_description: string
-          p_plain_title: string
-          p_result_value?: string
-          p_test_run_id?: string
-          p_title: string
-          p_units?: string
-          p_value_number_display_type?: Database["public"]["Enums"]["data_component_value_number_display_type"]
-          p_value_number_sig_figs?: number
-          p_value_type?: Database["public"]["Enums"]["data_component_value_type"]
-          p_version_rolled_back_to?: number
-          p_version_type?: Database["public"]["Enums"]["data_component_version_type"]
-        }
-        Returns: {
-          bytes_changed: number
-          comment: string
-          created_at: string
-          datetime_range_end: string
-          datetime_range_start: string
-          datetime_repeat_every: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
-          description: string
-          dimension_ids: string[]
-          editor_id: string
-          id: number
-          input_value: string
-          label_ids: number[]
-          owner_id: string
-          plain_description: string
-          plain_title: string
-          result_value: string
-          test_run_id: string
-          title: string
-          units: string
-          value_number_display_type: Database["public"]["Enums"]["data_component_value_number_display_type"]
-          value_number_sig_figs: number
-          value_type: Database["public"]["Enums"]["data_component_value_type"]
-          version_number: number
-          version_rolled_back_to: number
-          version_type: Database["public"]["Enums"]["data_component_version_type"]
-          warning_message: string
-        }[]
-      }
       insert_data_component_v2: {
         Args: {
           components: Database["public"]["CompositeTypes"]["data_component_insert_params"][]
@@ -382,6 +342,7 @@ export type Database = {
           description: string
           dimension_ids: string[] | null
           editor_id: string
+          function_arguments: Json | null
           id: number
           input_value: string | null
           label_ids: number[] | null
@@ -390,6 +351,7 @@ export type Database = {
           plain_search_text: string | null
           plain_title: string
           result_value: string | null
+          scenarios: Json | null
           search_vector: unknown | null
           test_run_id: string | null
           title: string
@@ -431,6 +393,7 @@ export type Database = {
           description: string
           dimension_ids: string[]
           editor_id: string
+          function_arguments: Json
           id: number
           input_value: string
           label_ids: number[]
@@ -439,6 +402,7 @@ export type Database = {
           plain_description: string
           plain_title: string
           result_value: string
+          scenarios: Json
           score: number
           test_run_id: string
           title: string
@@ -451,57 +415,49 @@ export type Database = {
           version_type: Database["public"]["Enums"]["data_component_version_type"]
         }[]
       }
-      update_data_component: {
+      update_data_component_v2: {
         Args: {
-          p_bytes_changed: number
-          p_comment?: string
-          p_datetime_range_end?: string
-          p_datetime_range_start?: string
-          p_datetime_repeat_every?: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
-          p_description: string
-          p_dimension_ids?: string[]
-          p_id: number
-          p_input_value?: string
-          p_label_ids?: number[]
-          p_plain_description: string
-          p_plain_title: string
-          p_result_value?: string
-          p_title: string
-          p_units?: string
-          p_value_number_display_type?: Database["public"]["Enums"]["data_component_value_number_display_type"]
-          p_value_number_sig_figs?: number
-          p_value_type?: Database["public"]["Enums"]["data_component_value_type"]
-          p_version_number: number
-          p_version_rolled_back_to?: number
-          p_version_type?: Database["public"]["Enums"]["data_component_version_type"]
+          components: Database["public"]["CompositeTypes"]["data_component_update_params"][]
+          server_secret: string
         }
         Returns: {
           bytes_changed: number
-          comment: string
+          comment: string | null
           created_at: string
-          datetime_range_end: string
-          datetime_range_start: string
-          datetime_repeat_every: Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+          datetime_range_end: string | null
+          datetime_range_start: string | null
+          datetime_repeat_every:
+            | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+            | null
           description: string
-          dimension_ids: string[]
+          dimension_ids: string[] | null
           editor_id: string
+          function_arguments: Json | null
           id: number
-          input_value: string
-          label_ids: number[]
-          owner_id: string
+          input_value: string | null
+          label_ids: number[] | null
+          owner_id: string | null
           plain_description: string
+          plain_search_text: string | null
           plain_title: string
-          result_value: string
-          test_run_id: string
+          result_value: string | null
+          scenarios: Json | null
+          search_vector: unknown | null
+          test_run_id: string | null
           title: string
-          units: string
-          value_number_display_type: Database["public"]["Enums"]["data_component_value_number_display_type"]
-          value_number_sig_figs: number
-          value_type: Database["public"]["Enums"]["data_component_value_type"]
+          units: string | null
+          value_number_display_type:
+            | Database["public"]["Enums"]["data_component_value_number_display_type"]
+            | null
+          value_number_sig_figs: number | null
+          value_type:
+            | Database["public"]["Enums"]["data_component_value_type"]
+            | null
           version_number: number
-          version_rolled_back_to: number
-          version_type: Database["public"]["Enums"]["data_component_version_type"]
-          warning_message: string
+          version_rolled_back_to: number | null
+          version_type:
+            | Database["public"]["Enums"]["data_component_version_type"]
+            | null
         }[]
       }
     }
@@ -559,8 +515,43 @@ export type Database = {
           | null
         p_units: string | null
         p_dimension_ids: string[] | null
+        p_function_arguments: Json | null
+        p_scenarios: Json | null
         p_test_run_id: string | null
         p_id: number | null
+      }
+      data_component_update_params: {
+        p_id: number //| null
+        p_version_number: number //| null
+        p_title: string //| null
+        p_description: string //| null
+        p_plain_title: string //| null
+        p_plain_description: string //| null
+        p_bytes_changed: number //| null
+        p_comment: string | null
+        p_version_type:
+          | Database["public"]["Enums"]["data_component_version_type"]
+          | null
+        p_version_rolled_back_to: number | null
+        p_label_ids: number[] | null
+        p_input_value: string | null
+        p_result_value: string | null
+        p_value_type:
+          | Database["public"]["Enums"]["data_component_value_type"]
+          | null
+        p_value_number_display_type:
+          | Database["public"]["Enums"]["data_component_value_number_display_type"]
+          | null
+        p_value_number_sig_figs: number | null
+        p_datetime_range_start: string | null
+        p_datetime_range_end: string | null
+        p_datetime_repeat_every:
+          | Database["public"]["Enums"]["data_component_datetime_repeat_every"]
+          | null
+        p_units: string | null
+        p_dimension_ids: string[] | null
+        p_function_arguments: Json | null
+        p_scenarios: Json | null
       }
     }
   }

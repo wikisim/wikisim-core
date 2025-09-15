@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
 
-import { get_supabase, GetSupabase } from "../supabase"
+import { get_supabase, GetSupabase } from "../supabase/browser"
 // import * as data_components from "./data_components"
 import type { RootCoreState } from "./interface"
 import * as user_auth_session from "./user_auth_session"

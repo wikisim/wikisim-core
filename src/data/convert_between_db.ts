@@ -1,9 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { browser_convert_tiptap_to_plain } from "../rich_text/browser_convert_tiptap_to_plain"
-import { DBDataComponentRow } from "../supabase"
-import { IdAndVersion, parse_id } from "./id"
-import { DataComponent, FunctionArgument, NewDataComponent, Scenario } from "./interface"
+import { DBDataComponentRow } from "../supabase/index.ts"
+import type { Json } from "../supabase/interface.ts"
+import { IdAndVersion, parse_id } from "./id.ts"
+import type {
+    DataComponent,
+    DBFunctionArgument,
+    DBScenario,
+    FunctionArgument,
+    NewDataComponent,
+    Scenario,
+} from "./interface.ts"
 
 
 export function flatten_data_component_for_db(data_component: DataComponent | NewDataComponent)
@@ -39,22 +44,20 @@ export function flatten_data_component_for_db(data_component: DataComponent | Ne
             ? data_component.dimension_ids.map(d => d.to_str())
             : null,
         function_arguments: data_component.function_arguments
-            ? JSON.stringify(data_component.function_arguments.map(({ id: _, ...args }) => args))
+            ? data_component.function_arguments.map(({ id: _, ...args }) => args) as Json
             : null,
         scenarios: data_component.scenarios
-            ? JSON.stringify(data_component.scenarios.map(({ id: _, ...args }) => args))
+            ? data_component.scenarios.map(({ id: _, ...args }) => args as any as Json)
             : null,
 
-        // Will be overwritted by the server-side (edge function) conversion but
-        // included here for consistency and just in case server side conversion
-        // fails.
-        plain_title: browser_convert_tiptap_to_plain(data_component.title),
-        plain_description: browser_convert_tiptap_to_plain(data_component.description),
+        // Will be set by the server-side (edge function)
+        plain_title: "",
+        plain_description: "",
     }
 }
 
 
-export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id" | "version_number" | "test_run_id">)
+export function hydrate_data_component_from_db(row: DBDataComponentRow)
 {
     return {
         owner_id: row.owner_id ?? undefined,
@@ -80,9 +83,7 @@ export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
         units: row.units ?? undefined,
         dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => parse_id(id, true)) : undefined,
-        // @ts-expect-error
         function_arguments: hydrate_function_arguments(row),
-        // @ts-expect-error
         scenarios: hydrate_scenarios(row),
 
         plain_title: row.plain_title,
@@ -93,18 +94,17 @@ export function hydrate_data_component_from_db(row: Omit<DBDataComponentRow, "id
 
 function hydrate_function_arguments(row: DBDataComponentRow): FunctionArgument[] | undefined
 {
-    // @ts-expect-error
     if (!row.function_arguments) return undefined
 
     try
     {
-        // @ts-expect-error
-        const args = JSON.parse(row.function_arguments) as Omit<FunctionArgument, "id">[]
+        if (!Array.isArray(row.function_arguments)) return undefined
+
+        const args = row.function_arguments as unknown as DBFunctionArgument[]
         return args.map((arg, index) => ({ id: index, ...arg }))
     }
     catch (e)
     {
-        // @ts-expect-error
         console.error("Error parsing function_arguments from DB row:", e, row.function_arguments)
         return undefined
     }
@@ -113,18 +113,17 @@ function hydrate_function_arguments(row: DBDataComponentRow): FunctionArgument[]
 
 function hydrate_scenarios(row: DBDataComponentRow): Scenario[] | undefined
 {
-    // @ts-expect-error
     if (!row.scenarios) return undefined
 
     try
     {
-        // @ts-expect-error
-        const args = JSON.parse(row.scenarios) as Omit<Scenario, "id">[]
+        if (!Array.isArray(row.scenarios)) return undefined
+
+        const args = row.scenarios as unknown as DBScenario[]
         return args.map((arg, index) => ({ id: index, ...arg }))
     }
     catch (e)
     {
-        // @ts-expect-error
         console.error("Error parsing scenarios from DB row:", e, row.scenarios)
         return undefined
     }

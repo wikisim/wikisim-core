@@ -24,7 +24,7 @@ describe("is_data_component_invalid", () =>
         {
             const component = init_new_data_component({}, true)
             component.function_arguments = [
-                { id: 1, name: " ", value_type: "number", description: "" },
+                { id: 1, name: " ", description: "" },
             ]
             expect(is_data_component_invalid(component)).equals("All inputs must have a name or be deleted")
         })
@@ -33,8 +33,8 @@ describe("is_data_component_invalid", () =>
         {
             const component = init_new_data_component({}, true)
             component.function_arguments = [
-                { id: 1, name: "min", value_type: "number", description: "" },
-                { id: 2, name: "min", value_type: "number", description: "" },
+                { id: 1, name: "min", description: "" },
+                { id: 2, name: "min", description: "" },
             ]
             expect(is_data_component_invalid(component)).equals(`Input names must be unique but "min" is duplicated`)
         })
@@ -45,7 +45,7 @@ describe("is_data_component_invalid", () =>
             ;[" 1min ", " -min "].forEach(name =>
             {
                 component.function_arguments = [
-                    { id: 2, name, value_type: "number", description: "" },
+                    { id: 2, name, description: "" },
                 ]
                 expect(is_data_component_invalid(component)).equals(`Input name must start with a letter or underscore but got "${name.trim()[0]}" as the first character of "${name.trim()}"`)
             })
@@ -57,7 +57,7 @@ describe("is_data_component_invalid", () =>
             ;[" min imum ", " min-imum "].forEach(name =>
             {
                 component.function_arguments = [
-                    { id: 2, name, value_type: "number", description: "" },
+                    { id: 2, name, description: "" },
                 ]
                 expect(is_data_component_invalid(component)).equals(`Input name must only contain letters, numbers, and underscores but got "${name.trim()}"`)
             })
@@ -67,7 +67,7 @@ describe("is_data_component_invalid", () =>
         {
             const component = init_new_data_component({}, true)
             component.function_arguments = [
-                { id: 1, name: " min_imum1", value_type: "number", description: "" },
+                { id: 1, name: " min_imum1", description: "" },
             ]
             expect(is_data_component_invalid(component)).equals(false)
         })

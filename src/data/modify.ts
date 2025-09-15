@@ -40,10 +40,10 @@ export function init_data_component(partial: Partial<DataComponent> = {}, for_te
 }
 
 
-export function init_new_data_component(partial: Partial<DataComponent> = {}): NewDataComponent
+export function init_new_data_component(partial: Partial<DataComponent> = {}, for_testing = false): NewDataComponent
 {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...rest } = init_data_component(partial)
+    const { id, ...rest } = init_data_component(partial, for_testing)
     return {
         ...rest,
         // Use a temporary ID for draft components

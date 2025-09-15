@@ -1,14 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from "chai"
 
-import {
-    __testing__,
-    DBDataComponentInsertArgs,
-    DBDataComponentUpdateArgs,
-    get_supabase,
-} from "../supabase"
+import { __testing__, get_supabase } from "../supabase/browser"
 import { deep_equals } from "../utils/deep_equals"
-import { convert_from_db_row } from "./convert_between_db"
 import {
     request_data_components,
     request_historical_data_components,
@@ -19,10 +13,7 @@ import { DataComponent } from "./interface"
 import { init_data_component } from "./modify"
 import {
     insert_data_component,
-    prepare_data_component_for_db_insert,
-    prepare_data_component_for_db_update,
     update_data_component,
-    UpsertDataComponentResponse,
 } from "./write_to_db"
 
 
@@ -30,16 +21,20 @@ import {
 const OTHER_USER_ID = "c3b9d96b-dc5c-4f5f-9698-32eaf601b7f2"
 type TABLE_NAME = "data_components_history" | "data_components"
 
-describe("can init, insert, update, and search wiki data components", () =>
+describe("can init, insert, update, and search wiki data components", function ()
 {
+    this.timeout(5000)
+
     // We don't use the init_new_data_component because for testing when we want
     // to insert into the DB we have to specify an ID and it has to be negative
     // where as `init_new_data_component` does not generate an `.id` value and
     // only adds a temporary_id value.
     // const draft_data_component_fixture: NewDataComponent = Object.freeze(init_new_data_component({}, true))
-    const data_component_fixture: DataComponent = Object.freeze(init_data_component({}, true))
+    const data_component_fixture: DataComponent = Object.freeze(init_data_component({
+        title: "Test title",
+    }, true))
 
-    after(async () =>
+    afterEach(async () =>
     {
         // Clean up test data after all tests have run
         await delete_test_data_in_db("data_components_history")
@@ -47,16 +42,16 @@ describe("can init, insert, update, and search wiki data components", () =>
     })
 
 
+    it("should not have any test data components in the database", async () =>
+    {
+        await check_no_test_data_in_db_and_delete_if_present()
+    })
+
+
     let user_id: string
     it("should be logged in", async () =>
     {
         user_id = await check_user_is_logged_in()
-    })
-
-
-    it("should not have any test data components in the database", async () =>
-    {
-        await check_no_test_data_in_db_and_delete_if_present()
     })
 
 
@@ -72,14 +67,13 @@ describe("can init, insert, update, and search wiki data components", () =>
         {
             expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals("ERR03. Must be authenticated")
+        // expect(response.error).equals("ERR03. Must be authenticated")
+        expect(response.error).equals("Invalid JWT")
     })
 
 
     it("should allow inserting new data component and ignore editor_id, and use that of user logged in", async function ()
     {
-        this.timeout(5000)
-
         const data_component = {
             ...data_component_fixture,
             editor_id: OTHER_USER_ID,
@@ -92,53 +86,34 @@ describe("can init, insert, update, and search wiki data components", () =>
             expect.fail(`Should have inserted data component with editor_id as that of logged in user, but got response: ${JSON.stringify(response1)}`)
         }
         expect(response1.data).to.have.property("editor_id", user_id)
+        // Note that we don't currently test this as rigorously as previously
+        // when we used to set the editor_id value on a data_component
+        // and then ued a lower level function (to attempt to) insert that into
+        // the DB and check that the wrong editor_id was ignored and the current
+        // user's id was used instead.
 
         await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
-
-        // Check insert_data_component rpc call would fail if editor_id is given
-        const db_data_component = prepare_data_component_for_db_insert(data_component)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ;(db_data_component as any).p_editor_id = OTHER_USER_ID
-
-        const response2 = await low_level_insert_data_component(db_data_component)
-        expect(response2.error).to.have.property("message").includes("Could not find the function public.insert_data_component")
     })
 
 
     it("should compute fields using edge function on insert and update", async function ()
     {
-        this.timeout(5000)
-
         const data_component = {
             ...data_component_fixture,
             title: "<p>Some Title</p>",
             description: "<p>Some Description</p>",
+            // plain title and description will be set to "" before posting to
+            // edge function but set here explicitly as well
+            plain_title: "",
+            plain_description: "",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
-        const db_data_component1 = prepare_data_component_for_db_insert(data_component)
-        expect(db_data_component1.p_plain_title).equals("Some Title")
-        expect(db_data_component1.p_plain_description).equals("Some Description")
-        db_data_component1.p_plain_title = "" // Explicitly set to empty string to test edge function sets it
-        db_data_component1.p_plain_description = "" // Explicitly set to empty string to test edge function sets it
-
-        const response1 = await low_level_insert_data_component(db_data_component1)
-        if (response1.error) expect.fail(`Should have inserted data component with edge function computing fields, but got response: ${JSON.stringify(response1)}`)
-        expect(response1.data.plain_title).equals("Some Title", "Edge function should have computed plain_title on insert")
-        expect(response1.data.plain_description).equals("Some Description", "Edge function should have computed plain_description on insert")
-
-        // Check update also calls edge function and computes the fields
-        data_component.title = "<p>Some Other Title</p>"
-        data_component.description = "<p>Some Other Description</p>"
-        const db_data_component2 = prepare_data_component_for_db_update(data_component)
-        db_data_component2.p_plain_title = "" // Explicitly set to empty string to test edge function sets it
-        db_data_component2.p_plain_description = "" // Explicitly set to empty string to test edge function sets it
-
-        const response2 = await low_level_update_data_component(db_data_component2)
-        if (response2.error) expect.fail(`Should have inserted data component with edge function computing fields, but got response: ${JSON.stringify(response2)}`)
-        expect(response2.data.plain_title).equals("Some Other Title", "Edge function should have computed plain_title on update")
-        expect(response2.data.plain_description).equals("Some Other Description", "Edge function should have computed plain_description on update")
+        const response3 = await insert_data_component(get_supabase, data_component)
+        if (response3.error !== null) expect.fail(`Should have inserted data component with edge function computing fields, but got response: ${JSON.stringify(response3)}`)
+        expect(response3.data.plain_title).equals("Some Title", "Edge function should have computed plain_title on insert")
+        expect(response3.data.plain_description).equals("Some Description", "Edge function should have computed plain_description on insert")
 
         await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
@@ -147,8 +122,6 @@ describe("can init, insert, update, and search wiki data components", () =>
 
     it("ERR01 should ignore version_number when inserting new data component", async function ()
     {
-        this.timeout(3000)
-
         const id = new IdAndVersion(data_component_fixture.id.id, 1) // Version 0 is not allowed in constructor
         id.version = 0 // Explicitly set to 0 for this test
         const data_component: DataComponent = {
@@ -181,6 +154,9 @@ describe("can init, insert, update, and search wiki data components", () =>
             datetime_repeat_every: undefined,
             units: undefined,
             dimension_ids: undefined,
+            function_arguments: undefined,
+            scenarios: undefined,
+            plain_title: "Test title",
         })
 
         await delete_test_data_in_db("data_components_history")
@@ -203,10 +179,10 @@ describe("can init, insert, update, and search wiki data components", () =>
         {
             expect.fail(`Production data at risk of corruption.  Should have failed to insert data component with id >= 0 and test_run_id set, but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals(`ERR05. p_id must be negative for test runs, got 0`)
+        expect(response.error).equals(`ERR05.v2. p_id must be negative for test runs, got 0`)
         // This error would be produced but we raise our own error ERR05 in the
         // function as a belt and braces approach.
-        // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
+        // expect(error).equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
 
@@ -224,10 +200,10 @@ describe("can init, insert, update, and search wiki data components", () =>
         {
             expect.fail(`Should have failed to insert data component with id < -20 (and test_run_id set), but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals(`ERR13. p_id must be negative for test runs but no smaller than -20, got -21`)
+        expect(response.error).equals(`ERR13.v2. p_id must be negative for test runs but no smaller than -20, got -21`)
         // This error would be produced but we raise our own error ERR13 in the
         // function as a belt and braces approach.
-        // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
+        // expect(error).equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
 
@@ -246,15 +222,14 @@ describe("can init, insert, update, and search wiki data components", () =>
             expect.fail(`Should have failed to insert data component with id < 0 and test_run_id not set, but got response: ${JSON.stringify(response)}`)
         }
 
-        expect(response.error).to.have.property("message").that.equals(`ERR06. p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
+        expect(response.error).equals(`ERR06.v2. p_test_run_id must be provided for test runs with negative id of -1, but got <NULL>`)
         // This error would be produced but we raise our own error ERR06 in the
         // function as a belt and braces approach.
-        // expect(error).to.have.property("message").that.equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
+        // expect(error).equals(`new row for relation "data_components" violates check constraint "data_components_test_data_id_and_run_id_consistency"`)
     })
 
 
-    let inserted_data_component: DataComponent
-    it("should write the data component to the database", async function ()
+    async function helper_insert_wiki_data_component(test_title: string | undefined, override?: Partial<DataComponent>)
     {
         const data_component: DataComponent = {
             ...data_component_fixture,
@@ -275,11 +250,20 @@ describe("can init, insert, update, and search wiki data components", () =>
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             plain_title: "",
             plain_description: "",
-            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+            test_run_id: data_component_fixture.test_run_id + ` - ${test_title}`,
+            ...override,
         }
 
         const response = await insert_data_component(get_supabase, data_component)
-        if (response.error)
+
+        return { data_component, response }
+    }
+
+
+    it("should write the data component to the database", async function ()
+    {
+        const { data_component, response } = await helper_insert_wiki_data_component(this.test?.title)
+        if (response.error !== null)
         {
             expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         }
@@ -315,10 +299,11 @@ describe("can init, insert, update, and search wiki data components", () =>
             // Should be set by the server (edge function)
             plain_description: "Test Description",
             test_run_id: data_component.test_run_id,
+            function_arguments: undefined,
+            scenarios: undefined,
         }
 
         compare_data_components(response.data, expected_response, "Data component from insertion should match expected response")
-        inserted_data_component = response.data
 
         // Double check that the data component was inserted correctly into
         // both the main table and historical table
@@ -331,7 +316,9 @@ describe("can init, insert, update, and search wiki data components", () =>
 
     it("ERR07 should disallow updating data component when user not logged in", async function ()
     {
-        expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
+        const inserted_data_component = inserted_data_component_response.data
+        if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
 
         const data_component = {
             ...inserted_data_component,
@@ -341,14 +328,16 @@ describe("can init, insert, update, and search wiki data components", () =>
 
         const response = await update_data_component(__testing__.get_supabase_not_signed_in, data_component)
         if (response.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
-        expect(response.error).to.have.property("message").that.equals("ERR07. Must be authenticated")
+        // expect(response.error).equals("ERR07. Must be authenticated")
+        expect(response.error).equals("Invalid JWT")
     })
 
 
-    let updated_data_component: DataComponent
     it("should update data component and ignore editor_id and use that of user logged in", async function ()
     {
-        expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
+        const inserted_data_component = inserted_data_component_response.data
+        if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
 
         const data_component = {
             ...inserted_data_component,
@@ -356,40 +345,32 @@ describe("can init, insert, update, and search wiki data components", () =>
         }
 
         const response = await update_data_component(get_supabase, data_component)
-        if (response.error) expect.fail(`Should have updated data component with editor_id of the logged in user, but got response: ${JSON.stringify(response)}`)
+        if (response.error !== null) expect.fail(`Should have updated data component with editor_id of the logged in user, but got response: ${JSON.stringify(response)}`)
         expect(response.data).to.have.property("editor_id").that.equals(user_id)
-        updated_data_component = response.data
-
-
-        // Check update_data_component rpc call would fail if editor_id is given
-        const db_data_component = prepare_data_component_for_db_update(data_component)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ;(db_data_component as any).p_editor_id = OTHER_USER_ID
-
-        const response2 = await low_level_update_data_component(db_data_component)
-        expect(response2.error).to.have.property("message").includes("Could not find the function public.update_data_component")
     })
 
 
-    it("should update the test data component in the database", async function ()
+    it("should update the (test) data component in the database", async function ()
     {
-        expect(updated_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
+        const inserted_data_component = inserted_data_component_response.data
+        if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
 
         const data_component = {
-            ...updated_data_component,
+            ...inserted_data_component,
             title: "<p>Test Second Title</p>",
             plain_title: "",
         }
 
         const response = await update_data_component(get_supabase, data_component)
-        if (response.error)
+        if (response.error !== null)
         {
             expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         }
 
         const expected_response: DataComponent = {
             // The version number should have been increased by the DB
-            id: new IdAndVersion(-1, 3),
+            id: new IdAndVersion(-1, 2),
 
             owner_id: undefined,
 
@@ -420,83 +401,69 @@ describe("can init, insert, update, and search wiki data components", () =>
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
+            function_arguments: undefined,
+            scenarios: undefined,
 
             plain_description: "Test Description",
         }
 
         compare_data_components(response.data, expected_response)
-        updated_data_component = response.data
 
         // Double check that the data component was inserted correctly into
         // both the main table and historical table
         const row_from_data_components = await request_data_components(get_supabase, { ids: [new IdOnly(-1)] })
         const row_from_data_components_history = await request_historical_data_components(get_supabase, [new IdOnly(-1)])
         compare_data_component_lists(row_from_data_components.data!, [expected_response])
-        expect(row_from_data_components_history.data!.length).equals(3, "Should now have 3 rows in the historical table")
+        expect(row_from_data_components_history.data!.length).equals(2, "Should now have 2 rows in the historical table")
         compare_data_components(row_from_data_components_history.data![0]!, expected_response)
     })
 
 
     it("ERR02 & ERR09 should disallow updating data component with the wrong version_number", async function ()
     {
-        expect(updated_data_component, "This test is stateful and requires insertion & update from previous test").to.exist
+        const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
+        const inserted_data_component = inserted_data_component_response.data
+        if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
 
-        const data_component = {
-            ...updated_data_component,
-            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
-        }
-        data_component.id.version += 1 // This version number does not yet exist in the DB so should fail
-        expect(data_component.id.version).to.equal(4, "Version number should be 4 for this test")
+        const data_component = { ...inserted_data_component, title: "title two" }
+        const response_update_1 = await update_data_component(get_supabase, data_component)
+        if(response_update_1.error) expect.fail(`First update of data component should have succeeded but got: ${JSON.stringify(response_update_1.error)}`)
 
+        data_component.id.version = 3 // This version number does not yet exist in the DB so should fail
         const response = await update_data_component(get_supabase, data_component)
         if (response.data) expect.fail(`Should have failed to upsert data component`)
-        expect(response.error).to.have.property("message").that.equals("ERR09. Update failed: id -1 with version_number 4 not found or version mismatch.")
+        expect(response.error).equals("ERR09.v2. Update failed: id -1 with version_number 3 not found or version mismatch, or owner_id editor_id mismatch.")
 
-        // This version number does exist in the DB but only in the
+        // This version number does exist in the DB but now only in the
         // data_components_history table and so it is the wrong value for updating
-        data_component.id.version -= 2
-        expect(data_component.id.version).to.equal(2, "Version number should be 2 for this test")
-
+        data_component.id.version = 1
         const response2 = await update_data_component(get_supabase, data_component)
         if (response2.data) expect.fail(`Should have failed to upsert data component`)
-        // ERR02 won't be raised because ERR09 is raised first
-        // expect(response2.error).to.have.property("message").that.equals("ERR02. Update failed: version_number mismatch. Existing: 3, Update Attempt: 2, Expected: 3")
-        expect(response2.error).to.have.property("message").that.equals("ERR09. Update failed: id -1 with version_number 2 not found or version mismatch.")
+        // ERR02 won't be raised because ERR09.v2 is raised first
+        expect(response2.error).equals("ERR09.v2. Update failed: id -1 with version_number 1 not found or version mismatch, or owner_id editor_id mismatch.")
     })
 
 
-    let second_updated_data_component: UpsertDataComponentResponse
     it("should paginate over the test data components in the database", async function ()
     {
-        this.timeout(5000)
-        expect(inserted_data_component, "This test is stateful and requires insertion from previous test").to.exist
-        const data_component_2: DataComponent = {
-            ...inserted_data_component,
-            id: new IdAndVersion(-2, 1),
-            editor_id: user_id,
-            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`
-        }
+        const inserted_data_component_1_response = (await helper_insert_wiki_data_component(this.test?.title)).response
+        const inserted_data_component_1 = inserted_data_component_1_response.data
+        if (!inserted_data_component_1) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_1_response.error)}`)
+        const response_update_1_1 = await update_data_component(get_supabase, inserted_data_component_1)
+        if(!response_update_1_1.data) expect.fail(`First update of data component 1 should have succeeded but got: ${JSON.stringify(response_update_1_1.error)}`)
+        const response_update_1_2 = await update_data_component(get_supabase, response_update_1_1.data)
+        if(response_update_1_2.error) expect.fail(`Second update of data component 1 should have succeeded but got: ${JSON.stringify(response_update_1_2.error)}`)
 
-        const id_1 = inserted_data_component.id
 
-        const response = await insert_data_component(get_supabase, data_component_2)
-        if (response.error)
-        {
-            expect.fail(`Failed to insert second data component: ${JSON.stringify(response.error)}`)
-        }
-        const id_2 = response.data.id
+        const inserted_data_component_2_response = (await helper_insert_wiki_data_component(this.test?.title, { id: new IdAndVersion(-2, 1) })).response
+        const inserted_data_component_2 = inserted_data_component_2_response.data
+        if (!inserted_data_component_2) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_2_response.error)}`)
+        const response_update_2 = await update_data_component(get_supabase, inserted_data_component_2)
+        if(response_update_2.error) expect.fail(`First update of data component 2 should have succeeded but got: ${JSON.stringify(response_update_2.error)}`)
 
-        second_updated_data_component = await update_data_component(get_supabase, {
-            ...data_component_2,
-            id: id_2,
-            title: "<p>Test Second Component's Second Title</p>"
-        })
 
-        if (second_updated_data_component.error)
-        {
-            expect.fail(`Failed to update second data component: ${JSON.stringify(second_updated_data_component.error)}`)
-        }
-
+        const id_1 = inserted_data_component_1.id
+        const id_2 = inserted_data_component_2.id
         const ids_only = [id_1.as_IdOnly(), id_2.as_IdOnly()]
         const data_components_page_1 = await request_data_components(get_supabase, { page: 0, size: 1, ids: ids_only })
         const data_components_page_2 = await request_data_components(get_supabase, { page: 1, size: 1, ids: ids_only })
@@ -542,9 +509,19 @@ describe("can init, insert, update, and search wiki data components", () =>
 
     it("should search over title and description of data components", async function ()
     {
-        expect(second_updated_data_component.data, "This test is stateful and requires the insertion and update from previous test").to.exist
+        const inserted_data_component_1_response = (await helper_insert_wiki_data_component(this.test?.title, { title: "abc", description: "some description" })).response
+        const inserted_data_component_1 = inserted_data_component_1_response.data
+        if (!inserted_data_component_1) expect.fail(`Failed to insert data component 1 ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_1_response.error)}`)
 
-        const search_results = await search_data_components(get_supabase, "second title", { page: 0, size: 10, similarity_threshold: 0.5 })
+        const inserted_data_component_2_response = (await helper_insert_wiki_data_component(this.test?.title, {
+            id: new IdAndVersion(-2, 1),
+            title: "<p>Test Second Component's Title</p>",
+            description: "some description",
+        })).response
+        const inserted_data_component_2 = inserted_data_component_2_response.data
+        if (!inserted_data_component_2) expect.fail(`Failed to insert data component 2 ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_2_response.error)}`)
+
+        const search_results = await search_data_components(get_supabase, "some description", { page: 0, size: 10, similarity_threshold: 0.5 })
         const search_2_results = await search_data_components(get_supabase, `"Second Component"`, { page: 0, size: 10, similarity_threshold: 0.5 })
 
         if (search_results.error || search_2_results.error)
@@ -552,29 +529,36 @@ describe("can init, insert, update, and search wiki data components", () =>
             expect.fail(`Error whilst searching for data components: ${JSON.stringify(search_results.error || search_2_results.error)}`)
         }
 
-        expect(search_results.data, "Expected search results to be an array").to.be.an("array")
-        expect(search_2_results.data, "Expected search 2 results to be an array").to.be.an("array")
+        expect(search_results.data, "Expected results of search no1 to be an array").to.be.an("array")
+        expect(search_2_results.data, "Expected results of search no2 to be an array").to.be.an("array")
         expect(search_results.data.length).equals(2, "Expected search results to match both data components")
         expect(search_2_results.data.length).equals(1, "Expected search two results to match only the second data component")
         deep_equals(
             search_2_results.data,
-            [second_updated_data_component.data],
+            [inserted_data_component_2],
             "Expected search results to match inserted and updated second data component"
         )
     })
 })
 
 
-describe("can init, insert, update, and search user owned data components", () =>
+describe("can init, insert, update, and search user owned data components", function ()
 {
+    this.timeout(5000)
+
     const data_component_fixture: DataComponent = Object.freeze(init_data_component({}, true))
 
-
-    after(async () =>
+    afterEach(async () =>
     {
         // Clean up test data after all tests have run
         await delete_test_data_in_db("data_components_history")
         await delete_test_data_in_db("data_components")
+    })
+
+
+    it("should not have any test data components in the database", async () =>
+    {
+        await check_no_test_data_in_db_and_delete_if_present()
     })
 
 
@@ -583,12 +567,6 @@ describe("can init, insert, update, and search user owned data components", () =
     {
         user_id = await check_user_is_logged_in()
         expect(user_id).not.equals(OTHER_USER_ID, `Must not be logged in with user_id "${OTHER_USER_ID}"`)
-    })
-
-
-    it("should not have any test data components in the database", async () =>
-    {
-        await check_no_test_data_in_db_and_delete_if_present()
     })
 
 
@@ -606,12 +584,11 @@ describe("can init, insert, update, and search user owned data components", () =
         {
             expect.fail(`Should have failed to insert data component when owner_id does not match user logged in, but got response: ${JSON.stringify(response)}`)
         }
-        expect(response.error).to.have.property("message").that.equals("ERR10. owner_id must match your user id or be NULL")
+        expect(response.error).equals("ERR10.v2. owner_id must match your user id or be NULL")
     })
 
 
-    let inserted_user_pages_data_component: DataComponent
-    it(`should allow inserting "user owned" (which are public) data component to the database`, async function ()
+    async function helper_insert_user_owned_data_component(test_title: string | undefined)
     {
         const data_component: DataComponent = {
             ...data_component_fixture,
@@ -631,16 +608,25 @@ describe("can init, insert, update, and search user owned data components", () =
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
+            function_arguments: undefined,
+            scenarios: undefined,
             plain_title: "",
             plain_description: "",
-            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+            test_run_id: data_component_fixture.test_run_id + ` - ${test_title}`,
         }
 
         const response = await insert_data_component(get_supabase, data_component)
-        if (response.error)
+        if (response.error !== null)
         {
             expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         }
+        return { data_component, response }
+    }
+
+    // let inserted_user_owned_data_component: DataComponent
+    it(`should allow inserting "user owned" (which are public) data component to the database`, async function ()
+    {
+        const { data_component, response } = await helper_insert_user_owned_data_component(this.test?.title)
 
         const expected_response: DataComponent = {
             id: new IdAndVersion(-1, 1),
@@ -664,6 +650,8 @@ describe("can init, insert, update, and search user owned data components", () =
             datetime_repeat_every: "day",
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
+            function_arguments: undefined,
+            scenarios: undefined,
             // Should be set by the server (edge function)
             plain_title: "Test User Owned Component (which is public not private)",
             // Should be set by the server (edge function)
@@ -672,7 +660,6 @@ describe("can init, insert, update, and search user owned data components", () =
         }
 
         compare_data_components(response.data, expected_response, "Data component from insertion should match expected response")
-        inserted_user_pages_data_component = response.data
 
         // Double check that the data component was inserted correctly into
         // both the main table and historical table
@@ -683,42 +670,36 @@ describe("can init, insert, update, and search user owned data components", () =
     })
 
 
-    it("ERR11 should disallow updating owner_id of data component", async function ()
+    it("should silently ignore updating owner_id of data component", async function ()
     {
-        expect(inserted_user_pages_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const data_component = {
-            ...inserted_user_pages_data_component,
+            ...inserted_user_owned_data_component,
             editor_id: user_id,
-            test_run_id: inserted_user_pages_data_component.test_run_id + ` - ${this.test?.title}`,
+            test_run_id: inserted_user_owned_data_component.test_run_id + ` - ${this.test?.title}`,
+            owner_id: OTHER_USER_ID, // Attempt to change owner_id
         }
 
-        const db_data_component = prepare_data_component_for_db_update(data_component)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ;(db_data_component as any).p_owner_id = OTHER_USER_ID // Attempt to change owner_id in the DB row
-
-        const response = await low_level_update_data_component(db_data_component)
-        if (response.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
-        // `update_data_component` function does not accept p_owner_id as a
-        // parameter otherwise ERR11 should be raised and returned here.
-        expect(response.error).to.have.property("message").that.includes(`Could not find the function public.update_data_component`)
+        const response = await update_data_component(get_supabase, data_component)
+        if (response.error !== null) expect.fail(`Should not have failed to update data component, but got response: ${JSON.stringify(response)}`)
+        expect(response.data.owner_id).equals(user_id, "owner_id should not have changed on the data component")
     })
 
 
-    let updated_user_pages_data_component: DataComponent
-    it("should update the test data component in the database", async function ()
+    it("should update the user owned (test) data component in the database", async function ()
     {
-        expect(inserted_user_pages_data_component, "This test is stateful and requires insertion from previous test").to.exist
+        const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const data_component = {
-            ...inserted_user_pages_data_component,
+            ...inserted_user_owned_data_component,
             title: "<p>Test Updated User Owned Component (which is public not private)</p>",
             plain_title: "",
             test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         }
 
         const response = await update_data_component(get_supabase, data_component)
-        if (response.error)
+        if (response.error !== null)
         {
             expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         }
@@ -731,7 +712,7 @@ describe("can init, insert, update, and search user owned data components", () =
             // Should be updated by the server (edge function)
             plain_title: "Test Updated User Owned Component (which is public not private)",
             // The test_run_id should remain the same
-            test_run_id: inserted_user_pages_data_component.test_run_id!,
+            test_run_id: inserted_user_owned_data_component.test_run_id!,
 
             // All other fields should remain the same
             owner_id: user_id,
@@ -754,10 +735,11 @@ describe("can init, insert, update, and search user owned data components", () =
             units: "kg",
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             plain_description: "Test Description",
+            function_arguments: undefined,
+            scenarios: undefined,
         }
 
         compare_data_components(response.data, expected_response)
-        updated_user_pages_data_component = response.data
 
         // Double check that the data component was inserted correctly into
         // both the main table and historical table
@@ -769,7 +751,7 @@ describe("can init, insert, update, and search user owned data components", () =
     })
 
 
-    it("ERR12 should disallow updating data component belonging to another user", async function ()
+    it("ERR09 should disallow updating data component belonging to another user", async function ()
     {
         // TODO replace this with ability to just log out of this current user,
         // log in as another user, make this change, then log back in as the
@@ -778,32 +760,40 @@ describe("can init, insert, update, and search user owned data components", () =
             p_id: -10,
             p_test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
         })
-        if (response1.error) expect.fail(`Should have run __testing_insert_test_data_component without error to insert a test data component with editor_id who is different to logged in user, but got response: ${JSON.stringify(response1)}`)
+        if (response1.error) expect.fail(`Should have run __testing_insert_test_data_component without error to insert a test data component with owner_id who is different to logged in user, but got response: ${JSON.stringify(response1)}`)
         expect(response1.data.owner_id).equals(OTHER_USER_ID)
-
-        const data_component = {
-            ...inserted_user_pages_data_component,
-            editor_id: user_id,
-            test_run_id: inserted_user_pages_data_component.test_run_id + ` - ${this.test?.title}`,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const inserted_component_for_other_user: DataComponent = {
+            ...(response1.data as any),
+            id: new IdAndVersion(response1.data.id, response1.data.version_number),
+            created_at: new Date(response1.data.created_at),
         }
 
-        const db_data_component = prepare_data_component_for_db_update(data_component)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ;(db_data_component as any).p_owner_id = OTHER_USER_ID // Attempt to change owner_id in the DB row
+        const modified_data_component_a = {
+            ...inserted_component_for_other_user,
+            title: "Attempt to update data component belonging to another user",
+        }
 
-        const response2 = await low_level_update_data_component(db_data_component)
-        if (response2.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response2)}`)
-        // `update_data_component` function does not accept owner_id as a
-        // parameter otherwise ERR12 should be raised and returned here.
-        expect(response2.error).to.have.property("message").that.includes(`Could not find the function public.update_data_component`)
+        const response_a = await update_data_component(get_supabase, modified_data_component_a)
+        if (response_a.data) expect.fail(`Should have failed to update data component with owner_id who is different to logged in user, but got response: ${JSON.stringify(response_a)}`)
+        expect(response_a.error).includes("ERR09.v2. Update failed: id -10 with version_number 1 not found or version mismatch, or owner_id editor_id mismatch.")
+
+
+        const modified_data_component_b = {
+            ...inserted_component_for_other_user,
+            owner_id: user_id, // Attempt to change the owner_id to that of the logged in user
+        }
+
+        const response_b = await update_data_component(get_supabase, modified_data_component_b)
+        if (response_b.data) expect.fail(`Should have failed to update data component to change owner_id, but got response: ${JSON.stringify(response_b)}`)
+        expect(response_b.error).includes("ERR09.v2. Update failed: id -10 with version_number 1 not found or version mismatch, or owner_id editor_id mismatch.")
     })
 
 
-    let inserted_wiki_data_component: DataComponent
-    it(`until there are moderation tools we should not include "user owned" (which are public) data by default on the home page unless specific owner_id is given`, async function ()
+    it(`until there are moderation tools we should not include "user owned" (which are public) data by default on the home page.  Only show when a specific owner_id is given (i.e. the user can see their own content on the home page)`, async function ()
     {
-        this.timeout(5000)
-        expect(updated_user_pages_data_component, "This test is stateful and requires inserted and updated component from previous test").to.exist
+        const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
+
         const response = await insert_data_component(get_supabase, {
             ...data_component_fixture,
             id: new IdAndVersion(-2, 1),
@@ -811,17 +801,17 @@ describe("can init, insert, update, and search user owned data components", () =
             plain_title: "Wiki Component",
             owner_id: undefined,
         })
-        if (response.error)
+        if (response.error !== null)
         {
             expect.fail(`Failed to insert wiki data component: ${JSON.stringify(response.error)}`)
         }
-        inserted_wiki_data_component = response.data
-        expect(inserted_wiki_data_component, "Inserted wiki data component should exist").to.exist
+        const inserted_wiki_data_component = response.data
 
-        expect(inserted_user_pages_data_component.owner_id).equals(user_id, "Inserted data component should have owner_id set to user logged in")
+        expect(inserted_user_owned_data_component.owner_id).equals(user_id, "User owned inserted data component should have owner_id set to user logged in")
+        expect(inserted_wiki_data_component.owner_id).equals(undefined, "Wiki inserted data component should have owner_id set to undefined")
 
         const data_components_1 = await request_data_components(get_supabase, { __only_test_data: true })
-        const ids = [inserted_wiki_data_component.id.as_IdOnly(), inserted_user_pages_data_component.id.as_IdOnly()]
+        const ids = [inserted_wiki_data_component.id.as_IdOnly(), inserted_user_owned_data_component.id.as_IdOnly()]
         const historical_data_component_1 = await request_historical_data_components(get_supabase, ids)
         const data_components_1_with_owner = await request_data_components(get_supabase, { owner_id: user_id, __only_test_data: true })
 
@@ -831,12 +821,12 @@ describe("can init, insert, update, and search user owned data components", () =
             get_ids_and_versions([inserted_wiki_data_component]),
             "Expected data components"
         )
+
         deep_equals(
             get_ids_and_versions(historical_data_component_1.data!),
             get_ids_and_versions([
-                updated_user_pages_data_component,
                 inserted_wiki_data_component,
-                inserted_user_pages_data_component,
+                inserted_user_owned_data_component,
             ]),
             "Expected historical data components"
         )
@@ -844,16 +834,16 @@ describe("can init, insert, update, and search user owned data components", () =
             get_ids_and_versions(data_components_1_with_owner.data!),
             get_ids_and_versions([
                 inserted_wiki_data_component,
-                updated_user_pages_data_component,
+                inserted_user_owned_data_component,
             ]),
-            "Expected historical data components"
+            "Expected historical data components with owner_id filter"
         )
     })
 
 
     it(`should search over all data components including a users' own "user owned" (which are public) data components`, async function ()
     {
-        expect(updated_user_pages_data_component, "This test is stateful and requires the insertion and update from previous test").to.exist
+        const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const search_results = await search_data_components(get_supabase, `"User Owned Component"`)
         if (search_results.error) expect.fail(`Error whilst searching for data components: ${JSON.stringify(search_results.error)}`)
@@ -863,7 +853,7 @@ describe("can init, insert, update, and search user owned data components", () =
             get_ids_and_versions(search_results.data),
             get_ids_and_versions([
                 // inserted_wiki_data_component,
-                updated_user_pages_data_component,
+                inserted_user_owned_data_component,
             ]),
             `Expected search results to match "user owned" data component`
         )
@@ -927,33 +917,6 @@ async function delete_test_data_in_db(table_name: TABLE_NAME, data_count?: numbe
     if (response.error) {
         expect.fail(`Failed to delete test rows from "${table_name}": ${response.error.message}`)
     }
-}
-
-
-
-async function low_level_insert_data_component(db_data_component: DBDataComponentInsertArgs): Promise<UpsertDataComponentResponse>
-{
-    return await get_supabase()
-        .rpc("insert_data_component", db_data_component)
-        .then(({ data, error }) =>
-        {
-            if (error) return { data: null, error }
-            else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from insert, expected 1 got ${data.length}`) }
-            else return { data: convert_from_db_row(data[0]!), error: null }
-        })
-}
-
-
-async function low_level_update_data_component(db_data_component: DBDataComponentUpdateArgs): Promise<UpsertDataComponentResponse>
-{
-    return await get_supabase()
-        .rpc("update_data_component", db_data_component)
-        .then(({ data, error }) =>
-        {
-            if (error) return { data: null, error }
-            else if (data.length !== 1) return { data: null, error: new Error(`Wrong number of data returned from update, expected 1 got ${data.length}`) }
-            else return { data: convert_from_db_row(data[0]!), error: null }
-        })
 }
 
 
