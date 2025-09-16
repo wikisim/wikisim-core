@@ -29,8 +29,8 @@ export type UpsertDataComponentResponse = {
 }
 export async function insert_data_component (
     get_supabase: GetSupabase,
-    // Allow inserting DataComponent for convenience for running integration
-    // tests.  In normal use this should be NewDataComponent.
+    // Allow inserting DataComponent (which has a specific id) to allow running
+    // integration tests.  Normal use for this should be NewDataComponent.
     data_component: NewDataComponent | DataComponent
 ): Promise<UpsertDataComponentResponse>
 {

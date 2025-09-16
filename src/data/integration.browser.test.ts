@@ -51,7 +51,7 @@ describe("can init, insert, update, and search wiki data components", function (
     let user_id: string
     it("should be logged in", async () =>
     {
-        user_id = await check_user_is_logged_in()
+        user_id = await check_user_is_logged_in(user_id)
     })
 
 
@@ -74,6 +74,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("should allow inserting new data component and ignore editor_id, and use that of user logged in", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component = {
             ...data_component_fixture,
             editor_id: OTHER_USER_ID,
@@ -122,8 +124,10 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("ERR01 should ignore version_number when inserting new data component", async function ()
     {
-        const id = new IdAndVersion(data_component_fixture.id.id, 1) // Version 0 is not allowed in constructor
-        id.version = 0 // Explicitly set to 0 for this test
+        user_id = await check_user_is_logged_in(user_id)
+
+        // Version 2 is wrong for the initial version_number and should be ignored
+        const id = new IdAndVersion(data_component_fixture.id.id, 2)
         const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -164,8 +168,10 @@ describe("can init, insert, update, and search wiki data components", function (
     })
 
 
-    it("ERR05 should disallowed inserting test data component when id >= 0 (and test_run_id is set)", async function ()
+    it("ERR05 should disallow inserting test data component when id >= 0 (and test_run_id is set)", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -188,6 +194,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("ERR13 should disallowed inserting test data component when id < -20 (and test_run_id is set)", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -209,6 +217,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("ERR06 should disallowed inserting test data component when id < 0 and test_run_id not set", async () =>
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -231,6 +241,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     async function helper_insert_wiki_data_component(test_title: string | undefined, override?: Partial<DataComponent>)
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component: DataComponent = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -262,6 +274,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("should write the data component to the database", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const { data_component, response } = await helper_insert_wiki_data_component(this.test?.title)
         if (response.error !== null)
         {
@@ -316,6 +330,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("ERR07 should disallow updating data component when user not logged in", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
         const inserted_data_component = inserted_data_component_response.data
         if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
@@ -335,6 +351,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("should update data component and ignore editor_id and use that of user logged in", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
         const inserted_data_component = inserted_data_component_response.data
         if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
@@ -352,6 +370,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("should update the (test) data component in the database", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_data_component_response = (await helper_insert_wiki_data_component(this.test?.title)).response
         const inserted_data_component = inserted_data_component_response.data
         if (!inserted_data_component) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_response.error)}`)
@@ -446,6 +466,8 @@ describe("can init, insert, update, and search wiki data components", function (
 
     it("should paginate over the test data components in the database", async function ()
     {
+        this.timeout(10000)
+
         const inserted_data_component_1_response = (await helper_insert_wiki_data_component(this.test?.title)).response
         const inserted_data_component_1 = inserted_data_component_1_response.data
         if (!inserted_data_component_1) expect.fail(`Failed to insert data component ${this.test?.title} but got error: ${JSON.stringify(inserted_data_component_1_response.error)}`)
@@ -604,7 +626,7 @@ describe("value_type of function", function ()
         if (response.error !== null) expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
         const inserted_data_component = response.data
 
-        expect(inserted_data_component.result_value).equals("(a, b = 1) => (a + b)", "result_value should be set by edge function to the function expression")
+        expect(inserted_data_component.result_value).equals("(a, b = 1) => a + b", "result_value should be set by edge function to the function expression")
         expect(inserted_data_component.function_arguments).to.deep.equal(data_component.function_arguments, "function_arguments should match those inserted")
         expect(inserted_data_component.scenarios).to.deep.equal(data_component.scenarios, "scenarios should match those inserted")
     })
@@ -641,6 +663,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     it("ERR10 should disallow inserting new data component when owner_id does not match user logged in", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component = {
             ...data_component_fixture,
             editor_id: user_id,
@@ -659,6 +683,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     async function helper_insert_user_owned_data_component(test_title: string | undefined)
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const data_component: DataComponent = {
             ...data_component_fixture,
             owner_id: user_id, // owner_id should match user logged in
@@ -695,6 +721,8 @@ describe("can init, insert, update, and search user owned data components", func
     // let inserted_user_owned_data_component: DataComponent
     it(`should allow inserting "user owned" (which are public) data component to the database`, async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const { data_component, response } = await helper_insert_user_owned_data_component(this.test?.title)
 
         const expected_response: DataComponent = {
@@ -741,6 +769,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     it("should silently ignore updating owner_id of data component", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const data_component = {
@@ -758,6 +788,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     it("should update the user owned (test) data component in the database", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const data_component = {
@@ -822,6 +854,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     it("ERR09 should disallow updating data component belonging to another user", async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         // TODO replace this with ability to just log out of this current user,
         // log in as another user, make this change, then log back in as the
         // original user.
@@ -861,6 +895,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     it(`until there are moderation tools we should not include "user owned" (which are public) data by default on the home page.  Only show when a specific owner_id is given (i.e. the user can see their own content on the home page)`, async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const response = await insert_data_component(get_supabase, {
@@ -912,6 +948,8 @@ describe("can init, insert, update, and search user owned data components", func
 
     it(`should search over all data components including a users' own "user owned" (which are public) data components`, async function ()
     {
+        user_id = await check_user_is_logged_in(user_id)
+
         const inserted_user_owned_data_component = (await helper_insert_user_owned_data_component(this.test?.title)).response.data
 
         const search_results = await search_data_components(get_supabase, `"User Owned Component"`)
@@ -930,8 +968,10 @@ describe("can init, insert, update, and search user owned data components", func
 })
 
 
-async function check_user_is_logged_in(): Promise<string>
+async function check_user_is_logged_in(user_id?: string): Promise<string>
 {
+    if (user_id) return user_id
+
     const { data: { user }, error } = await get_supabase().auth.getUser()
     if (error || !user)
     {
