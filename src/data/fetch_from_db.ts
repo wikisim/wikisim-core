@@ -1,10 +1,15 @@
 import type { PostgrestError } from "@supabase/supabase-js"
+import { z } from "zod"
 
 import type { GetSupabase } from "../supabase"
 import { clamp } from "../utils/clamp"
 import { hydrate_data_component_from_json } from "./convert_between_json"
 import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
 import type { DataComponent } from "./interface"
+import { make_field_validators } from "./validate_fields"
+
+
+const field_validators = make_field_validators(z)
 
 
 export type RequestDataComponentsReturn =
@@ -64,7 +69,7 @@ export async function request_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => hydrate_data_component_from_json(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
             return { data: instances, error: null }
         })
 }
@@ -118,7 +123,7 @@ export async function request_historical_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => hydrate_data_component_from_json(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
             return { data: instances, error: null }
         })
 }
@@ -163,7 +168,7 @@ export async function search_data_components_v1(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => hydrate_data_component_from_json(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
             return { data: instances, error: null }
         })
 }
@@ -197,7 +202,7 @@ export async function search_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => hydrate_data_component_from_json(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
             return { data: instances, error: null }
         })
 }

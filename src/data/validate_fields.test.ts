@@ -1,13 +1,13 @@
 import { expect } from "chai"
+import { z } from "zod"
 
-import {
-    validate_function_arguments_from_json,
-    validate_scenarios_from_json
-} from "./validate_fields"
+import { make_field_validators } from "./validate_fields"
 
 
 describe("validate_function_arguments_from_json", () =>
 {
+    const { validate_function_arguments_from_json } = make_field_validators(z)
+
     it("should return for null input", () =>
     {
         const result = validate_function_arguments_from_json(null)
@@ -65,6 +65,8 @@ describe("validate_function_arguments_from_json", () =>
 
 describe("validate_scenarios_from_json", () =>
 {
+    const { validate_scenarios_from_json } = make_field_validators(z)
+
     it("should return when null or undefined is input", () =>
     {
         const test_cases = [

@@ -1,9 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { expect } from "chai"
+import { z } from "zod"
 
-import { flatten_new_or_data_component_to_json, hydrate_data_component_from_json } from "./convert_between_json"
+import {
+    flatten_new_or_data_component_to_json,
+    hydrate_data_component_from_json,
+} from "./convert_between_json"
 import { DataComponent, NewDataComponent } from "./interface"
 import { init_data_component, init_new_data_component } from "./modify"
+import { make_field_validators } from "./validate_fields"
+
+
+const field_validators = make_field_validators(z)
 
 
 describe("flatten_data_component_to_json and hydrate_data_component_from_json", function ()
@@ -60,7 +68,7 @@ function helper_flatten_to_json_and_hydrate(data_component: NewDataComponent | D
     const as_json = JSON.parse(as_json_string) // Check it doesn't throw
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const hydrated: DataComponent = hydrate_data_component_from_json(as_json)
+    const hydrated: DataComponent = hydrate_data_component_from_json(as_json, field_validators)
 
     return hydrated
 }

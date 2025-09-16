@@ -8,10 +8,7 @@ import {
     type NewDataComponent,
     type Scenario
 } from "./interface.ts"
-import {
-    validate_function_arguments_from_json,
-    validate_scenarios_from_json,
-} from "./validate_fields.ts"
+import type { FieldValidators } from "./validate_fields.ts"
 
 
 export function flatten_new_or_data_component_to_json(data_component: NewDataComponent): NewDataComponentAsJSON
@@ -95,10 +92,10 @@ export function flatten_data_component_to_json(data_component: DataComponent): D
 
 
 
-export function hydrate_data_component_from_json(row: DataComponentAsJSON): DataComponent
-export function hydrate_data_component_from_json(row: NewDataComponentAsJSON): NewDataComponent
-export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON): DataComponent | NewDataComponent
-export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON): DataComponent | NewDataComponent
+export function hydrate_data_component_from_json(row: DataComponentAsJSON, validators: FieldValidators): DataComponent
+export function hydrate_data_component_from_json(row: NewDataComponentAsJSON, validators: FieldValidators): NewDataComponent
+export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
+export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
 {
     const core = {
         owner_id: row.owner_id ?? undefined,
@@ -124,8 +121,8 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
         units: row.units ?? undefined,
         dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => parse_id(id, true)) : undefined,
-        function_arguments: hydrate_function_arguments(row),
-        scenarios: hydrate_scenarios(row),
+        function_arguments: hydrate_function_arguments(row, validators),
+        scenarios: hydrate_scenarios(row, validators),
 
         plain_title: row.plain_title,
         plain_description: row.plain_description,
@@ -150,16 +147,16 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
 }
 
 
-function hydrate_function_arguments(row: NewDataComponentAsJSON | DataComponentAsJSON): FunctionArgument[] | undefined
+function hydrate_function_arguments(row: NewDataComponentAsJSON | DataComponentAsJSON, validators: FieldValidators): FunctionArgument[] | undefined
 {
-    const function_arguments = validate_function_arguments_from_json(row.function_arguments)
+    const function_arguments = validators.validate_function_arguments_from_json(row.function_arguments)
     return function_arguments?.map((arg, index) => ({ id: index, ...arg }) )
 }
 
 
-function hydrate_scenarios(row: NewDataComponentAsJSON | DataComponentAsJSON): Scenario[] | undefined
+function hydrate_scenarios(row: NewDataComponentAsJSON | DataComponentAsJSON, validators: FieldValidators): Scenario[] | undefined
 {
-    const scenarios = validate_scenarios_from_json(row.scenarios)
+    const scenarios = validators.validate_scenarios_from_json(row.scenarios)
     return scenarios?.map((arg, index) => ({ id: index, ...arg }) )
 }
 

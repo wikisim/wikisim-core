@@ -1,22 +1,25 @@
+import { z } from "zod"
+
 import type {
     ClientInsertDataComponentV2Response,
     ClientUpdateDataComponentV2Response,
     EFInsertDataComponentV2Args,
     EFUpdateDataComponentV2Args,
-} from "../supabase/edge_functions.ts";
-import type {
-    GetSupabase
-} from "../supabase/index.ts";
+} from "../supabase/edge_functions.ts"
+import type { GetSupabase } from "../supabase/index.ts"
 import {
     flatten_data_component_to_json,
     flatten_new_or_data_component_to_json,
-    hydrate_data_component_from_json
-} from "./convert_between_json.ts";
-import { type DataComponent, type NewDataComponent } from "./interface.ts";
+    hydrate_data_component_from_json,
+} from "./convert_between_json.ts"
+import { type DataComponent, type NewDataComponent } from "./interface.ts"
+import { make_field_validators } from "./validate_fields.ts"
 
 
+const field_validators = make_field_validators(z)
 
-type ErrorResponse = string //| { code: number, message: string } //| Error //| PostgrestError;
+
+type ErrorResponse = string //| { code: number, message: string } //| Error //| PostgrestError
 export type UpsertDataComponentResponse = {
     data: null
     error: ErrorResponse
@@ -56,7 +59,7 @@ export async function insert_data_component (
                 return { data: null, error: `Wrong number of data returned from insert, expected 1 got ${data.length}` }
             }
 
-            return { data: hydrate_data_component_from_json(data[0]!), error: null }
+            return { data: hydrate_data_component_from_json(data[0]!, field_validators), error: null }
         })
 }
 
@@ -88,7 +91,7 @@ export async function update_data_component (get_supabase: GetSupabase, data_com
                 return { data: null, error: `Wrong number of data returned from update, expected 1 got ${data.length}` }
             }
 
-            return { data: hydrate_data_component_from_json(data[0]!), error: null }
+            return { data: hydrate_data_component_from_json(data[0]!, field_validators), error: null }
         })
 }
 
