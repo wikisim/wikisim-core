@@ -26,6 +26,7 @@ export type MinimalEvaluationResponse =
 
 export type EvaluationResponse = MinimalEvaluationResponse &
 {
+    js_input_value: string
     requested_at: number
     start_time: number
     end_time: number

@@ -14,6 +14,7 @@ export function format_function_input_value_string(basic_request: EvaluationRequ
 
         // TODO: remove these fields from the EvaluationResponse interface
         evaluation_id: 0,
+        js_input_value: basic_request.js_input_value,
         requested_at: Date.now(),
         start_time: Date.now(),
         end_time: 0,
