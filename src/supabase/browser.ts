@@ -1,11 +1,10 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
 
-import { GetSupabase as GetSupabaseOrig } from "."
 import { supabase_anon_key, supabase_url } from "./constants"
 import { Database } from "./interface"
 
 
-export type GetSupabase = GetSupabaseOrig
+export type GetSupabase = () => SupabaseClient<Database>
 
 let supabase: SupabaseClient<Database> | undefined = undefined
 

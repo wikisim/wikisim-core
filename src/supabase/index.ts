@@ -1,10 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js"
-
-
 import { Database } from "./interface.ts"
-
-
-export type GetSupabase = () => SupabaseClient<Database>
 
 
 export type DBDataComponentRow = Database["public"]["Tables"]["data_components"]["Row"]

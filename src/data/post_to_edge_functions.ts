@@ -1,19 +1,19 @@
 import { z } from "zod"
 
+import type { GetSupabase } from "../supabase/browser"
 import type {
     ClientInsertDataComponentV2Response,
     ClientUpdateDataComponentV2Response,
     EFInsertDataComponentV2Args,
     EFUpdateDataComponentV2Args,
-} from "../supabase/edge_functions.ts"
-import type { GetSupabase } from "../supabase/index.ts"
+} from "../supabase/edge_functions"
 import {
     flatten_data_component_to_json,
     flatten_new_or_data_component_to_json,
     hydrate_data_component_from_json,
-} from "./convert_between_json.ts"
-import { type DataComponent, type NewDataComponent } from "./interface.ts"
-import { make_field_validators } from "./validate_fields.ts"
+} from "./convert_between_json"
+import { type DataComponent, type NewDataComponent } from "./interface"
+import { make_field_validators } from "./validate_fields"
 
 
 const field_validators = make_field_validators(z)

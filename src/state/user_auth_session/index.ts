@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import type { AuthError, Session } from "@supabase/supabase-js"
 
-import { GetSupabase } from "../../supabase"
+import { GetSupabase } from "../../supabase/browser"
 import { StateMachine } from "../../utils/state_machine"
 import { GetCoreState, SetCoreState } from "../interface"
 import type { CoreStore } from "../store"

@@ -1,7 +1,7 @@
 import type { PostgrestError } from "@supabase/supabase-js"
 import { z } from "zod"
 
-import type { GetSupabase } from "../supabase"
+import type { GetSupabase } from "../supabase/browser"
 import { clamp } from "../utils/clamp"
 import { hydrate_data_component_from_json } from "./convert_between_json"
 import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
