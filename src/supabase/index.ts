@@ -20,3 +20,5 @@ export type DBDataComponentUpdateV2ArgsComponent = DBDataComponentUpdateV2Args["
 export type DBDataComponentUpdateV2Returns = Database["public"]["Functions"]["update_data_component_v2"]["Returns"]
 
 // export type DBDataComponentHistoryRow = Database["public"]["Tables"]["data_components_history"]["Row"]
+export type NewDataComponentAsJSON = Omit<DBDataComponentRow, "id" | "version_number"> & { temporary_id: string }
+export type DataComponentAsJSON = DBDataComponentRow

@@ -1,10 +1,10 @@
 import type { PostgrestError } from "@supabase/supabase-js"
 
-import { GetSupabase } from "../supabase"
+import type { GetSupabase } from "../supabase"
 import { clamp } from "../utils/clamp"
-import { convert_from_db_row } from "./convert_between_db"
+import { hydrate_data_component_from_json } from "./convert_between_json"
 import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
-import { DataComponent } from "./interface"
+import type { DataComponent } from "./interface"
 
 
 export type RequestDataComponentsReturn =
@@ -64,7 +64,7 @@ export async function request_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d))
             return { data: instances, error: null }
         })
 }
@@ -118,7 +118,7 @@ export async function request_historical_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d))
             return { data: instances, error: null }
         })
 }
@@ -163,7 +163,7 @@ export async function search_data_components_v1(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d))
             return { data: instances, error: null }
         })
 }
@@ -197,7 +197,7 @@ export async function search_data_components(
         .then(({ data, error }) =>
         {
             if (error) return { data: null, error }
-            const instances = data.map(d => convert_from_db_row(d))
+            const instances = data.map(d => hydrate_data_component_from_json(d))
             return { data: instances, error: null }
         })
 }

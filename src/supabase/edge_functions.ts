@@ -1,15 +1,12 @@
 import type {
-    DBDataComponentInsertV2ArgsComponent,
-    DBDataComponentInsertV2Returns,
-    DBDataComponentUpdateV2ArgsComponent,
-    DBDataComponentUpdateV2Returns,
+    DataComponentAsJSON,
+    NewDataComponentAsJSON
 } from "./index.ts"
 
 
 export interface EFInsertDataComponentV2Args
 {
-    // Use the same input type for this edge function as the RPC function
-    batch: DBDataComponentInsertV2ArgsComponent[]
+    batch: (NewDataComponentAsJSON | DataComponentAsJSON)[]
 }
 
 
@@ -18,7 +15,7 @@ export interface EFInsertDataComponentV2Args
 export type ClientInsertDataComponentV2Response =
 {
     response: Response
-    data: DBDataComponentInsertV2Returns
+    data: DataComponentAsJSON[]
     error?: null
 } | {
     response: Response
@@ -29,8 +26,7 @@ export type ClientInsertDataComponentV2Response =
 
 export interface EFUpdateDataComponentV2Args
 {
-    // Use the same input type for this edge function as the RPC function
-    batch: DBDataComponentUpdateV2ArgsComponent[]
+    batch: DataComponentAsJSON[]
 }
 
 
@@ -39,7 +35,7 @@ export interface EFUpdateDataComponentV2Args
 export type ClientUpdateDataComponentV2Response =
 {
     response: Response
-    data: DBDataComponentUpdateV2Returns
+    data: DataComponentAsJSON[]
     error?: null
 } | {
     response: Response

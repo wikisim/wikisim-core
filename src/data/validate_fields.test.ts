@@ -1,30 +1,30 @@
 import { expect } from "chai"
 
 import {
-    validate_function_arguments_as_json,
-    validate_scenarios_as_json
+    validate_function_arguments_from_json,
+    validate_scenarios_from_json
 } from "./validate_fields"
 
 
-describe("validate_function_arguments_as_json", () =>
+describe("validate_function_arguments_from_json", () =>
 {
-    it("should return null for null input", () =>
+    it("should return for null input", () =>
     {
-        const result = validate_function_arguments_as_json(null)
-        expect(result).equals(null)
+        const result = validate_function_arguments_from_json(null)
+        expect(result).equals(undefined)
     })
 
 
-    it("should return null for undefined input", () =>
+    it("should return for undefined input", () =>
     {
-        const result = validate_function_arguments_as_json(undefined)
-        expect(result).equals(null)
+        const result = validate_function_arguments_from_json(undefined)
+        expect(result).equals(undefined)
     })
 
 
     it("should return an empty array", () =>
     {
-        const result = validate_function_arguments_as_json([])
+        const result = validate_function_arguments_from_json([])
         expect(result).deep.equals([])
     })
 
@@ -35,7 +35,7 @@ describe("validate_function_arguments_as_json", () =>
             { name: "arg1", description: "desc1", default_value: "default1" },
             { name: "arg2" }, // description and default_value are optional
         ]
-        const result = validate_function_arguments_as_json(input)
+        const result = validate_function_arguments_from_json(input)
 
         expect(result).deep.equals([
             { name: "arg1", description: "desc1", default_value: "default1" },
@@ -56,25 +56,16 @@ describe("validate_function_arguments_as_json", () =>
 
         test_cases.forEach(test_case =>
         {
-            try
-            {
-                validate_function_arguments_as_json(test_case)
-            }
-            catch (e: unknown)
-            {
-                const err = e as Error
-                expect(err.message).includes(`"code": "invalid_type"`)
-                return
-            }
-            expect.fail(`Expected an error to be thrown for "${JSON.stringify(test_case)}"`)
+            expect(() => validate_function_arguments_from_json(test_case))
+                .to.throw(/code": "invalid_type"/)
         })
     })
 })
 
 
-describe("validate_scenarios_as_json", () =>
+describe("validate_scenarios_from_json", () =>
 {
-    it("should return null when null or undefined is input", () =>
+    it("should return when null or undefined is input", () =>
     {
         const test_cases = [
             null,
@@ -83,14 +74,14 @@ describe("validate_scenarios_as_json", () =>
 
         test_cases.forEach(test_case =>
         {
-            const result = validate_scenarios_as_json(test_case)
-            expect(result).equals(null, `Failed for input: ${JSON.stringify(test_case)}`)
+            const result = validate_scenarios_from_json(test_case)
+            expect(result).equals(undefined, `Failed for input: ${JSON.stringify(test_case)}`)
         })
     })
 
     it("should return an empty array", () =>
     {
-        const result = validate_scenarios_as_json([])
+        const result = validate_scenarios_from_json([])
         expect(result).deep.equals([])
     })
 
@@ -116,7 +107,7 @@ describe("validate_scenarios_as_json", () =>
                 values: {},
             }
         ]
-        const result = validate_scenarios_as_json(input)
+        const result = validate_scenarios_from_json(input)
 
         expect(result).deep.equals([
             {
@@ -151,17 +142,8 @@ describe("validate_scenarios_as_json", () =>
 
         test_cases.forEach(test_case =>
         {
-            try
-            {
-                validate_scenarios_as_json(test_case)
-            }
-            catch (e: unknown)
-            {
-                const err = e as Error
-                expect(err.message).includes(`"code": "invalid_type"`)
-                return
-            }
-            expect.fail(`Expected an error to be thrown for "${JSON.stringify(test_case)}"`)
+            expect(() => validate_scenarios_from_json(test_case))
+                .to.throw(/code": "invalid_type"/)
         })
     })
 })

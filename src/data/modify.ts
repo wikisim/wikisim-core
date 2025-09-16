@@ -14,20 +14,29 @@ export function init_data_component(partial: Partial<DataComponent> = {}, for_te
         editor_id: "",
         created_at: new Date(),
         bytes_changed: 0,
+        comment: undefined,
+        version_type: undefined,
+        version_rolled_back_to: undefined,
 
         title: "",
         // Use the default values produced by the TipTap editor so that the
         // new form does not show changes to the title and description when none
         // were made.
         description: "<p></p>",
+        label_ids: undefined,
 
-        // value: "",
-        // value_type: "number",
-        // datetime_range_start: new Date(),
-        // datetime_range_end: new Date(),
-        // datetime_repeat_every: "day",
-        // units: "",
-        // dimension_ids: [],
+        input_value: undefined,
+        result_value: undefined,
+        value_type: undefined,
+        value_number_display_type: undefined,
+        value_number_sig_figs: undefined,
+        datetime_range_start: undefined,
+        datetime_range_end: undefined,
+        datetime_repeat_every: undefined,
+        units: undefined,
+        dimension_ids: undefined,
+        function_arguments: undefined,
+        scenarios: undefined,
 
         plain_title: "",
         plain_description: "",

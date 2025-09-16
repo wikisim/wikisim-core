@@ -14,7 +14,7 @@ import { init_data_component } from "./modify"
 import {
     insert_data_component,
     update_data_component,
-} from "./write_to_db"
+} from "./post_to_edge_functions"
 
 
 // AJPtest2 user id:
@@ -538,6 +538,75 @@ describe("can init, insert, update, and search wiki data components", function (
             [inserted_data_component_2],
             "Expected search results to match inserted and updated second data component"
         )
+    })
+})
+
+
+describe("value_type of function", function ()
+{
+    this.timeout(5000)
+
+    const data_component_fixture: DataComponent = Object.freeze(init_data_component({
+        title: "summation or increment function",
+        value_type: "function",
+        input_value: "a + b",
+        result_value: "", // Will be set by edge function when value_type == "function"
+        function_arguments: [
+            // `id` values will be ignored on insert and update but we set them
+            // here to make it easier to compare the entire object later
+            { id: 0, name: "a" },
+            { id: 1, name: "b", default_value: "1" },
+        ],
+        scenarios: [
+            {
+                id: 0,
+                description: "basic addition",
+                values: {
+                    a: { value: "2" },
+                    b: { value: "-3" },
+                },
+                expected_result: "-1",
+                expectation_met: true,
+            },
+            {
+                id: 1,
+                description: "use default to increment",
+                values: {
+                    a: { value: "5" },
+                },
+                expected_result: "6",
+                expectation_met: true,
+            },
+        ]
+    }, true))
+
+
+    afterEach(async () =>
+    {
+        // Clean up test data after all tests have run
+        await delete_test_data_in_db("data_components_history")
+        await delete_test_data_in_db("data_components")
+    })
+
+
+    it("should insert data component", async function ()
+    {
+        const user_id = await check_user_is_logged_in()
+        if (!user_id) expect.fail("Should be logged in for this test")
+
+        const data_component = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.error !== null) expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
+        const inserted_data_component = response.data
+
+        expect(inserted_data_component.result_value).equals("(a, b = 1) => (a + b)", "result_value should be set by edge function to the function expression")
+        expect(inserted_data_component.function_arguments).to.deep.equal(data_component.function_arguments, "function_arguments should match those inserted")
+        expect(inserted_data_component.scenarios).to.deep.equal(data_component.scenarios, "scenarios should match those inserted")
     })
 })
 
