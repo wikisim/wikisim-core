@@ -6,7 +6,8 @@ import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 
 export function format_function_input_value_string(basic_request: EvaluationRequest): EvaluationResponse
 {
-    const formatted_function = function_signature(basic_request.function_arguments) + " => " + function_body(basic_request.js_input_value)
+    const body = function_body(basic_request.js_input_value).trim()
+    const formatted_function = !body ? "" : function_signature(basic_request.function_arguments) + " => " + body
 
     return {
         result: formatted_function,

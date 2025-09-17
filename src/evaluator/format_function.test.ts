@@ -82,4 +82,20 @@ describe("format_function_input_value_string", () =>
             return result + 1
         }`))
     })
+
+
+    it("does not make empty functions", () =>
+    {
+        const function_arguments: FunctionArgument[] = [
+            { id: 0, name: "min", default_value: "" }
+        ]
+        const basic_request: EvaluationRequest = {
+            requested_at: 0,
+            js_input_value: "",
+            value_type,
+            function_arguments,
+        }
+        const { result } = format_function_input_value_string(basic_request)
+        expect(result).to.equal("")
+    })
 })
