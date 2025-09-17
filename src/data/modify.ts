@@ -63,7 +63,10 @@ export function init_new_data_component(partial: Partial<DataComponent> = {}, fo
 
 export function changes_made(component_1: DataComponent | NewDataComponent, component_2: DataComponent | NewDataComponent, compare_meta_fields?: boolean): boolean
 {
-    const diff = component_1.title !== component_2.title
+    const diff = (
+        component_1.owner_id !== component_2.owner_id
+
+        || component_1.title !== component_2.title
         || component_1.description !== component_2.description
         || JSON.stringify(component_1.label_ids) !== JSON.stringify(component_2.label_ids)
 
@@ -79,6 +82,7 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         || JSON.stringify(component_1.dimension_ids) !== JSON.stringify(component_2.dimension_ids)
         || function_arguments_changed(component_1.function_arguments, component_2.function_arguments)
         || scenarios_changed(component_1.scenarios, component_2.scenarios)
+    )
 
     if (diff || !compare_meta_fields) return diff
 

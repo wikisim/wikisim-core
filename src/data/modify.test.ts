@@ -34,7 +34,10 @@ describe("changes_made function", () =>
 
     const original: DataComponent = init_data_component({}, true)
     const modified: DataComponent = init_data_component({
-        owner_id: "owner_2", // In practice this field should and will never be changed
+        // This field should not and will never be changed once a component is
+        // created, but whilst a new component is being edited for the first
+        // time it may be changed.
+        owner_id: "owner_2",
 
         editor_id: "editor_1",
         created_at: new Date("2025-07-30T00:00:00Z"),
@@ -78,6 +81,8 @@ describe("changes_made function", () =>
     })
 
     const normal_fields: (keyof DataComponent)[] = [
+        "owner_id",
+
         "title",
         "description",
         "label_ids",
@@ -107,9 +112,6 @@ describe("changes_made function", () =>
         // Not sure we want to compare these fields yet
         "editor_id",
         "created_at",
-
-        // We should not compare owner_id as it is not allowed to be changed
-        "owner_id",
 
         // These fields are derived or special and should not be compared
         "plain_title",
