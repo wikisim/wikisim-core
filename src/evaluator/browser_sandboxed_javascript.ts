@@ -26,10 +26,12 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
     let resolve: (response: EvaluationResponse) => void
     const promise_result = new Promise<EvaluationResponse>(resolv => resolve = resolv)
     const request: ExtendedEvaluationRequest = {
-        timeout_ms: 100, // Default timeout of 100 ms
-        ...basic_request,
+        js_input_value: basic_request.js_input_value,
+        value_type: basic_request.value_type,
+        function_arguments: basic_request.function_arguments,
+        requested_at: basic_request.requested_at,
+        timeout_ms: basic_request.timeout_ms ?? 1000, // Default timeout of 1000 ms
         evaluation_id: ++next_evaluation_id,
-        requested_at: performance.now(),
         start_time: -1,
         promise_result,
         resolve: resolve!,
