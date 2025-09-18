@@ -19,6 +19,7 @@ export type UserAuthStatus = (
 export interface UserAuthSessionState
 {
     user_name?: string | null
+    user_name_set?: boolean
     session?: Session | null
     status: UserAuthStatus
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
@@ -30,4 +31,5 @@ export interface UserAuthSessionState
     logout: () => void
 
     set_user_name: (user_name: string) => void
+    error_setting_user_name?: string
 }

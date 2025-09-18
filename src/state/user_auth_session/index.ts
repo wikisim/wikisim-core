@@ -169,7 +169,8 @@ function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name:
             if (!entry || error)
             {
                 console.error("Supabase supabase_set_user_name error:", error)
-                root_state.user_auth_session.error = error
+
+                root_state.user_auth_session.error_setting_user_name = error?.message || "Unknown error setting user name"
             }
             else
             {
@@ -215,5 +216,6 @@ async function load_user_info(store: CoreStore, user_id: string, get_supabase: G
     store.setState(root_state =>
     {
         root_state.user_auth_session.user_name = user_name
+        root_state.user_auth_session.user_name_set = user_name !== null
     })
 }
