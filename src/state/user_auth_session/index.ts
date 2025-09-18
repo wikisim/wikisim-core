@@ -149,6 +149,11 @@ function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name:
     const user_id = get().user_auth_session.session?.user.id
     if (!user_id) throw new Error("Cannot set user name, user is not logged in.")
 
+    set(root_state =>
+    {
+        root_state.user_auth_session.error_setting_user_name = undefined
+    })
+
     // Update user name in supabase users table
     get_supabase()
         .from("users")
@@ -170,7 +175,8 @@ function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name:
             {
                 // Update user name in the state
                 root_state.user_auth_session.user_name = entry.name
-                root_state.user_auth_session.error = undefined
+                root_state.user_auth_session.user_name_set = true
+                root_state.user_auth_session.error_setting_user_name = undefined
             }
         })
     })
