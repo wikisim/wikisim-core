@@ -10,19 +10,31 @@ describe("browser_convert_tiptap_to_javascript", () =>
     const tiptap_text = `
         <p><span class="mention-chip" data-type="customMention" data-id="1003v1" data-label="Dwelling stock in England (2023)">@Dwelling stock in England (2023)</span>+2</p>`
 
-    it("should convert tiptap text to javascript text", () =>
+    describe("referencing other data components", () =>
     {
-        const d1003v1 = init_data_component({ id: new IdAndVersion(1003, 1), result_value: "25400000" })
-        const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {"1003v1": d1003v1})
-        // expect(plain_text).equals("d1003v1 = 25400000\nd1003v1 + 2")
-        expect(plain_text).equals("25400000 +2")
-    })
+        it("should convert tiptap text to javascript text", () =>
+        {
+            const d1003v1 = init_data_component({ id: new IdAndVersion(1003, 1), result_value: "25400000" })
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {"1003v1": d1003v1})
+            // expect(plain_text).equals("d1003v1 = 25400000\nd1003v1 + 2")
+            expect(plain_text).equals("25400000 +2")
+        })
 
-    it("should not convert undefined data components into strings that can be parsed as a float", () =>
-    {
-        const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
-        expect(plain_text).equals(`"component 1003v1 is undefined" +2`)
-        expect(parseFloat(plain_text)).deep.equals(NaN)
+        it("should not convert undefined data components into strings that can be parsed as a float", () =>
+        {
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
+            expect(plain_text).equals(`"component 1003v1 is undefined" +2`)
+            expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
+
+        it("should mention that only versioned components can be referenced", () =>
+        {
+            const tiptap_text = `
+                <p><span class="mention-chip" data-type="customMention" data-id="1003" data-label="Thing">@Thing</span>+ 2</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
+            expect(plain_text).equals(`"referenced components must use a version but got id 1003 of Thing" + 2`)
+            expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
     })
 
 
@@ -43,7 +55,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 "1012v1": init_data_component({ id: new IdAndVersion(1012, 1), result_value: "100" }),
                 "1010v2": init_data_component({ id: new IdAndVersion(1010, 2), result_value: "200" }),
             })
-            expect(plain_text).equals(`available_people = 0.8* 100\n200`)
+            expect(plain_text).equals(`available_people = 0.8* 100 \n 200`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
 
@@ -55,8 +67,38 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 "1012v1": init_data_component({ id: new IdAndVersion(1012, 1), result_value: "100" }),
                 "1010v2": init_data_component({ id: new IdAndVersion(1010, 2), result_value: "200" }),
             })
-            expect(plain_text).equals(`person_days_required = 200 * 30e6\navailable_people = 0.8* 100\nperson_days_required / available_people`)
+            expect(plain_text).equals(`person_days_required = 200 * 30e6 \navailable_people = 0.8* 100 \nperson_days_required / available_people`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
+    })
+
+
+    describe("handling functions", () =>
+    {
+        const increment_function_component = init_data_component({
+            id: new IdAndVersion(1019, 3),
+            value_type: "function",
+            result_value: "(a, b = 1) => a + b",
+        })
+
+        const increment_function_tiptap_mention_chip = `<span class="mention-chip" data-type="customMention" data-id="1019v3" data-label="increment">@increment</span>`
+
+        it("should wrap functions in parentheses", () =>
+        {
+            const tiptap_text = `<p>${increment_function_tiptap_mention_chip}(0.5)</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {
+                "1019v3": increment_function_component,
+            })
+            expect(plain_text).equals(`((a, b = 1) => a + b)(0.5)`)
+        })
+
+        it("should introduce newlines", () =>
+        {
+            const tiptap_text = `<p>value = 1e7/1e8<br>value2 = 2</p><p>${increment_function_tiptap_mention_chip}(value, value2)</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {
+                "1019v3": increment_function_component,
+            })
+            expect(plain_text).equals(`value = 1e7/1e8\nvalue2 = 2\n((a, b = 1) => a + b)(value, value2)`)
         })
     })
 })
