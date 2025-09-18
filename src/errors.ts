@@ -55,4 +55,5 @@ export const ERRORS =
     ERR29: new TSError("ERR29", "ERR29. Unexpected error during ef_insert_data_component_v2."),
     ERR30: new PostgreSQLError("ERR30", "ERR30. Invalid user name. Must be 4-32 characters long and only contain letters, numbers, and underscores."),
     ERR31: new PostgreSQLError("ERR31", "ERR31. This user name is reserved and cannot be used."),
+    users_ERR_dup_key: new PostgreSQLError("users_ERR_dup_key", `duplicate key value violates unique constraint "users_name_lowercase_key"`),
 }
