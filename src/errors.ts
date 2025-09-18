@@ -53,5 +53,6 @@ export const ERRORS =
     ERR27: new TSError("ERR27", "ERR27. Failed to calculate result value."),
     ERR28: new TSError("ERR28", "ERR28. Missing or invalid Authorization header."),
     ERR29: new TSError("ERR29", "ERR29. Unexpected error during ef_insert_data_component_v2."),
-    ERR30: new PostgreSQLError("ERR30", "ERR30. Invalid user name. Must be 3-32 characters long and only contain letters, numbers, underscores, and hyphens."),
+    ERR30: new PostgreSQLError("ERR30", "ERR30. Invalid user name. Must be 4-32 characters long and only contain letters, numbers, and underscores."),
+    ERR31: new PostgreSQLError("ERR31", "ERR31. This user name is reserved and cannot be used."),
 }
