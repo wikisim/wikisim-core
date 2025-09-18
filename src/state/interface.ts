@@ -8,11 +8,11 @@ export interface RootCoreState
 
 export type SetCoreState = {
     (
-        partial: RootCoreState | Partial<RootCoreState> | ((state: RootCoreState) => RootCoreState | Partial<RootCoreState>),
+        partial: RootCoreState | Partial<RootCoreState> | ((state: RootCoreState) => void),
         replace?: false
     ): void
     (
-        state: RootCoreState | ((state: RootCoreState) => RootCoreState),
+        state: RootCoreState | ((state: RootCoreState) => void),
         replace: true
     ): void
 }
