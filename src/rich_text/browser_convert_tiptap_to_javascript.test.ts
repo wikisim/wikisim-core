@@ -33,6 +33,15 @@ describe("browser_convert_tiptap_to_javascript", () =>
             expect(plain_text).equals(`"referenced components must use a version but got id 1003 of Thing"+ 2`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
+
+        it("should modify plain text that would otherwise be valid ids", () =>
+        {
+            const tiptap_text = `
+                <p>d_123v2 + d123v2 + <span class="mention-chip" data-type="customMention" data-id="1003v2" data-label="Thing">@Thing</span> + d678v3</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text)
+            expect(plain_text).equals("_d123v2 + _d123v2 + d1003v2 + _d678v3")
+            expect(parseFloat(plain_text)).deep.equals(NaN)
+        })
     })
 
 
