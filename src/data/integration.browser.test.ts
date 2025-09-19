@@ -3,6 +3,7 @@ import { expect } from "chai"
 
 import { __testing__, get_supabase } from "../supabase/browser"
 import { deep_equals } from "../utils/deep_equals"
+import { deindent } from "../utils/deindent"
 import {
     request_data_components,
     request_historical_data_components,
@@ -279,7 +280,7 @@ describe("can init, insert, update, and search wiki data components", function (
         const { data_component, response } = await helper_insert_wiki_data_component(this.test?.title)
         if (response.error !== null)
         {
-            expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
+            expect.fail(`Failed to insert data component: ${JSON.stringify(response.error)}`)
         }
 
         const expected_response: DataComponent = {
@@ -385,7 +386,7 @@ describe("can init, insert, update, and search wiki data components", function (
         const response = await update_data_component(get_supabase, data_component)
         if (response.error !== null)
         {
-            expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
+            expect.fail(`Failed to update data component: ${JSON.stringify(response.error)}`)
         }
 
         const expected_response: DataComponent = {
@@ -451,14 +452,14 @@ describe("can init, insert, update, and search wiki data components", function (
 
         data_component.id.version = 3 // This version number does not yet exist in the DB so should fail
         const response = await update_data_component(get_supabase, data_component)
-        if (response.data) expect.fail(`Should have failed to upsert data component`)
+        if (response.data) expect.fail(`Should have failed to update data component`)
         expect(response.error).equals("ERR09.v2. Update failed: id -1 with version_number 3 not found or version mismatch, or owner_id editor_id mismatch.")
 
         // This version number does exist in the DB but now only in the
         // data_components_history table and so it is the wrong value for updating
         data_component.id.version = 1
         const response2 = await update_data_component(get_supabase, data_component)
-        if (response2.data) expect.fail(`Should have failed to upsert data component`)
+        if (response2.data) expect.fail(`Should have failed to update data component`)
         // ERR02 won't be raised because ERR09.v2 is raised first
         expect(response2.error).equals("ERR09.v2. Update failed: id -1 with version_number 1 not found or version mismatch, or owner_id editor_id mismatch.")
     })
@@ -623,12 +624,67 @@ describe("value_type of function", function ()
         }
 
         const response = await insert_data_component(get_supabase, data_component)
-        if (response.error !== null) expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
+        if (response.error !== null) expect.fail(`Failed to insert data component: ${JSON.stringify(response.error)}`)
         const inserted_data_component = response.data
 
         expect(inserted_data_component.result_value).equals("(a, b = 1) => a + b", "result_value should be set by edge function to the function expression")
         expect(inserted_data_component.function_arguments).to.deep.equal(data_component.function_arguments, "function_arguments should match those inserted")
         expect(inserted_data_component.scenarios).to.deep.equal(data_component.scenarios, "scenarios should match those inserted")
+    })
+
+    it("should include references to other functions and data components", async function ()
+    {
+        this.timeout(10000)
+
+        const user_id = await check_user_is_logged_in()
+        if (!user_id) expect.fail("Should be logged in for this test")
+
+        const increment_function: DataComponent = {
+            ...data_component_fixture,
+            id: new IdAndVersion(-2, 1),
+            title: "increment",
+            value_type: "function",
+            input_value: "x + 1",
+            result_value: "", // Will be set by edge function when value_type == "function"
+            function_arguments: [
+                { id: 0, name: "x" },
+            ],
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title} - increment function`,
+        }
+        const increment_function_response = await insert_data_component(get_supabase, increment_function)
+        if (increment_function_response.error !== null) expect.fail(`Failed to insert increment function data component: ${JSON.stringify(increment_function_response.error)}`)
+        expect(increment_function_response.data.result_value).equals("(x) => x + 1", "result_value of increment function should be set by edge function to the function expression")
+
+        const data_point_value: DataComponent = {
+            ...data_component_fixture,
+            id: new IdAndVersion(-3, 1),
+            title: "Some Number",
+            value_type: "number",
+            input_value: "42",
+            result_value: "42", // Will not be set by edge function when value_type == "number"
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title} - data point`,
+        }
+        const data_point_response = await insert_data_component(get_supabase, data_point_value)
+        if (data_point_response.error !== null) expect.fail(`Failed to insert data point data component: ${JSON.stringify(data_point_response.error)}`)
+        expect(data_point_response.data.result_value).equals("42", "result_value of data point should remain as 42")
+
+        const data_component: DataComponent = {
+            ...data_component_fixture,
+            editor_id: user_id,
+            input_value: `<p>value = <span class="mention-chip" data-type="customMention" data-id="-3v1" data-label="Some Number">@Some Number</span>/10</p><p><span class="mention-chip" data-type="customMention" data-id="-2v1" data-label="increment">@increment</span>(value)</p>`,
+            function_arguments: [],
+            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+        }
+
+        const response = await insert_data_component(get_supabase, data_component)
+        if (response.error !== null) expect.fail(`Failed to insert data component: ${JSON.stringify(response.error)}`)
+        expect(response.data.result_value).equals(deindent(`
+            () => {
+                value = d_3v1/10
+                return d_2v1(value)
+            }
+        `)
+        , "result_value should reference other data components correctly")
     })
 })
 
@@ -713,7 +769,7 @@ describe("can init, insert, update, and search user owned data components", func
         const response = await insert_data_component(get_supabase, data_component)
         if (response.error !== null)
         {
-            expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
+            expect.fail(`Failed to insert data component: ${JSON.stringify(response.error)}`)
         }
         return { data_component, response }
     }
@@ -802,7 +858,7 @@ describe("can init, insert, update, and search user owned data components", func
         const response = await update_data_component(get_supabase, data_component)
         if (response.error !== null)
         {
-            expect.fail(`Failed to upsert data component: ${JSON.stringify(response.error)}`)
+            expect.fail(`Failed to update data component: ${JSON.stringify(response.error)}`)
         }
 
         const expected_response: DataComponent = {
