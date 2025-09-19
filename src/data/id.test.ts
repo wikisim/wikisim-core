@@ -34,6 +34,12 @@ describe("IdAndVersion", () =>
         const id = new IdAndVersion(123, 2)
         expect(id.to_str()).equals("123v2")
     })
+
+    it("should convert to javascript string with version", () =>
+    {
+        const id = new IdAndVersion(-123, 2)
+        expect(id.to_javascript_str()).equals("d_123v2")
+    })
 })
 
 

@@ -1,10 +1,8 @@
 import { IdOnly, parse_id } from "../data/id.ts"
-import { DataComponent } from "../data/interface.ts"
-import { to_javascript_reference } from "../data/to_javascript_reference.ts"
 import { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 
 
-export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMParser, tiptap_text: string, data_component_by_id_and_version: Record<string, DataComponent>): string
+export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMParser, tiptap_text: string): string //, data_component_by_id_and_version: Record<string, DataComponent>): string
 {
     // console .log("Converting tiptap to javascript:", tiptap_text, data_component_by_id_and_version)
 
@@ -38,10 +36,10 @@ export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMPars
                 }
                 else
                 {
-                    const component = data_component_by_id_and_version[data_id_and_maybe_version]
-                    if (!component) return `"component ${data_id_and_maybe_version} is undefined"`
+                    // const component = data_component_by_id_and_version[data_id_and_maybe_version]
+                    // if (!component) return `"component ${data_id_and_maybe_version} is undefined"`
 
-                    return to_javascript_reference(component)
+                    return data_id_and_version.to_javascript_str()
                 }
             }
 
