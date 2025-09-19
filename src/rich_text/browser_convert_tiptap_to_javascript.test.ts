@@ -1,7 +1,5 @@
 import { expect } from "chai"
 
-import { IdAndVersion } from "../data/id"
-import { init_data_component } from "../data/modify"
 import { browser_convert_tiptap_to_javascript } from "./browser_convert_tiptap_to_javascript"
 
 
@@ -75,13 +73,6 @@ describe("browser_convert_tiptap_to_javascript", () =>
 
     describe("handling functions", () =>
     {
-        const increment_function_component = init_data_component({
-            title: "increment",
-            id: new IdAndVersion(1019, 3),
-            value_type: "function",
-            result_value: "(a, b = 1) => a + b",
-        })
-
         const increment_function_tiptap_mention_chip = `<span class="mention-chip" data-type="customMention" data-id="1019v3" data-label="increment">@increment</span>`
 
         it("should wrap functions in parentheses", () =>

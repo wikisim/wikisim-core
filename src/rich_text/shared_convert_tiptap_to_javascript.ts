@@ -45,7 +45,7 @@ export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMPars
 
             const parts = Array.from(node.childNodes).map(extract_text).flat().filter(Boolean)
             let text = ""
-            parts.forEach((part, i) =>
+            parts.forEach(part =>
             {
                 if (part === "\n") text += "\n"
                 else
