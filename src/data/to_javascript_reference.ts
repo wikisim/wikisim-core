@@ -1,4 +1,4 @@
-import { DataComponent } from "./interface"
+import { DataComponent } from "./interface.ts"
 
 
 export function to_javascript_reference(component: DataComponent): string
