@@ -17,13 +17,13 @@ describe("browser_convert_tiptap_to_javascript", () =>
             const d1003v1 = init_data_component({ id: new IdAndVersion(1003, 1), result_value: "25400000" })
             const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {"1003v1": d1003v1})
             // expect(plain_text).equals("d1003v1 = 25400000\nd1003v1 + 2")
-            expect(plain_text).equals("25400000 +2")
+            expect(plain_text).equals("d1003v1+2")
         })
 
         it("should not convert undefined data components into strings that can be parsed as a float", () =>
         {
             const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
-            expect(plain_text).equals(`"component 1003v1 is undefined" +2`)
+            expect(plain_text).equals(`"component 1003v1 is undefined"+2`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
 
@@ -32,7 +32,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
             const tiptap_text = `
                 <p><span class="mention-chip" data-type="customMention" data-id="1003" data-label="Thing">@Thing</span>+ 2</p>`
             const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {})
-            expect(plain_text).equals(`"referenced components must use a version but got id 1003 of Thing" + 2`)
+            expect(plain_text).equals(`"referenced components must use a version but got id 1003 of Thing"+ 2`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
     })
@@ -55,7 +55,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 "1012v1": init_data_component({ id: new IdAndVersion(1012, 1), result_value: "100" }),
                 "1010v2": init_data_component({ id: new IdAndVersion(1010, 2), result_value: "200" }),
             })
-            expect(plain_text).equals(`available_people = 0.8* 100 \n 200`)
+            expect(plain_text).equals(`available_people = 0.8*d1012v1\nd1010v2`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
 
@@ -67,7 +67,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 "1012v1": init_data_component({ id: new IdAndVersion(1012, 1), result_value: "100" }),
                 "1010v2": init_data_component({ id: new IdAndVersion(1010, 2), result_value: "200" }),
             })
-            expect(plain_text).equals(`person_days_required = 200 * 30e6 \navailable_people = 0.8* 100 \nperson_days_required / available_people`)
+            expect(plain_text).equals(`person_days_required = d1010v2*d1002v5\navailable_people = 0.8*d1012v1\nperson_days_required / available_people`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
     })
@@ -76,6 +76,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
     describe("handling functions", () =>
     {
         const increment_function_component = init_data_component({
+            title: "increment",
             id: new IdAndVersion(1019, 3),
             value_type: "function",
             result_value: "(a, b = 1) => a + b",
@@ -89,7 +90,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
             const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {
                 "1019v3": increment_function_component,
             })
-            expect(plain_text).equals(`((a, b = 1) => a + b)(0.5)`)
+            expect(plain_text).equals(`d1019v3_increment(0.5)`)
         })
 
         it("should introduce newlines", () =>
@@ -98,7 +99,9 @@ describe("browser_convert_tiptap_to_javascript", () =>
             const plain_text = browser_convert_tiptap_to_javascript(tiptap_text, {
                 "1019v3": increment_function_component,
             })
-            expect(plain_text).equals(`value = 1e7/1e8\nvalue2 = 2\n((a, b = 1) => a + b)(value, value2)`)
+            // Note the ";" in the "\n;" is only present for when we wrap
+            // functions in parentheses AND there is a newline before them.
+            expect(plain_text).equals(`value = 1e7/1e8\nvalue2 = 2\nd1019v3_increment(value, value2)`)
         })
     })
 })
