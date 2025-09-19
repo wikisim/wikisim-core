@@ -53,6 +53,7 @@ export class IdAndVersion
 
     to_str_without_version(): string { return `${this.id}` }
 
+    // The replacing of - with _ is to allow for negative ids in tests
     to_javascript_str(): string { return "d" + this.to_str().replace("-", "_") }
 }
 
@@ -122,4 +123,19 @@ export function all_are_id_only(ids: IdAndMaybeVersion[]): ids is IdOnly[]
 export function all_are_id_and_version(ids: IdAndMaybeVersion[]): ids is IdAndVersion[]
 {
     return ids.every(is_id_and_version)
+}
+
+
+export const REGEX_MATCH_IDS = /(?<=^|[^A-Za-z0-9_])d_?(\d+)v(\d+)(?=[^A-Za-z0-9_]|$)/gim
+export function extract_ids_from_text(text: string): IdAndVersion[]
+{
+    const ids: IdAndVersion[] = []
+    for (const match of text.matchAll(REGEX_MATCH_IDS))
+    {
+        const id = parseInt(match[1]!, 10)
+        const version = parseInt(match[2]!, 10)
+        ids.push(new IdAndVersion(id, version))
+    }
+
+    return ids
 }

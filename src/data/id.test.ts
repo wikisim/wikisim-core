@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { IdAndVersion, IdOnly, parse_id } from "./id"
+import { extract_ids_from_text, IdAndVersion, IdOnly, parse_id } from "./id"
 
 
 describe("IdOnly", () =>
@@ -97,11 +97,39 @@ describe("parse_id", () =>
 })
 
 
-// @ts-expect-error: IdOnly requires only one argument
-new IdOnly(123, 2)
+describe("extract_ids_from_text", () =>
+{
+    it("should extract ids with versions from text and ignore things that look like ids but aren't", () =>
+    {
+        const text = `
+            d1003v1+d1003v2-d1003v3
+            d4006v4.5*d5007v5/d6008v6
+            d7009v7,d8000v8;
+            somed123v123
+            d123v123thing
+        `
 
-// @ts-expect-error: IdAndVersion should not be used where IdOnly is expected
-const _bad_id_2: IdOnly = new IdAndVersion(1, 2)
+        const ids = extract_ids_from_text(text)
+        expect(ids).to.have.length(8)
+        expect(ids.map(id => id.to_str())).to.deep.equal([
+            "1003v1",
+            "1003v2",
+            "1003v3",
+            "4006v4",
+            "5007v5",
+            "6008v6",
+            "7009v7",
+            "8000v8",
+        ])
+    })
+})
 
-// @ts-expect-error: IdOnly should not be used where IdAndVersion is expected
-const _bad_id_3: IdAndVersion = new IdOnly(1)
+
+// // @ts-expect-error: IdOnly requires only one argument
+// new IdOnly(123, 2)
+
+// // @ts-expect-error: IdAndVersion should not be used where IdOnly is expected
+// const _bad_id_2: IdOnly = new IdAndVersion(1, 2)
+
+// // @ts-expect-error: IdOnly should not be used where IdAndVersion is expected
+// const _bad_id_3: IdAndVersion = new IdOnly(1)
