@@ -8,7 +8,6 @@ import { EvaluationRequest } from "./interface"
 
 describe("format_function_input_value_string", () =>
 {
-    const value_type = "function"
     const function_arguments: FunctionArgument[] = [
         // Swap around the order to ensure formatting uses argument
         // positions not names
@@ -22,10 +21,8 @@ describe("format_function_input_value_string", () =>
         const basic_request: EvaluationRequest = {
             requested_at: 0,
             js_input_value: "Math.max(value, min)",
-            value_type,
-            function_arguments,
         }
-        const { result } = format_function_input_value_string(basic_request)
+        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal("(min = 0, value) => Math.max(value, min)")
     })
 
@@ -38,10 +35,8 @@ describe("format_function_input_value_string", () =>
         const basic_request: EvaluationRequest = {
             requested_at: 0,
             js_input_value: "Math.max(1, min)",
-            value_type,
-            function_arguments,
         }
-        const { result } = format_function_input_value_string(basic_request)
+        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal("(min) => Math.max(1, min)")
     })
 
@@ -53,10 +48,8 @@ describe("format_function_input_value_string", () =>
             js_input_value: `
             result = Math.max(min, value)
             return result`,
-            value_type,
-            function_arguments,
         }
-        const { result } = format_function_input_value_string(basic_request)
+        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal(deindent(`
         (min = 0, value) => {
             result = Math.max(min, value)
@@ -72,10 +65,8 @@ describe("format_function_input_value_string", () =>
             js_input_value: `
             result = Math.max(min, value)
             result + 1`,
-            value_type,
-            function_arguments,
         }
-        const { result } = format_function_input_value_string(basic_request)
+        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal(deindent(`
         (min = 0, value) => {
             result = Math.max(min, value)
@@ -92,10 +83,8 @@ describe("format_function_input_value_string", () =>
         const basic_request: EvaluationRequest = {
             requested_at: 0,
             js_input_value: "",
-            value_type,
-            function_arguments,
         }
-        const { result } = format_function_input_value_string(basic_request)
+        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal("")
     })
 })

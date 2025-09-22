@@ -1,10 +1,14 @@
 import type { FunctionArgument } from "../data/interface.ts"
 import { deindent } from "../utils/deindent.ts"
-
 import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 
 
-export function format_function_input_value_string(basic_request: EvaluationRequest): EvaluationResponse
+interface FunctionToStringEvaluationRequest extends EvaluationRequest
+{
+    function_arguments: FunctionArgument[]
+}
+
+export function format_function_input_value_string(basic_request: FunctionToStringEvaluationRequest): EvaluationResponse
 {
     const body = function_body(basic_request.js_input_value).trim()
     const formatted_function = !body ? "" : function_signature(basic_request.function_arguments) + " => " + body
@@ -23,10 +27,9 @@ export function format_function_input_value_string(basic_request: EvaluationRequ
 }
 
 
-function function_signature(function_arguments?: FunctionArgument[]): string
+function function_signature(function_arguments: FunctionArgument[]): string
 {
-    const args = function_arguments || []
-    const formatted_args = args.map(arg =>
+    const formatted_args = function_arguments.map(arg =>
     {
         if (arg.default_value)
         {

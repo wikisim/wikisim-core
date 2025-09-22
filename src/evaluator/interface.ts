@@ -1,11 +1,8 @@
-import type { FunctionArgument, ValueType } from "../data/interface.ts"
 
 
 export interface EvaluationRequest
 {
     js_input_value: string
-    value_type: ValueType | undefined
-    function_arguments?: FunctionArgument[]
     requested_at: number
     timeout_ms?: number // Optional timeout in milliseconds, default is 100 ms
 }

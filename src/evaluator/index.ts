@@ -1,6 +1,7 @@
 import { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { format_function_input_value_string } from "./format_function.ts"
 import { EvaluationRequest, EvaluationResponse } from "./interface.ts"
+import { load_dependencies_into_sandbox } from "./load_dependencies_into_sandbox.ts"
 
 
 interface CalculateResultValueArgs
@@ -22,16 +23,24 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
     const js_input_value = args.convert_tiptap_to_javascript(input_value)
     const basic_request: EvaluationRequest = {
         js_input_value,
-        value_type: component.value_type,
-        function_arguments: component.function_arguments || [],
         requested_at: performance.now(),
-        timeout_ms: args.timeout_ms
+        timeout_ms: args.timeout_ms,
     }
 
     if (component.value_type === "function")
     {
-        return format_function_input_value_string(basic_request)
+        return format_function_input_value_string({
+            ...basic_request,
+            function_arguments: component.function_arguments || [],
+        })
     }
+
+    const dependencies = await load_dependencies_into_sandbox({
+        component,
+        data_component_by_id_and_version: args.data_component_by_id_and_version,
+        evaluate_code_in_sandbox: args.evaluate_code_in_sandbox,
+    })
+    if (dependencies.error) return dependencies
 
     return await args.evaluate_code_in_sandbox(basic_request)
 }

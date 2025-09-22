@@ -11,7 +11,10 @@
   <script>
     mocha.setup("bdd")
 
-    import("../src/data/integration.browser.test.ts")
+    Promise.all([
+      import("../src/data/integration.browser.test.ts"),
+      import("../src/evaluator/index.browser.test.ts"),
+    ])
     .then(() => mocha.run())
   </script>
 </body>

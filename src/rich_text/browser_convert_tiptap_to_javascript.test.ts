@@ -104,4 +104,15 @@ describe("browser_convert_tiptap_to_javascript", () =>
             expect(plain_text).equals(`value = 1e7/1e8\nvalue2 = 2\nd1019v3(value, value2)`)
         })
     })
+
+
+    describe("replacing any text that matches variable names for dependencies", () =>
+    {
+        it("should replace d123v4 with _d123v4", () =>
+        {
+            const tiptap_text = `<p>a = 1 + d123v4</p>`
+            const plain_text = browser_convert_tiptap_to_javascript(tiptap_text)
+            expect(plain_text).equals(`a = 1 + _d123v4`, "variable names for dependencies should be replaced to avoid confusion")
+        })
+    })
 })

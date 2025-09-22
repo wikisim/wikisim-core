@@ -100,6 +100,8 @@ export interface DataComponentFields
 
     input_value?: string
     result_value?: string
+    // IDs & version numbers recursively parsed from input_value
+    recursive_dependency_ids?: IdAndVersion[]
     value_type?: ValueType
     value_number_display_type?: NumberDisplayType
     value_number_sig_figs?: number

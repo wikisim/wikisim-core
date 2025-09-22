@@ -11,7 +11,7 @@ const iframe_loaded = new Promise<true>(resolve => {
     resolve_iframe_loaded = resolve
 })
 
-interface ExtendedEvaluationRequest extends EvaluationRequest
+interface ExtendedEvaluationRequest extends Omit<EvaluationRequest, "data_component_by_id_and_version">
 {
     evaluation_id: number
     requested_at: number
@@ -27,8 +27,6 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
     const promise_result = new Promise<EvaluationResponse>(resolv => resolve = resolv)
     const request: ExtendedEvaluationRequest = {
         js_input_value: basic_request.js_input_value,
-        value_type: basic_request.value_type,
-        function_arguments: basic_request.function_arguments,
         requested_at: basic_request.requested_at,
         timeout_ms: basic_request.timeout_ms ?? 1000, // Default timeout of 1000 ms
         evaluation_id: ++next_evaluation_id,
@@ -106,109 +104,7 @@ async function request_next_evaluation(request: ExtendedEvaluationRequest)
 export function Evaluator()
 {
     useEffect(() => {
-        // --- Create hidden sandboxed iframe ---
-        iframe = document.createElement("iframe")
-
-        // The sandbox attribute is key:
-        // - allow-scripts: lets code inside run
-        // - no same-origin, no storage, no network
-        iframe.setAttribute("sandbox", "allow-scripts")
-        iframe.style.display = "none"
-
-        // Load a blank page with a script that listens for code
-        const raw_src_doc = `
-        // Add mathjs from https://unpkg.com/mathjs@14.7.0/lib/browser/math.js
-        // Alternatives listed here: https://mathjs.org/download.html
-        <script src="https://unpkg.com/mathjs@14.7.0/lib/browser/math.js"></script>
-
-        <script>
-            // Expose some global functions for easier use
-            window.range = (...args) => math.range(...args).toArray();
-        </script>
-
-        <script>
-            const console_log = (...args) =>
-            {
-                // console .log(' [iFrame] ==========> ', ...args);
-            }
-
-            console_log('Sandboxed iframe loaded');
-            console_log('mathjs...', window.math);
-
-            window.addEventListener('message', (e) => {
-                const payload = JSON.parse(e.data);
-                console_log('received payload:', payload);
-                try {
-                    // Evaluate the code inside the sandboxed iframe
-                    const result = eval(payload.js_input_value);
-                    const result_json = JSON.stringify(result);
-                    console_log('Success, result:', result_json);
-                    e.source.postMessage({
-                        evaluation_id: payload.evaluation_id,
-                        result: result_json,
-                        error: null,
-                    }, '*');
-                } catch (err) {
-                    console_log('Error:', err);
-                    e.source.postMessage({
-                        evaluation_id: payload.evaluation_id,
-                        result: null,
-                        error: err.toString(),
-                    }, '*');
-                }
-            });
-        </script>
-        `
-        iframe.srcdoc = raw_src_doc
-
-        iframe.onload = () => resolve_iframe_loaded(true)
-        iframe.onerror = e => console .error('Iframe error:', e)
-
-        document.body.appendChild(iframe)
-
-
-        // --- Communication setup ---
-        function handle_message_from_iframe(event: MessageEvent<EvaluationResponse>)
-        {
-            // console .log("Received message from sandboxed iframe:", event.data)
-            if (event.source === iframe.contentWindow)
-            {
-                const existing_call_in_progress = requests[event.data.evaluation_id]
-                if (!existing_call_in_progress) return
-                delete requests[existing_call_in_progress.evaluation_id]
-
-                clearTimeout(existing_call_in_progress.timeout_id)
-
-                let response: EvaluationResponse = {
-                    ...existing_call_in_progress,
-                    result: "",
-                    error: null,
-                    end_time: performance.now(),
-                }
-
-                if (event.data.error)
-                {
-                    response = {
-                        ...response,
-                        result: null,
-                        error: event.data.error,
-                    }
-                }
-                else if (event.data.result !== null)
-                {
-                    response = {
-                        ...response,
-                        // Ensure result is a string if it's not null
-                        result: `${event.data.result}`,
-                        error: null,
-                    }
-                }
-
-                existing_call_in_progress.resolve(response)
-            }
-        }
-        window.addEventListener("message", handle_message_from_iframe)
-
+        const { handle_message_from_iframe } = setup_sandboxed_iframe()
 
         return () =>
         {
@@ -219,4 +115,113 @@ export function Evaluator()
     }, [])
 
     return null
+}
+
+
+export function setup_sandboxed_iframe()
+{
+    // --- Create hidden sandboxed iframe ---
+    iframe = document.createElement("iframe")
+
+    // The sandbox attribute is key:
+    // - allow-scripts: lets code inside run
+    // - no same-origin, no storage, no network
+    iframe.setAttribute("sandbox", "allow-scripts")
+    iframe.style.display = "none"
+
+    // Load a blank page with a script that listens for code
+    const raw_src_doc = `
+    // Add mathjs from https://unpkg.com/mathjs@14.7.0/lib/browser/math.js
+    // Alternatives listed here: https://mathjs.org/download.html
+    <script src="https://unpkg.com/mathjs@14.7.0/lib/browser/math.js"></script>
+
+    <script>
+        // Expose some global functions for easier use
+        window.range = (...args) => math.range(...args).toArray();
+    </script>
+
+    <script>
+        const console_log = (...args) =>
+        {
+            console .log(' [iFrame] ==========> ', ...args);
+        }
+
+        console_log('Sandboxed iframe loaded');
+        console_log('mathjs...', window.math);
+
+        window.addEventListener('message', (e) => {
+            const payload = JSON.parse(e.data);
+            console_log('received payload:', payload);
+            try {
+                // Evaluate the code inside the sandboxed iframe
+                const result = eval(payload.js_input_value);
+                const result_json = JSON.stringify(result);
+                console_log('Success, result:', result_json);
+                e.source.postMessage({
+                    evaluation_id: payload.evaluation_id,
+                    result: result_json,
+                    error: null,
+                }, '*');
+            } catch (err) {
+                console_log('Error:', err);
+                e.source.postMessage({
+                    evaluation_id: payload.evaluation_id,
+                    result: null,
+                    error: err.toString(),
+                }, '*');
+            }
+        });
+    </script>
+    `
+    iframe.srcdoc = raw_src_doc
+
+    iframe.onload = () => resolve_iframe_loaded(true)
+    iframe.onerror = e => console .error('Iframe error:', e)
+
+    document.body.appendChild(iframe)
+
+
+    // --- Communication setup ---
+    function handle_message_from_iframe(event: MessageEvent<EvaluationResponse>)
+    {
+        // console .log("Received message from sandboxed iframe:", event.data)
+        if (event.source === iframe.contentWindow)
+        {
+            const existing_call_in_progress = requests[event.data.evaluation_id]
+            if (!existing_call_in_progress) return
+            delete requests[existing_call_in_progress.evaluation_id]
+
+            clearTimeout(existing_call_in_progress.timeout_id)
+
+            let response: EvaluationResponse = {
+                ...existing_call_in_progress,
+                result: "",
+                error: null,
+                end_time: performance.now(),
+            }
+
+            if (event.data.error)
+            {
+                response = {
+                    ...response,
+                    result: null,
+                    error: event.data.error,
+                }
+            }
+            else if (event.data.result !== null)
+            {
+                response = {
+                    ...response,
+                    // Ensure result is a string if it's not null
+                    result: `${event.data.result}`,
+                    error: null,
+                }
+            }
+
+            existing_call_in_progress.resolve(response)
+        }
+    }
+    window.addEventListener("message", handle_message_from_iframe)
+
+    return { handle_message_from_iframe }
 }
