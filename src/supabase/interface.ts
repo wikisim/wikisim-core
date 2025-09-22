@@ -14,7 +14,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -39,6 +39,7 @@ export type Database = {
           plain_description: string
           // plain_search_text: string | null
           plain_title: string
+          recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
           // search_vector: unknown | null
@@ -78,6 +79,7 @@ export type Database = {
           plain_description: string
           // plain_search_text?: string | null
           plain_title: string
+          recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
           // search_vector?: unknown | null
@@ -117,6 +119,7 @@ export type Database = {
           plain_description?: string
           // plain_search_text?: string | null
           plain_title?: string
+          recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
           // search_vector?: unknown | null
@@ -158,6 +161,7 @@ export type Database = {
           owner_id: string | null
           plain_description: string
           plain_title: string
+          recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
           test_run_id: string | null
@@ -195,6 +199,7 @@ export type Database = {
           owner_id?: string | null
           plain_description: string
           plain_title: string
+          recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
           test_run_id?: string | null
@@ -232,6 +237,7 @@ export type Database = {
           owner_id?: string | null
           plain_description?: string
           plain_title?: string
+          recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
           test_run_id?: string | null
@@ -305,6 +311,7 @@ export type Database = {
           plain_description: string
           // plain_search_text: string | null
           plain_title: string
+          recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
           // search_vector: unknown | null
@@ -348,11 +355,12 @@ export type Database = {
           label_ids: number[] | null
           owner_id: string | null
           plain_description: string
-          plain_search_text: string | null
+          // plain_search_text: string | null
           plain_title: string
+          recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
-          search_vector: unknown | null
+          // search_vector: unknown | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -401,6 +409,7 @@ export type Database = {
           owner_id: string
           plain_description: string
           plain_title: string
+          recursive_dependency_ids: string[]
           result_value: string
           scenarios: Json
           score: number
@@ -438,11 +447,12 @@ export type Database = {
           label_ids: number[] | null
           owner_id: string | null
           plain_description: string
-          plain_search_text: string | null
+          // plain_search_text: string | null
           plain_title: string
+          recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
-          search_vector: unknown | null
+          // search_vector: unknown | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -519,6 +529,7 @@ export type Database = {
         p_scenarios: Json | null
         p_test_run_id: string | null
         p_id: number | null
+        p_recursive_dependency_ids: string[] | null
       }
       data_component_update_params: {
         p_id: number //| null
@@ -552,6 +563,7 @@ export type Database = {
         p_dimension_ids: string[] | null
         p_function_arguments: Json | null
         p_scenarios: Json | null
+        p_recursive_dependency_ids: string[] | null
       }
     }
   }
