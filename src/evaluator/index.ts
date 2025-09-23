@@ -9,7 +9,11 @@ interface CalculateResultValueArgs
     component: DataComponent | NewDataComponent
     data_components_by_id_and_version: Record<string, DataComponent>
     convert_tiptap_to_javascript: (tiptap_text: string) => string,
-    evaluate_code_in_sandbox: (request: EvaluationRequest) => Promise<EvaluationResponse>,
+    /**
+     * When run on the edge functions we pass undefined here as we can't
+     * evaluate code in a sandbox.
+     */
+    evaluate_code_in_sandbox: undefined | ((request: EvaluationRequest) => Promise<EvaluationResponse>),
     timeout_ms?: number
 }
 
@@ -34,6 +38,22 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
             function_arguments: component.function_arguments || [],
         })
     }
+
+
+    // When on edge function, args.evaluate_code_in_sandbox will be undefined so
+    // we just return the result value as the args.component.result_value that
+    // was given by the user.
+    if (!args.evaluate_code_in_sandbox) return Promise.resolve({
+        result: args.component.result_value || "",
+
+        evaluation_id: 0,
+        js_input_value,
+        requested_at: basic_request.requested_at,
+        start_time: 0,
+        end_time: 0,
+        error: null,
+    })
+
 
     const load_dependencies_response = await load_dependencies_into_sandbox({
         component,
