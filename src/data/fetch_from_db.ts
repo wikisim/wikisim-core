@@ -4,7 +4,8 @@ import { z } from "zod"
 import type { GetSupabase } from "../supabase/browser"
 import { clamp } from "../utils/clamp"
 import { hydrate_data_component_from_json } from "./convert_between_json"
-import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
+import { make_or_clause_for_ids } from "./fetch_from_db_utils"
+import { IdAndMaybeVersion, IdOnly } from "./id"
 import type { DataComponent } from "./interface"
 import { make_field_validators } from "./validate_fields"
 
@@ -94,29 +95,12 @@ export async function request_historical_data_components(
     limit_ids(ids, 1)
     const { from, to } = get_range_from_options(options)
 
-    let supa = get_supabase()
+    const or_clause = make_or_clause_for_ids(ids)
+
+    return get_supabase()
         .from("data_components_history")
         .select("*")
-
-    const or_clauses: string[] = []
-    ids.forEach(id =>
-    {
-        if (id instanceof IdOnly)
-        {
-            or_clauses.push(`id.eq.${id.to_str_without_version()}`)
-        }
-        else if (id instanceof IdAndVersion)
-        {
-            or_clauses.push(`and(id.eq.${id.id},version_number.eq.${id.version})`)
-        }
-        else
-        {
-            throw new Error(`Invalid ID type: ${id}, typeof: ${typeof id}, expected IdAndVersion or IdOnly`)
-        }
-    })
-    supa = supa.or(or_clauses.join(','))
-
-    return supa
+        .or(or_clause)
         .order("version_number", { ascending: false })
         .order("id", { ascending: true })
         .range(from, to)

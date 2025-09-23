@@ -1,4 +1,4 @@
-import { ERRORS } from "../errors"
+import { ERRORS } from "../errors.ts"
 
 
 export class IdOnly
