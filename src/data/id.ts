@@ -140,3 +140,37 @@ export function extract_ids_from_text(text: string): IdAndVersion[]
 
     return ids
 }
+
+
+export class OrderedUniqueIdAndVersionList
+{
+    private items: IdAndVersion[] = []
+    private id_set: Set<string> = new Set()
+
+    add(item: IdAndVersion | string)
+    {
+        const key = typeof item === "string" ? item : item.to_str()
+        if (this.id_set.has(key)) return
+
+        const item_as_id = typeof item === "string" ? parse_id(item, true) : item
+        if (item_as_id instanceof IdOnly)
+        {
+            throw new Error(`IdOnly cannot be added to OrderedUniqueIdAndVersionList: ${item}`)
+        }
+        this.items.push(item_as_id)
+        this.id_set.add(key)
+    }
+
+    add_multiple(items: IdAndVersion[])
+    {
+        for (const item of items)
+        {
+            this.add(item)
+        }
+    }
+
+    get_all(): IdAndVersion[]
+    {
+        return this.items
+    }
+}
