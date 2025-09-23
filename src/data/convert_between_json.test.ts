@@ -69,6 +69,23 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         expect(() => helper_flatten_to_json_and_hydrate(data_component))
             .to.throw(/code": "invalid_type"/)
     })
+
+    it("empty lists should return undefined", function ()
+    {
+        const new_data_component = new_data_component_all_fields_set()
+        new_data_component.recursive_dependency_ids = []
+        new_data_component.label_ids = []
+        new_data_component.dimension_ids = []
+        new_data_component.function_arguments = []
+        new_data_component.scenarios = []
+
+        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component)
+        expect(hydrated.recursive_dependency_ids).equals(undefined, "empty list of recursive_dependency_ids should flatten and hydrate to undefined")
+        expect(hydrated.label_ids).equals(undefined, "empty list of label_ids should flatten and hydrate to undefined")
+        expect(hydrated.dimension_ids).equals(undefined, "empty list of dimension_ids should flatten and hydrate to undefined")
+        expect(hydrated.function_arguments).equals(undefined, "empty list of function_arguments should flatten and hydrate to undefined")
+        expect(hydrated.scenarios).equals(undefined, "empty list of scenarios should flatten and hydrate to undefined")
+    })
 })
 
 

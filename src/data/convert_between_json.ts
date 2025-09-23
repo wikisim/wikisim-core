@@ -107,7 +107,7 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
 
         title: row.title,
         description: row.description,
-        label_ids: row.label_ids ?? undefined,
+        label_ids: row.label_ids && row.label_ids.length ? row.label_ids : undefined,
 
         input_value: row.input_value ?? undefined,
         result_value: row.result_value ?? undefined,
@@ -148,21 +148,23 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
 
 function hydrate_list_of_ids(ids: string[] | null | undefined): IdAndVersion[] | undefined
 {
-    return ids ? ids.map(id => parse_id(id, true)) : undefined
+    return (ids && ids.length) ? ids.map(id => parse_id(id, true)) : undefined
 }
 
 
 function hydrate_function_arguments(row: NewDataComponentAsJSON | DataComponentAsJSON, validators: FieldValidators): FunctionArgument[] | undefined
 {
     const function_arguments = validators.validate_function_arguments_from_json(row.function_arguments)
-    return function_arguments?.map((arg, index) => ({ id: index, ...arg }) )
+    if (!function_arguments || function_arguments.length === 0) return undefined
+    return function_arguments.map((arg, index) => ({ id: index, ...arg }) )
 }
 
 
 function hydrate_scenarios(row: NewDataComponentAsJSON | DataComponentAsJSON, validators: FieldValidators): Scenario[] | undefined
 {
     const scenarios = validators.validate_scenarios_from_json(row.scenarios)
-    return scenarios?.map((arg, index) => ({ id: index, ...arg }) )
+    if (!scenarios || scenarios.length === 0) return undefined
+    return scenarios.map((arg, index) => ({ id: index, ...arg }) )
 }
 
 
