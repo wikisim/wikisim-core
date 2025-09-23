@@ -1,6 +1,6 @@
-import { IdAndMaybeVersion, IdAndVersion } from "../data/id"
-import { DataComponent, NewDataComponent } from "../data/interface"
-import { init_data_component, init_new_data_component } from "../data/modify"
+import { IdAndMaybeVersion, IdAndVersion } from "../data/id.ts"
+import type { DataComponent, NewDataComponent } from "../data/interface.ts"
+import { init_data_component, init_new_data_component } from "../data/modify.ts"
 
 
 export function tiptap_mention_chip(args: {title: string, id: IdAndMaybeVersion }): string
@@ -9,7 +9,7 @@ export function tiptap_mention_chip(args: {title: string, id: IdAndMaybeVersion 
 }
 
 
-export function new_data_component_all_fields_set(): NewDataComponent
+export function new_data_component_all_fields_set(overrides: Partial<NewDataComponent> = {}): NewDataComponent
 {
     return init_new_data_component({
         // This field should not and will never be changed once a component is
@@ -57,16 +57,20 @@ export function new_data_component_all_fields_set(): NewDataComponent
         plain_description: "Modified Description",
 
         test_run_id: "test_run_-789",
+        ...overrides,
     })
 }
 
 
-export function data_component_all_fields_set(): DataComponent
+export function data_component_all_fields_set(overrides: Partial<DataComponent> = {}): DataComponent
 {
     const {
         temporary_id: _,
         ...rest_new_data_component
     } = new_data_component_all_fields_set()
 
-    return init_data_component(rest_new_data_component)
+    return init_data_component({
+        ...rest_new_data_component,
+        ...overrides,
+    })
 }
