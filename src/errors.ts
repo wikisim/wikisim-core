@@ -62,4 +62,5 @@ export const ERRORS =
     ERR35: new TSError("ERR35", "ERR35. IdOnly cannot be added to OrderedUniqueIdAndVersionList:"),
     ERR36: new TSError("ERR36", "ERR36. Unable to parse text"),
     ERR37: new TSError("ERR37", "ERR37. Unexpected error during get_data_components_by_id_and_version."),
+    ERR38: new TSError("ERR38", "ERR38. Insufficient data_component_history matches during get_data_components_by_id_and_version."),
 }
