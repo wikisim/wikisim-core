@@ -1,4 +1,3 @@
-/* eslint-disable */
 // Adapted from
 // `npx supabase gen types typescript --project-id sfkgqscbwofiphfxhnxg --schema public > src/supabase/interface2.ts`
 

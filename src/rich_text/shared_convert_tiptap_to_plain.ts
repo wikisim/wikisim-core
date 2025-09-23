@@ -6,7 +6,7 @@ import type { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 export function shared_convert_tiptap_text_to_plain_text(parser: GenericDOMParser, tiptap_text: string): string
 {
     const doc = parser.parseFromString(tiptap_text, "text/html")
-    if (!doc) return "Error: Unable to parse text"
+    if (!doc) throw new Error("Error: Unable to parse text")
 
     // List of block-level elements to add spaces between
     const block_tags = new Set([

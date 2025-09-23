@@ -27,6 +27,7 @@ export function init_data_component(partial: Partial<DataComponent> = {}, for_te
 
         input_value: undefined,
         result_value: undefined,
+        recursive_dependency_ids: undefined,
         value_type: undefined,
         value_number_display_type: undefined,
         value_number_sig_figs: undefined,

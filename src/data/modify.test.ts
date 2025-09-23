@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { IdAndVersion } from "./id"
+import { data_component_all_fields_set } from "../test/fixtures"
 import { DataComponent } from "./interface"
 import { changes_made, init_data_component } from "./modify"
 
@@ -33,52 +33,7 @@ describe("changes_made function", () =>
     })
 
     const original: DataComponent = init_data_component({}, true)
-    const modified: DataComponent = init_data_component({
-        // This field should not and will never be changed once a component is
-        // created, but whilst a new component is being edited for the first
-        // time it may be changed.
-        owner_id: "owner_2",
-
-        editor_id: "editor_1",
-        created_at: new Date("2025-07-30T00:00:00Z"),
-        comment: "Another comment",
-        bytes_changed: 100,
-        version_type: "minor",
-        version_rolled_back_to: -10,
-
-        title: "<p>Modified Title</p>",
-        description: "<p>Modified Description</p>",
-        label_ids: [-2, -3],
-
-        input_value: "Modified Value",
-        result_value: "Modified Value",
-        value_type: "number",
-        value_number_display_type: "scientific",
-        value_number_sig_figs: 3,
-        datetime_range_start: new Date("2025-07-30T00:00:00Z"),
-        datetime_range_end: new Date("2025-07-30T00:00:00Z"),
-        datetime_repeat_every: "day",
-        units: "some units",
-        dimension_ids: [ new IdAndVersion(-1, 1) ],
-        function_arguments: [
-            {
-                id: 1,
-                name: "arg1",
-                default_value: "123",
-            }
-        ],
-        scenarios: [
-            {
-                id: 1,
-                values: { arg1: { value: "456" } },
-            }
-        ],
-
-        plain_title: "Modified Title",
-        plain_description: "Modified Description",
-
-        test_run_id: "test_run_-789",
-    })
+    const modified: DataComponent = data_component_all_fields_set()
 
     const normal_fields: (keyof DataComponent)[] = [
         "owner_id",

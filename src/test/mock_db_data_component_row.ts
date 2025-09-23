@@ -23,6 +23,7 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
 
         input_value: null,
         result_value: null,
+        recursive_dependency_ids: null,
         value_type: null,
         value_number_display_type: null,
         value_number_sig_figs: null,

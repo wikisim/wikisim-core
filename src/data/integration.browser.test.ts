@@ -2,6 +2,7 @@
 import { expect } from "chai"
 
 import { __testing__, get_supabase } from "../supabase/browser"
+import { tiptap_mention_chip } from "../test/fixtures"
 import { deep_equals } from "../utils/deep_equals"
 import { deindent } from "../utils/deindent"
 import {
@@ -15,6 +16,7 @@ import { init_data_component } from "./modify"
 import {
     insert_data_component,
     update_data_component,
+    UpsertDataComponentResponse,
 } from "./post_to_edge_functions"
 
 
@@ -94,9 +96,6 @@ describe("can init, insert, update, and search wiki data components", function (
         // and then ued a lower level function (to attempt to) insert that into
         // the DB and check that the wrong editor_id was ignored and the current
         // user's id was used instead.
-
-        await delete_test_data_in_db("data_components_history")
-        await delete_test_data_in_db("data_components")
     })
 
 
@@ -163,9 +162,6 @@ describe("can init, insert, update, and search wiki data components", function (
             scenarios: undefined,
             plain_title: "Test title",
         })
-
-        await delete_test_data_in_db("data_components_history")
-        await delete_test_data_in_db("data_components")
     })
 
 
@@ -301,6 +297,7 @@ describe("can init, insert, update, and search wiki data components", function (
 
             input_value: "123",
             result_value: "123",
+            recursive_dependency_ids: undefined,
             value_type: "number",
             value_number_display_type: "bare",
             value_number_sig_figs: 2,
@@ -414,6 +411,7 @@ describe("can init, insert, update, and search wiki data components", function (
 
             input_value: "123",
             result_value: "123",
+            recursive_dependency_ids: undefined,
             value_type: "number",
             value_number_display_type: "bare",
             value_number_sig_figs: 2,
@@ -565,7 +563,7 @@ describe("can init, insert, update, and search wiki data components", function (
 })
 
 
-describe("value_type of function", function ()
+describe(`when value_type == "function"`, function ()
 {
     this.timeout(5000)
 
@@ -795,6 +793,7 @@ describe("can init, insert, update, and search user owned data components", func
             label_ids: [-1, -2],
             input_value: "123",
             result_value: "123",
+            recursive_dependency_ids: undefined,
             value_type: "number",
             value_number_display_type: "bare",
             value_number_sig_figs: 2,
@@ -883,6 +882,7 @@ describe("can init, insert, update, and search user owned data components", func
             label_ids: [-1, -2],
             input_value: "123",
             result_value: "123",
+            recursive_dependency_ids: undefined,
             value_type: "number",
             value_number_display_type: "bare",
             value_number_sig_figs: 2,

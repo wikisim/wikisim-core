@@ -68,6 +68,8 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
         // when value_type === "number" (as this would require executing
         // user javascript inside the edge functions).
         result_value: data_component.result_value ?? null,
+        // Will be set on server-side (edge function)
+        recursive_dependency_ids: null,
 
         // Will be set by the server-side (edge function)
         plain_title: "",
@@ -113,6 +115,7 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
 
         input_value: row.input_value ?? undefined,
         result_value: row.result_value ?? undefined,
+        recursive_dependency_ids: hydrate_list_of_ids(row.recursive_dependency_ids),
         value_type: row.value_type ?? undefined,
         value_number_display_type: row.value_number_display_type ?? undefined,
         value_number_sig_figs: row.value_number_sig_figs ?? undefined,
@@ -120,7 +123,7 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
         datetime_range_end: convert_datetime(row.datetime_range_end),
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
         units: row.units ?? undefined,
-        dimension_ids: row.dimension_ids ? row.dimension_ids.map(id => parse_id(id, true)) : undefined,
+        dimension_ids: hydrate_list_of_ids(row.dimension_ids),
         function_arguments: hydrate_function_arguments(row, validators),
         scenarios: hydrate_scenarios(row, validators),
 
@@ -144,6 +147,12 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
             test_run_id: row.test_run_id ?? undefined,
         }
     }
+}
+
+
+function hydrate_list_of_ids(ids: string[] | null | undefined): IdAndVersion[] | undefined
+{
+    return ids ? ids.map(id => parse_id(id, true)) : undefined
 }
 
 
