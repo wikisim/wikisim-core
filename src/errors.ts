@@ -58,4 +58,7 @@ export const ERRORS =
     ERR32: new PostgreSQLError("ERR32", "ERR32. This user name is too similar to a reserved name and cannot be used."),
     users_ERR_dup_key: new PostgreSQLError("users_ERR_dup_key", `duplicate key value violates unique constraint "users_name_lowercase_key"`),
     ERR33: new TSError("ERR33", "ERR33. Invalid batch size.  Can only insert between 1 and 10 data components at a time"),
+    ERR34: new TSError("ERR34", "ERR34. Data component id in mention chip lacks version number:"),
+    ERR35: new TSError("ERR35", "ERR35. IdOnly cannot be added to OrderedUniqueIdAndVersionList:"),
+    ERR36: new TSError("ERR36", "ERR36. Unable to parse text"),
 }

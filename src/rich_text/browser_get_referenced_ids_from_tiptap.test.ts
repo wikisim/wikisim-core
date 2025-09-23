@@ -30,6 +30,6 @@ describe("browser_get_referenced_ids_from_tiptap", () =>
         const tiptap_text = `
             <p>${tiptap_mention_chip({ id: new IdOnly(1003), title: "variable a" })} + 2</p>`
 
-        expect(() => browser_get_referenced_ids_from_tiptap(tiptap_text)).to.throw("Data component id in mention chip lacks version number: 1003")
+        expect(() => browser_get_referenced_ids_from_tiptap(tiptap_text)).to.throw("ERR34. Data component id in mention chip lacks version number: 1003")
     })
 })

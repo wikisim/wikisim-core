@@ -1,3 +1,4 @@
+import { ERRORS } from "../errors"
 
 
 export class IdOnly
@@ -146,16 +147,26 @@ export class OrderedUniqueIdAndVersionList
 {
     private items: IdAndVersion[] = []
     private id_set: Set<string> = new Set()
+    private custom_error_message_when_id_only: string | null = null
+
+    constructor(custom_error_message_when_id_only?: string)
+    {
+        this.custom_error_message_when_id_only = custom_error_message_when_id_only || null
+    }
 
     add(item: IdAndVersion | string)
     {
         const key = typeof item === "string" ? item : item.to_str()
         if (this.id_set.has(key)) return
 
-        const item_as_id = typeof item === "string" ? parse_id(item, true) : item
+        const item_as_id = typeof item === "string" ? parse_id(item, false) : item
         if (item_as_id instanceof IdOnly)
         {
-            throw new Error(`IdOnly cannot be added to OrderedUniqueIdAndVersionList: ${item}`)
+            const error_message = this.custom_error_message_when_id_only
+                ? this.custom_error_message_when_id_only
+                : ERRORS.ERR35.message
+
+            throw new Error(`${error_message} ${item}`)
         }
         this.items.push(item_as_id)
         this.id_set.add(key)

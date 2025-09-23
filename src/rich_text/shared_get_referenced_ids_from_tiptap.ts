@@ -1,13 +1,14 @@
 import { IdAndVersion, OrderedUniqueIdAndVersionList } from "../data/id.ts"
+import { ERRORS } from "../errors.ts"
 import { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 
 
 export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser, tiptap_text: string): IdAndVersion[]
 {
     const doc = parser.parseFromString(tiptap_text, "text/html")
-    if (!doc) throw new Error("Error: Unable to parse text")
+    if (!doc) throw new Error(ERRORS.ERR36.message)
 
-    const ids = new OrderedUniqueIdAndVersionList()
+    const ids = new OrderedUniqueIdAndVersionList(ERRORS.ERR34.message)
 
     function find_ids(node: GenericNode)
     {
