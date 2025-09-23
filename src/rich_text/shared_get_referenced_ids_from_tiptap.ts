@@ -7,7 +7,8 @@ export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser,
     const doc = parser.parseFromString(tiptap_text, "text/html")
     if (!doc) throw new Error("Error: Unable to parse text")
 
-    const ids = new Set<string>()
+    const ids: string[] = []
+    const ids_set = new Set<string>()
 
     function find_ids(node: GenericNode)
     {
@@ -17,9 +18,10 @@ export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser,
             if (tag === "span" && (node as Element).classList.contains("mention-chip"))
             {
                 const data_id_and_version = (node as Element).getAttribute("data-id")
-                if (data_id_and_version)
+                if (data_id_and_version && !ids_set.has(data_id_and_version))
                 {
-                    ids.add(data_id_and_version)
+                    ids.push(data_id_and_version)
+                    ids_set.add(data_id_and_version)
                 }
             }
 
@@ -28,7 +30,7 @@ export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser,
     }
 
     find_ids(doc.body)
-    return Array.from(ids)
+    return ids
         .map(id_str =>
         {
             const id = parse_id(id_str)
