@@ -27,7 +27,7 @@ describe("calculate_result_value", function ()
             input_value: `<p>2</p>`,
             result_value: `2`,
         })
-        const data_component_by_id_and_version = {
+        const data_components_by_id_and_version = {
             [a_number.id.to_str()]: a_number,
         }
 
@@ -44,7 +44,7 @@ describe("calculate_result_value", function ()
             i++
             const response = await calculate_result_value({
                 component,
-                data_component_by_id_and_version,
+                data_components_by_id_and_version,
                 convert_tiptap_to_javascript: browser_convert_tiptap_to_javascript,
                 evaluate_code_in_sandbox: evaluate_code_in_browser_sandbox,
                 timeout_ms: 5000,

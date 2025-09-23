@@ -7,7 +7,7 @@ import { load_dependencies_into_sandbox } from "./load_dependencies_into_sandbox
 interface CalculateResultValueArgs
 {
     component: DataComponent | NewDataComponent
-    data_component_by_id_and_version: Record<string, DataComponent>
+    data_components_by_id_and_version: Record<string, DataComponent>
     convert_tiptap_to_javascript: (tiptap_text: string) => string,
     evaluate_code_in_sandbox: (request: EvaluationRequest) => Promise<EvaluationResponse>,
     timeout_ms?: number
@@ -35,12 +35,12 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
         })
     }
 
-    const dependencies = await load_dependencies_into_sandbox({
+    const load_dependencies_response = await load_dependencies_into_sandbox({
         component,
-        data_component_by_id_and_version: args.data_component_by_id_and_version,
+        data_components_by_id_and_version: args.data_components_by_id_and_version,
         evaluate_code_in_sandbox: args.evaluate_code_in_sandbox,
     })
-    if (dependencies.error) return dependencies
+    if (load_dependencies_response.error) return load_dependencies_response
 
     return await args.evaluate_code_in_sandbox(basic_request)
 }

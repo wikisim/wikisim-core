@@ -8,7 +8,7 @@ import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 interface LoadDependenciesIntoSandboxArgs
 {
     component: DataComponent | NewDataComponent
-    data_component_by_id_and_version: Record<string, DataComponent>
+    data_components_by_id_and_version: Record<string, DataComponent>
     evaluate_code_in_sandbox: (request: EvaluationRequest) => Promise<EvaluationResponse>
     no_deep_freeze?: boolean
 }
@@ -16,7 +16,7 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
 {
     const {
         component,
-        data_component_by_id_and_version,
+        data_components_by_id_and_version,
         evaluate_code_in_sandbox,
         no_deep_freeze,
     } = args
@@ -28,7 +28,7 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
 
     for (const id of dependency_ids)
     {
-        const dep = data_component_by_id_and_version[id.to_str()]
+        const dep = data_components_by_id_and_version[id.to_str()]
         if (!dep)
         {
             return Promise.reject(new Error(`Missing dependency with id ${id.to_str()}`))
