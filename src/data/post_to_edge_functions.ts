@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { ERRORS } from "../errors"
 import type { GetSupabase } from "../supabase/browser"
 import type {
     ClientInsertDataComponentV2Response,
@@ -34,10 +35,40 @@ export async function insert_data_component (
     data_component: NewDataComponent | DataComponent
 ): Promise<UpsertDataComponentResponse>
 {
-    const new_data_component_json = flatten_new_or_data_component_to_json(data_component)
+    return insert_data_components(get_supabase, [data_component])
+        .then(result =>
+        {
+            let response: UpsertDataComponentResponse
+            if (result.data) response = { data: result.data[0]!, error: null }
+            else response = { data: null, error: result.error }
+            return response
+        })
+}
+
+
+export type UpsertDataComponentsResponse = {
+    data: null
+    error: ErrorResponse
+} | {
+    data: DataComponent[]
+    error: null
+}
+export async function insert_data_components (
+    get_supabase: GetSupabase,
+    // Allow inserting DataComponent (which has a specific id) to allow running
+    // integration tests.  Normal use for this should be NewDataComponent.
+    data_components: (NewDataComponent | DataComponent)[]
+): Promise<UpsertDataComponentsResponse>
+{
+    if (data_components.length === 0 || data_components.length > 10)
+    {
+        return { data: null, error: ERRORS.ERR33.message }
+    }
+
+    const new_data_components_json = data_components.map(flatten_new_or_data_component_to_json)
 
     const headers = await get_headers(get_supabase)
-    const request_body: EFInsertDataComponentV2Args = { batch: [new_data_component_json] }
+    const request_body: EFInsertDataComponentV2Args = { batch: new_data_components_json }
 
     return get_supabase()
         .functions.invoke("ef_insert_data_component_v2", {
@@ -54,12 +85,14 @@ export async function insert_data_component (
                 return await handle_error(error, response)
             }
 
-            if (data.length !== 1)
+            if (data.length !== data_components.length)
             {
-                return { data: null, error: `Wrong number of data returned from insert, expected 1 got ${data.length}` }
+                return { data: null, error: `Wrong number of data returned from insert, expected ${data_components.length} got ${data.length}` }
             }
 
-            return { data: hydrate_data_component_from_json(data[0]!, field_validators), error: null }
+            const hydrated = data.map(d => hydrate_data_component_from_json(d, field_validators))
+
+            return { data: hydrated, error: null }
         })
 }
 

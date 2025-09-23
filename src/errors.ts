@@ -57,4 +57,5 @@ export const ERRORS =
     ERR31: new PostgreSQLError("ERR31", "ERR31. This user name is reserved and cannot be used."),
     ERR32: new PostgreSQLError("ERR32", "ERR32. This user name is too similar to a reserved name and cannot be used."),
     users_ERR_dup_key: new PostgreSQLError("users_ERR_dup_key", `duplicate key value violates unique constraint "users_name_lowercase_key"`),
+    ERR33: new TSError("ERR33", "ERR33. Invalid batch size.  Can only insert between 1 and 10 data components at a time"),
 }
