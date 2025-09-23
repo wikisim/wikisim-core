@@ -1,7 +1,7 @@
 // TODO: rename this file
 
-import { IdAndVersion, TempId } from "./id"
-import { DataComponent, FunctionArgument, NewDataComponent } from "./interface"
+import { IdAndVersion, TempId } from "./id.ts"
+import { DataComponent, FunctionArgument, NewDataComponent } from "./interface.ts"
 
 
 export function init_data_component(partial: Partial<DataComponent> = {}, for_testing = false): DataComponent

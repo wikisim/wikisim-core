@@ -15,6 +15,7 @@ import { DataComponent } from "./interface"
 import { init_data_component } from "./modify"
 import {
     insert_data_component,
+    insert_data_components,
     update_data_component,
     UpsertDataComponentResponse,
 } from "./post_to_edge_functions"
@@ -99,26 +100,106 @@ describe("can init, insert, update, and search wiki data components", function (
     })
 
 
-    it("should compute fields using edge function on insert and update", async function ()
+    describe("computed fields using edge function on insert and update", function ()
     {
-        const data_component = {
-            ...data_component_fixture,
-            title: "<p>Some Title</p>",
-            description: "<p>Some Description</p>",
-            // plain title and description will be set to "" before posting to
-            // edge function but set here explicitly as well
-            plain_title: "",
-            plain_description: "",
-            test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
-        }
+        let data_component_2: UpsertDataComponentResponse["data"] | undefined = undefined
+        let data_component_3: UpsertDataComponentResponse["data"] | undefined = undefined
+        let data_component_4: UpsertDataComponentResponse["data"] | undefined = undefined
+        it("set up data for tests", async function ()
+        {
+            const data_component_1 = { id: new IdAndVersion(-1, 1), title: "Some other Component" }
 
-        const response3 = await insert_data_component(get_supabase, data_component)
-        if (response3.error !== null) expect.fail(`Should have inserted data component with edge function computing fields, but got response: ${JSON.stringify(response3)}`)
-        expect(response3.data.plain_title).equals("Some Title", "Edge function should have computed plain_title on insert")
-        expect(response3.data.plain_description).equals("Some Description", "Edge function should have computed plain_description on insert")
+            const data_component_2_to_insert = {
+                ...data_component_fixture,
+                id: new IdAndVersion(-2, 1),
 
-        await delete_test_data_in_db("data_components_history")
-        await delete_test_data_in_db("data_components")
+                title: "<p>Some Title</p>",
+                description: "<p>Some Description</p>",
+
+                value_type: undefined,  // should default to "number",
+                // This number has a calculation that references another data
+                // component but because we don't currently run the calculation
+                // on the edge function we haven't actually created it. Later
+                // when the edge function does calculation then this test will
+                // fail and need to be updated to create this referenced data
+                // component `id: -1v1, title: "Some other Component"`
+                input_value: `123 + ${tiptap_mention_chip(data_component_1)}`,
+                // Should be left as-is for non-function value_types
+                result_value: "456",
+                // Should be ignored and set to [id-1v1] by edge function
+                recursive_dependency_ids: [new IdAndVersion(-9, 1), new IdAndVersion(-10, 1)],
+
+                test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+            }
+
+            const data_component_3_to_insert: DataComponent = {
+                ...data_component_fixture,
+                id: new IdAndVersion(-3, 1),
+
+                value_type: "function",
+                input_value: `789 + ${tiptap_mention_chip(data_component_2_to_insert)}`,
+                // Should be computed by edge function
+                result_value: "",
+                // Should be ignored and set to [id-2v1] by edge function
+                recursive_dependency_ids: [new IdAndVersion(-9, 1), new IdAndVersion(-10, 1)],
+
+                test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+            }
+
+            const data_component_4_to_insert: DataComponent = {
+                ...data_component_fixture,
+                id: new IdAndVersion(-4, 1),
+
+                value_type: "function",
+                input_value: `101112 + ${tiptap_mention_chip(data_component_3_to_insert)}()`,
+                // Should be ignored and set to [id-2v1, id-3v1] by edge function
+                recursive_dependency_ids: [new IdAndVersion(-9, 1), new IdAndVersion(-10, 1)],
+
+                test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
+            }
+
+            const response = await insert_data_components(get_supabase, [
+                data_component_2_to_insert,
+                data_component_3_to_insert,
+                data_component_4_to_insert,
+            ])
+            if (response.error !== null) expect.fail(`Should have inserted mentioned data component, but got response: ${JSON.stringify(response)}`)
+            data_component_2 = response.data[0]
+            data_component_3 = response.data[1]
+            data_component_4 = response.data[2]
+        })
+
+        it("should compute title and description", function ()
+        {
+            if (!data_component_2) expect.fail("Test data not set up")
+
+            expect(data_component_2.plain_title).equals("Some Title", "Edge function should have computed plain_title on insert")
+            expect(data_component_2.plain_description).equals("Some Description", "Edge function should have computed plain_description on insert")
+        })
+
+        it("should compute recursive_dependency_ids", function ()
+        {
+            if (!data_component_2) expect.fail("Test data not set up")
+            if (!data_component_3) expect.fail("Test data not set up")
+            if (!data_component_4) expect.fail("Test data not set up")
+
+            expect(data_component_2.recursive_dependency_ids).deep.equals([
+                new IdAndVersion(-1, 1),
+            ], "Edge function should have computed recursive_dependency_ids of mentioned component on insert")
+            expect(data_component_2.result_value).equals("456", "result_value should be unchanged as edge function does not yet compute it")
+
+            expect(data_component_3.recursive_dependency_ids).deep.equals([
+                // new IdAndVersion(-1, 1), <-- it should not include dependencies of any non-functions it references
+                new IdAndVersion(-2, 1),
+            ], "Edge function should have computed recursive_dependency_ids of mentioned component on insert")
+            expect(data_component_3.result_value).equals("() => 789 + d_2v1", "result_value should be set by edge function for function value_type")
+
+            expect(data_component_4.recursive_dependency_ids).deep.equals([
+                new IdAndVersion(-2, 1), // <-- it should include dependencies of any functions it references
+                new IdAndVersion(-3, 1),
+            ], "Edge function should have computed recursive_dependency_ids of mentioned component on insert")
+            expect(data_component_4.result_value).equals("() => 101112 + d_3v1()", "result_value should be set by edge function for function value_type")
+        })
     })
 
 
