@@ -53,14 +53,17 @@ export type UpsertDataComponentsResponse = {
     data: DataComponent[]
     error: null
 }
-export async function insert_data_components (
+async function insert_data_components (
     get_supabase: GetSupabase,
-    // Allow inserting DataComponent (which has a specific id) to allow running
-    // integration tests.  Normal use for this should be NewDataComponent.
+    /**
+     * Note that we actually can not safely insert more than one at a time
+     * because when we're computing the recursive_dependency_ids on the edge
+     * function, it must have all of its dependencies already in the database.
+     */
     data_components: (NewDataComponent | DataComponent)[]
 ): Promise<UpsertDataComponentsResponse>
 {
-    if (data_components.length === 0 || data_components.length > 10)
+    if (data_components.length === 0 || data_components.length > 1)
     {
         return { data: null, error: ERRORS.ERR33.message }
     }

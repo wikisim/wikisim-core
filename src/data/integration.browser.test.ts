@@ -15,9 +15,8 @@ import { DataComponent } from "./interface"
 import { init_data_component } from "./modify"
 import {
     insert_data_component,
-    insert_data_components,
     update_data_component,
-    UpsertDataComponentResponse,
+    UpsertDataComponentResponse
 } from "./post_to_edge_functions"
 
 
@@ -158,15 +157,24 @@ describe("can init, insert, update, and search wiki data components", function (
                 test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
             }
 
-            const response = await insert_data_components(get_supabase, [
-                data_component_2_to_insert,
-                data_component_3_to_insert,
-                data_component_4_to_insert,
-            ])
-            if (response.error !== null) expect.fail(`Should have inserted mentioned data component, but got response: ${JSON.stringify(response)}`)
-            data_component_2 = response.data[0]
-            data_component_3 = response.data[1]
-            data_component_4 = response.data[2]
+            // Can not use `insert_data_components` (plural) because the edge
+            // function that computes recursive_dependency_ids requires that
+            // dependencies already exist in the DB so we have to insert
+            // them one at a time.
+            // const response = await insert_data_components(get_supabase, [
+            //     data_component_2_to_insert,
+            //     data_component_3_to_insert,
+            //     data_component_4_to_insert,
+            // ])
+            const response_1 = await insert_data_component(get_supabase, data_component_2_to_insert)
+            const response_2 = await insert_data_component(get_supabase, data_component_3_to_insert)
+            const response_3 = await insert_data_component(get_supabase, data_component_4_to_insert)
+            if (response_1.error !== null) expect.fail(`Should have inserted mentioned data component, but got response: ${JSON.stringify(response_1)}`)
+            if (response_2.error !== null) expect.fail(`Should have inserted mentioned data component, but got response: ${JSON.stringify(response_2)}`)
+            if (response_3.error !== null) expect.fail(`Should have inserted mentioned data component, but got response: ${JSON.stringify(response_3)}`)
+            data_component_2 = response_1.data
+            data_component_3 = response_2.data
+            data_component_4 = response_3.data
         })
 
         it("should compute title and description", function ()

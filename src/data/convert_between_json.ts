@@ -146,7 +146,7 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
 }
 
 
-function hydrate_list_of_ids(ids: string[] | null | undefined): IdAndVersion[] | undefined
+export function hydrate_list_of_ids(ids: string[] | null | undefined): IdAndVersion[] | undefined
 {
     return (ids && ids.length) ? ids.map(id => parse_id(id, true)) : undefined
 }
