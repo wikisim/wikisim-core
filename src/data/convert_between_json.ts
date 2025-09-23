@@ -41,6 +41,10 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
         label_ids: data_component.label_ids ?? null,
 
         input_value: data_component.input_value ?? null,
+        result_value: data_component.result_value ?? null,
+        recursive_dependency_ids: data_component.recursive_dependency_ids
+            ? data_component.recursive_dependency_ids.map(d => d.to_str())
+            : null,
         value_type: data_component.value_type ?? null,
         value_number_display_type: data_component.value_number_display_type ?? null,
         value_number_sig_figs: data_component.value_number_sig_figs ?? null,
@@ -62,14 +66,6 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
             // deno-lint-ignore no-explicit-any
             ? data_component.scenarios.map(({ id: _, ...args }) => args as any as Json)
             : null,
-
-        // Will be partially set by the server-side (edge function), i.e. when
-        // value_type === "function" this will be set on edge function but not
-        // when value_type === "number" (as this would require executing
-        // user javascript inside the edge functions).
-        result_value: data_component.result_value ?? null,
-        // Will be set on server-side (edge function)
-        recursive_dependency_ids: null,
 
         // Will be set by the server-side (edge function)
         plain_title: "",

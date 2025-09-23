@@ -99,8 +99,16 @@ export interface DataComponentFields
     label_ids?: number[]
 
     input_value?: string
+    /** Will be partially set by the server-side (edge function):
+     *  when value_type === "function" result_value will be set by edge function
+     *  when value_type === "number" result_value will be left as that provided
+     *  by users (because otherwise this would require executing user javascript
+     *  inside the edge functions).
+     */
     result_value?: string
-    // IDs & version numbers recursively parsed from input_value
+    /** IDs & version numbers recursively parsed from input_value.  Will be set
+     *  on server-side (edge function)
+     */
     recursive_dependency_ids?: IdAndVersion[]
     value_type?: ValueType
     value_number_display_type?: NumberDisplayType
