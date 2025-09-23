@@ -1,8 +1,8 @@
-import { IdAndMaybeVersion, IdOnly, parse_id } from "../data/id.ts"
+import { IdAndVersion, IdOnly, parse_id } from "../data/id.ts"
 import { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 
 
-export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser, tiptap_text: string): IdAndMaybeVersion[]
+export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser, tiptap_text: string): IdAndVersion[]
 {
     const doc = parser.parseFromString(tiptap_text, "text/html")
     if (!doc) throw new Error("Error: Unable to parse text")
