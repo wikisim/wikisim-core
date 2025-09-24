@@ -1,4 +1,5 @@
 import type { DataComponent, NewDataComponent } from "../data/interface.ts"
+import { ERRORS } from "../errors.ts"
 import { deep_freeze } from "../utils/deep_freeze.ts"
 import { deindent } from "../utils/deindent.ts"
 import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
@@ -22,6 +23,11 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
     } = args
     const dependency_ids = component.recursive_dependency_ids || []
 
+    if (dependency_ids.length !== Object.keys(data_components_by_id_and_version).length)
+    {
+        return errored(ERRORS.ERR39.message + ` Expected ${dependency_ids.length} dependencies but got ${Object.keys(data_components_by_id_and_version).length}`)
+    }
+
     let js_dependencies = deindent(`
     ${no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze.toString()}
     `)
@@ -31,7 +37,7 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
         const dep = data_components_by_id_and_version[id.to_str()]
         if (!dep)
         {
-            return Promise.reject(new Error(`Missing dependency with id ${id.to_str()}`))
+            return errored(ERRORS.ERR40.message + ` Missing dependency with id ${id.to_str()}`)
         }
 
         if (dep.result_value === undefined)
@@ -48,5 +54,19 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
         js_input_value: js_dependencies,
         requested_at: performance.now(),
         timeout_ms: 10000,
+    })
+}
+
+
+function errored(message: string): Promise<EvaluationResponse>
+{
+    return Promise.resolve({
+        result: null,
+        error: message,
+        evaluation_id: 0,
+        js_input_value: "",
+        requested_at: 0,
+        start_time: 0,
+        end_time: 0,
     })
 }
