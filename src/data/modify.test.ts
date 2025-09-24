@@ -44,6 +44,7 @@ describe("changes_made function", () =>
 
         "input_value",
         "result_value",
+        "recursive_dependency_ids",
         "value_type",
         "value_number_display_type",
         "value_number_sig_figs",
@@ -71,7 +72,6 @@ describe("changes_made function", () =>
         // These fields are derived or special and should not be compared
         "plain_title",
         "plain_description",
-        "recursive_dependency_ids",
         "test_run_id",
     ]
 
