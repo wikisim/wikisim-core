@@ -4,10 +4,15 @@ import { IdAndVersion, TempId } from "./id.ts"
 import { DataComponent, FunctionArgument, NewDataComponent } from "./interface.ts"
 
 
-export function init_data_component(partial: Partial<DataComponent> = {}, for_testing = false): DataComponent
+export function init_data_component(partial: Partial<DataComponent> | { id: string } = {}, for_testing = false): DataComponent
 {
+    let { id: id, ...rest } = partial
+
+    if (!id) id = new IdAndVersion(-1, 1) // Use a negative ID for test data
+    if (typeof id === "string") id = IdAndVersion.from_str(id)
+
     return {
-        id: new IdAndVersion(-1, 1), // Use a negative ID for test data
+        id,
 
         owner_id: undefined,
 
@@ -45,12 +50,12 @@ export function init_data_component(partial: Partial<DataComponent> = {}, for_te
         // Default to current time for test runs
         test_run_id: for_testing ? `test_run_id_${new Date().toISOString()}` : undefined,
 
-        ...partial,
+        ...rest,
     }
 }
 
 
-export function init_new_data_component(partial: Partial<DataComponent> = {}, for_testing = false): NewDataComponent
+export function init_new_data_component(partial: Partial<Omit<DataComponent, "id">> = {}, for_testing = false): NewDataComponent
 {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...rest } = init_data_component(partial, for_testing)

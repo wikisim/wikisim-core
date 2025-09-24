@@ -27,6 +27,12 @@ export class IdOnly
 
 export class IdAndVersion
 {
+    static
+    from_str(str: string): IdAndVersion
+    {
+        return parse_id(str, true)
+    }
+
     id: number
     version: number
     constructor(id: number | string, version: number | string)

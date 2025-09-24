@@ -1,10 +1,17 @@
-import { IdAndMaybeVersion, IdAndVersion } from "../data/id.ts"
+import { IdAndMaybeVersion, IdAndVersion, parse_id } from "../data/id.ts"
 import type { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { init_data_component, init_new_data_component } from "../data/modify.ts"
 
 
-export function tiptap_mention_chip(args: {title: string, id: IdAndMaybeVersion }): string
+export function tiptap_mention_chip(args: {title: string, id: IdAndMaybeVersion } | string): string
 {
+    if (typeof args === "string")
+    {
+        const id_str = parse_id(args).to_str()
+        const title = `Some title for ${args}`
+        return `<span class="mention-chip" data-type="customMention" data-id="${id_str}" data-label="${title}">@${title}</span>`
+    }
+
     return `<span class="mention-chip" data-type="customMention" data-id="${args.id.to_str()}" data-label="${args.title}">@${args.title}</span>`
 }
 
