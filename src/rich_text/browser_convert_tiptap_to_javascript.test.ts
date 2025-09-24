@@ -30,7 +30,7 @@ describe("browser_convert_tiptap_to_javascript", () =>
             const tiptap_text = `
                 <p><span class="mention-chip" data-type="customMention" data-id="1003" data-label="Thing">@Thing</span>+ 2</p>`
             const plain_text = browser_convert_tiptap_to_javascript(tiptap_text)//, {})
-            expect(plain_text).equals(`"referenced components must use a version but got id 1003 of Thing"+ 2`)
+            expect(plain_text).equals(`"referenced components must use a version but got id 1003 for Thing"+ 2`)
             expect(parseFloat(plain_text)).deep.equals(NaN)
         })
 

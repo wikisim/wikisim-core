@@ -32,7 +32,7 @@ export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMPars
                 if (data_id_and_version instanceof IdOnly)
                 {
                     const component_name = node.textContent?.replace(/^@/, "") || "unknown"
-                    return `"referenced components must use a version but got id ${data_id_and_maybe_version} of ${component_name}"`
+                    return `"referenced components must use a version but got id ${data_id_and_maybe_version} for ${component_name}"`
                 }
                 else
                 {
