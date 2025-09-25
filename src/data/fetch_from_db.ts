@@ -169,6 +169,9 @@ export async function search_data_components(
         page?: number
         size?: number
         similarity_threshold?: number
+        // Filters
+        filter_exclude_test_components?: boolean
+        filter_by_owner_id?: string
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
@@ -182,6 +185,8 @@ export async function search_data_components(
             similarity_threshold: options.similarity_threshold ?? 0,
             offset_n,
             limit_n,
+            filter_exclude_test_components: options.filter_exclude_test_components ?? true,
+            filter_by_owner_id: options.filter_by_owner_id,
         })
         .then(({ data, error }) =>
         {

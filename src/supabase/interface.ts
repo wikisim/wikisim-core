@@ -385,6 +385,7 @@ export type Database = {
           filter_by_label_id?: number
           filter_by_owner_id?: string
           filter_by_wiki_or_owned?: Database["public"]["Enums"]["search_data_components_filter_by_wiki_or_owned"]
+          filter_exclude_test_components?: boolean
           limit_n?: number
           offset_n?: number
           order_by?: Database["public"]["Enums"]["search_data_components_order_by"]
