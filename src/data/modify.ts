@@ -74,11 +74,11 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
 
         || component_1.title !== component_2.title
         || component_1.description !== component_2.description
-        || JSON.stringify(component_1.label_ids) !== JSON.stringify(component_2.label_ids)
+        || lists_changed(component_1.label_ids, component_2.label_ids)
 
         || component_1.input_value !== component_2.input_value
         || component_1.result_value !== component_2.result_value
-        || JSON.stringify(component_1.recursive_dependency_ids) !== JSON.stringify(component_2.recursive_dependency_ids)
+        || lists_changed(component_1.recursive_dependency_ids, component_2.recursive_dependency_ids)
         || component_1.value_type !== component_2.value_type
         || component_1.value_number_display_type !== component_2.value_number_display_type
         || component_1.value_number_sig_figs !== component_2.value_number_sig_figs
@@ -86,7 +86,7 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         || component_1.datetime_range_end?.getTime() !== component_2.datetime_range_end?.getTime()
         || component_1.datetime_repeat_every !== component_2.datetime_repeat_every
         || component_1.units !== component_2.units
-        || JSON.stringify(component_1.dimension_ids) !== JSON.stringify(component_2.dimension_ids)
+        || lists_changed(component_1.dimension_ids, component_2.dimension_ids)
         || function_arguments_changed(component_1.function_arguments, component_2.function_arguments)
         || scenarios_changed(component_1.scenarios, component_2.scenarios)
     )
@@ -103,6 +103,28 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
 
         // We do not allow changing owner_id at the moment.
         // || component_1.owner_id !== component_2.owner_id
+}
+
+
+function lists_changed<T>(list1: T[] | undefined, list2: T[] | undefined, order_matters?: boolean): boolean
+{
+    if ((!list1 || list1.length === 0) && (!list2 || list2.length === 0)) return false
+    if (!list1 || !list2) return true
+    if (list1.length !== list2.length) return true
+
+    if (order_matters)
+    {
+        const sorted1 = [...list1].sort()
+        const sorted2 = [...list2].sort()
+
+        for (let i = 0; i < sorted1.length; i++)
+        {
+            if (sorted1[i] !== sorted2[i]) return true
+        }
+        return false
+    }
+
+    return JSON.stringify(list1) !== JSON.stringify(list2)
 }
 
 

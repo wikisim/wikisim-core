@@ -110,4 +110,22 @@ describe("changes_made function", () =>
             expect(changes_made(updated_component, original, true)).equals(false, `Changes should be not detected for derived or special field "${field}" in both directions when compare_meta_fields is true`)
         })
     })
+
+    it("should return false for empty lists of ids", () =>
+    {
+        expect(changes_made(
+            { ...original, label_ids: undefined },
+            { ...original, label_ids: [] }
+        )).equals(false, `Changes should be not detected for empty lists of label_ids`)
+
+        expect(changes_made(
+            { ...original, recursive_dependency_ids: undefined },
+            { ...original, recursive_dependency_ids: [] }
+        )).equals(false, `Changes should be not detected for empty lists of recursive_dependency_ids`)
+
+        expect(changes_made(
+            { ...original, dimension_ids: undefined },
+            { ...original, dimension_ids: [] }
+        )).equals(false, `Changes should be not detected for empty lists of dimension_ids`)
+    })
 })
