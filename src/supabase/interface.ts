@@ -1,4 +1,6 @@
-// Adapted from
+// Update by running `node ./scripts/update_interface.cjs` and then copy over the
+// interface2.ts file into here and manually revert any other changes as needed.
+// node ./scripts/update_interface.cjs will run this command:
 // `npx supabase gen types typescript --project-id sfkgqscbwofiphfxhnxg --schema public > src/supabase/interface2.ts`
 
 export type Json =
@@ -379,14 +381,13 @@ export type Database = {
       }
       search_data_components: {
         Args: {
-          /**
-           * Allowed values: [1, 20]
-           */
+          filter_by_component_id?: string
+          filter_by_label_id?: number
+          filter_by_owner_id?: string
+          filter_by_wiki_or_owned?: Database["public"]["Enums"]["search_data_components_filter_by_wiki_or_owned"]
           limit_n?: number
-          /**
-           * Allowed values: [0, 500]
-           */
           offset_n?: number
+          order_by?: Database["public"]["Enums"]["search_data_components_order_by"]
           query: string
           similarity_threshold?: number
         }
@@ -493,6 +494,11 @@ export type Database = {
         | "number_array"
         | "function"
       data_component_version_type: "minor" | "rollback"
+      search_data_components_filter_by_wiki_or_owned: "wiki" | "owned"
+      search_data_components_order_by:
+        | "score"
+        | "created_at DESC"
+        | "created_at ASC"
     }
     CompositeTypes: {
       data_component_insert_params: {
@@ -713,6 +719,12 @@ export const Constants = {
         "function",
       ],
       data_component_version_type: ["minor", "rollback"],
+      search_data_components_filter_by_wiki_or_owned: ["wiki", "owned"],
+      search_data_components_order_by: [
+        "score",
+        "created_at DESC",
+        "created_at ASC",
+      ],
     },
   },
 } as const
