@@ -113,49 +113,53 @@ export async function request_historical_data_components(
 }
 
 
-export async function search_data_components_v1(
-    get_supabase: GetSupabase,
-    search_terms: string,
-    /**
-     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
-     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
-     */
-    options: {
-        page?: number
-        size?: number
-        owner_id?: string
-    } = {},
-): Promise<RequestDataComponentsReturn>
-{
-    const { owner_id } = options
-    const { from, to } = get_range_from_options(options)
+// export async function search_data_components_v1(
+//     get_supabase: GetSupabase,
+//     search_terms: string,
+//     /**
+//      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+//      * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+//      */
+//     options: {
+//         page?: number
+//         size?: number
+//         owner_id?: string
+//     } = {},
+// ): Promise<RequestDataComponentsReturn>
+// {
+//     const { owner_id } = options
+//     const { from, to } = get_range_from_options(options)
 
-    let supa = get_supabase()
-        .from("data_components")
-        // .select(`*, ts_rank(search_vector, plainto_tsquery('english', '${search_terms}')) as rank`)
-        // .select("*, ts_rank(search_vector, plainto_tsquery('english', ?)) as rank", { count: "exact" })
-        .select("*")
+//     let supa = get_supabase()
+//         .from("data_components")
+//         // .select(`*, ts_rank(search_vector, plainto_tsquery('english', '${search_terms}')) as rank`)
+//         // .select("*, ts_rank(search_vector, plainto_tsquery('english', ?)) as rank", { count: "exact" })
+//         .select("*")
 
-    // Unless owner_id is specified then for now we filter to exclude where
-    // there is an owner_id to ensure no "user owned" data is shown to other
-    // users e.g. on browse/search page
-    if (owner_id) supa = supa.or(`owner_id.is.null,owner_id.eq.${owner_id}`)
-    else supa = supa.is("owner_id", null)
+//     // Unless owner_id is specified then for now we filter to exclude where
+//     // there is an owner_id to ensure no "user owned" data is shown to other
+//     // users e.g. on browse/search page
+//     if (owner_id) supa = supa.or(`owner_id.is.null,owner_id.eq.${owner_id}`)
+//     else supa = supa.is("owner_id", null)
 
-    return supa
-        .textSearch("search_vector", search_terms, {
-            config: "english",
-            type: "websearch",
-        })
-        // .order("rank", { ascending: false })
-        .range(from, to)
-        .then(({ data, error }) =>
-        {
-            if (error) return { data: null, error }
-            const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
-            return { data: instances, error: null }
-        })
-}
+//     if (search_terms.trim())
+//     {
+//         supa = supa.textSearch("search_vector", search_terms, {
+//             config: "english",
+//             type: "websearch",
+//         })
+//     }
+
+//     return supa
+//         // .order("rank", { ascending: false })
+//         .range(from, to)
+//         .then(({ data, error }) =>
+//         {
+//             if (error) return { data: null, error }
+//             const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
+//             return { data: instances, error: null }
+//         })
+// }
 
 
 export async function search_data_components(
