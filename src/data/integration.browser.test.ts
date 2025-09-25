@@ -654,8 +654,8 @@ describe("when user logged in", function ()
                 description: "some description",
             }))
 
-            const search_results = await search_data_components(get_supabase, "some description", { page: 0, size: 10, similarity_threshold: 0.5 })
-            const search_2_results = await search_data_components(get_supabase, `"Second Component"`, { page: 0, size: 10, similarity_threshold: 0.5 })
+            const search_results = await search_data_components(get_supabase, "some description", { page: 0, size: 10, similarity_threshold: 0.5, filter_exclude_test_components: false })
+            const search_2_results = await search_data_components(get_supabase, `"Second Component"`, { page: 0, size: 10, similarity_threshold: 0.5, filter_exclude_test_components: false })
 
             if (search_results.error || search_2_results.error)
             {
