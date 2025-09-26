@@ -1,15 +1,15 @@
+import { Json } from "../supabase/interface"
 import { LabelsAndResults } from "./interface"
 
 
-export function result_string_to_graphable(result: string | undefined): LabelsAndResults | false
+export function result_string_to_json(result: string | undefined): { parsed: Json } | false
 {
     if (!result) return false
 
     try
     {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const json = JSON.parse(result)
-        return assert_json_is_graphable(json)
+        return { parsed: JSON.parse(result) }
     }
     catch
     {
@@ -18,11 +18,12 @@ export function result_string_to_graphable(result: string | undefined): LabelsAn
 }
 
 
-function assert_json_is_graphable(json: any): LabelsAndResults | false
+export function assert_result_json_is_graphable(json: Json): LabelsAndResults | false
 {
     if (typeof json !== "object" || json === null) return false
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    if (!("labels" in json) || !("results" in json)) return false
+
     const { labels, results } = json
     if (!Array.isArray(labels) || !Array.isArray(results)) return false
 
@@ -30,4 +31,13 @@ function assert_json_is_graphable(json: any): LabelsAndResults | false
     if (!results.every(l => typeof l === "number")) return false
 
     return { labels, results }
+}
+
+
+export function result_string_to_graphable(result: string | undefined): LabelsAndResults | false
+{
+    const parsed_json = result_string_to_json(result)
+    if (!parsed_json) return false
+
+    return assert_result_json_is_graphable(parsed_json.parsed)
 }
