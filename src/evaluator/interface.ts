@@ -4,7 +4,10 @@ export interface EvaluationRequest
 {
     js_input_value: string
     requested_at: number
-    timeout_ms?: number // Optional timeout in milliseconds, default is 100 ms
+    /**
+     * Optional timeout in milliseconds, default is 100 ms
+     */
+    timeout_ms?: number
 }
 
 export type MinimalEvaluationResponse =
