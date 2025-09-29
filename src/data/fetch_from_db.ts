@@ -25,11 +25,14 @@ export async function request_data_components(
     get_supabase: GetSupabase,
     /**
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
-     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     * Size is the number of items per page. Default is 20, min is 1, max is 101.
      */
     options: {
         page?: number
         size?: number
+        /**
+         * Max 1000 IDs
+         */
         ids?: IdOnly[]
         owner_id?: string
         __only_test_data?: boolean
@@ -79,12 +82,12 @@ export async function request_data_components(
 export async function request_historical_data_components(
     get_supabase: GetSupabase,
     /**
-     * Must provide at least one IdAndVersion or IdOnly
+     * Must provide at least one IdAndVersion or IdOnly. Max 1000 IDs
      */
     ids: IdAndMaybeVersion[],
     /**
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
-     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     * Size is the number of items per page. Default is 20, min is 1, max is 101.
      */
     options: {
         page?: number
@@ -118,7 +121,7 @@ export async function request_historical_data_components(
 //     search_terms: string,
 //     /**
 //      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
-//      * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+//      * Size is the number of items per page. Default is 20, min is 1, max is 101.
 //      */
 //     options: {
 //         page?: number
@@ -167,7 +170,7 @@ export async function search_data_components(
     search_terms: string,
     /**
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
-     * Size is the number of items per page. Default is 20, min is 1, max is 1000.
+     * Size is the number of items per page. Default is 20, min is 1, max is 101.
      */
     options: {
         page?: number
@@ -179,7 +182,7 @@ export async function search_data_components(
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
-    const limit_n = clamp(options.size ?? 20, 1, 20)
+    const limit_n = clamp_page_size(options.size)
     const page = Math.max(options.page ?? 0, 0)
     const offset_n = page * limit_n
 
@@ -218,10 +221,15 @@ function get_range_from_options(options: { page?: number, size?: number } = {}):
 {
     let { page, size } = options
     page = Math.max(page ?? 0, 0)
-    size = clamp(size ?? 20, 1, 1000)
+    size = clamp_page_size(size)
     const limit = size
     const offset = page * limit
     const from = offset
     const to = offset + limit - 1
     return { from, to }
+}
+
+function clamp_page_size(size: number = 20)
+{
+    return clamp(size, 1, 101)
 }
