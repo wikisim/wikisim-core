@@ -2,6 +2,9 @@ import { DataComponent, NewDataComponent, Scenario } from "../data/interface"
 import { indent } from "../utils/indent"
 
 
+const INDENTATION = "    "
+
+
 interface ScenarioCalculationRequest
 {
     component: DataComponent | NewDataComponent
@@ -36,19 +39,18 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     // by the iteration code below
     const args: string[] = []
 
-    const indentation = "    "
     let indentation_level = 1
 
-    let javascript = indent(`func = ${function_string};\n\n`, indentation, indentation_level)
+    let javascript = indent(`func = ${function_string};\n\n`, INDENTATION, indentation_level)
     // Wrap in iteration if any inputs are marked as iterate_over
     function_inputs.forEach(input =>
     {
         const scenario_value = scenario_inputs[input.name]
         if (scenario_value?.iterate_over)
         {
-            javascript += indent(`// iterate over argument "${input.name}"\n`, indentation, indentation_level)
-            javascript += indent(`labels = ${scenario_value.value}\n`, indentation, indentation_level)
-            javascript += indent(`results = labels.map(${input.name} =>\n{\n`, indentation, indentation_level)
+            javascript += indent(`// iterate over argument "${input.name}"\n`, INDENTATION, indentation_level)
+            javascript += indent(`labels = ${scenario_value.value}\n`, INDENTATION, indentation_level)
+            javascript += indent(`results = labels.map(${input.name} =>\n{\n`, INDENTATION, indentation_level)
             indentation_level++
 
             // Argument will be filled in by this iteration
@@ -61,7 +63,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     })
 
     // Normal function call
-    javascript += indent(`return func(${args.join(", ")});`, indentation, indentation_level)
+    javascript += indent(`return func(${args.join(", ")});`, INDENTATION, indentation_level)
 
     // Close any iteration blocks
     function_inputs.forEach((input) =>
@@ -70,8 +72,8 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
         if (scenario_value?.iterate_over)
         {
             indentation_level--
-            javascript += indent("\n});\n\n", indentation, indentation_level)
-            javascript += indent(`return { labels, results };`, indentation, indentation_level)
+            javascript += indent("\n});\n\n", INDENTATION, indentation_level)
+            javascript += indent(`return { labels, results };`, INDENTATION, indentation_level)
         }
     })
 
