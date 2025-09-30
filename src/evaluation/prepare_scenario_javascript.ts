@@ -9,10 +9,16 @@ interface ScenarioCalculationRequest
 {
     component: DataComponent | NewDataComponent
     scenario: Scenario
+    /**
+     * optionally add a `debugger` statement at the start of the code
+     * to help with debugging.  Default false.
+     */
+    debugging?: boolean
 }
 export function prepare_scenario_javascript(request: ScenarioCalculationRequest)
 {
     let javascript = "function calc()\n{\n"
+    if (request.debugging) javascript += (INDENTATION + "debugger;\n\n")
     javascript += prepare_function_call_javascript(request)
     javascript += "\n}\ncalc();"
     return javascript
