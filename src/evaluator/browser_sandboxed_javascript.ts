@@ -118,7 +118,7 @@ export function Evaluator()
 }
 
 
-export function setup_sandboxed_iframe()
+export function setup_sandboxed_iframe(logging = false)
 {
     // --- Create hidden sandboxed iframe ---
     iframe = document.createElement("iframe")
@@ -143,6 +143,7 @@ export function setup_sandboxed_iframe()
     <script>
         const console_log = (...args) =>
         {
+            if (!${logging}) return;
             console .log(' [iFrame] ==========> ', ...args);
         }
 
