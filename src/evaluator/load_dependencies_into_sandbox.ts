@@ -29,8 +29,8 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
     }
 
     let js_dependencies = (
-        args.debugging ? "debugger;" : "" +
-        no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze.toString()
+        (args.debugging ? "debugger;\n\n" : "") +
+        (no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze.toString()) + "\n"
     )
 
     for (const id of dependency_ids)
