@@ -115,8 +115,8 @@ async function request_next_evaluation(request: ExtendedEvaluationRequest)
 export function Evaluator()
 {
     useEffect(() => {
-        const { cleanup } = setup_sandboxed_iframe()
-        return cleanup
+        const { clean_up } = setup_sandboxed_iframe()
+        return clean_up
     }, [])
 
     return null
@@ -231,12 +231,12 @@ export function setup_sandboxed_iframe(logging = false)
 
     evaluator_has_mounted = true
 
-    function cleanup()
+    function clean_up()
     {
         window.removeEventListener("message", handle_message_from_iframe)
         // Remove sandboxed iframe
         document.body.removeChild(iframe)
     }
 
-    return { cleanup }
+    return { clean_up }
 }

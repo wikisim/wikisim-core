@@ -19,7 +19,18 @@ describe(`calculate_result_value`, function ()
     // the subsequent line is a breakpoint ?!
     // this.timeout(500)
 
-    setup_sandboxed_iframe()
+
+    let clean_up: () => void
+    before(() =>
+    {
+        clean_up = setup_sandboxed_iframe().clean_up
+    })
+
+    after(() =>
+    {
+        clean_up()
+    })
+
 
     // TODO remove the `span` tag for tiptap_mention_chip when
     // existing content has been updated to use `a` tags for

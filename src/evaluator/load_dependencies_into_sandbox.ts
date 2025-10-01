@@ -51,6 +51,8 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
         js_dependencies += `\n${id.to_javascript_str()} = deep_freeze(${dependency_js_value});`
     }
 
+    js_dependencies += `\n\n"loaded_dependencies";`
+
     return evaluate_code_in_sandbox({
         js_input_value: js_dependencies,
         requested_at: performance.now(),

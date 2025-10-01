@@ -13,6 +13,7 @@
 
     Promise.all([
       import("../src/data/integration.browser.test.ts"),
+      import("../src/evaluator/load_dependencies_into_sandbox.browser.test.ts"),
       import("../src/evaluator/index.browser.test.ts"),
     ])
     .then(() => mocha.run())
