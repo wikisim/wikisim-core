@@ -2,9 +2,13 @@ import type { PostgrestError } from "@supabase/supabase-js"
 import { z } from "zod"
 
 import type { GetSupabase } from "../supabase/browser"
-import { clamp } from "../utils/clamp"
 import { hydrate_data_component_from_json } from "./convert_between_json"
-import { make_or_clause_for_ids } from "./fetch_from_db_utils"
+import {
+    clamp_page_size,
+    get_range_from_options,
+    limit_ids,
+    make_or_clause_for_ids,
+} from "./fetch_from_db_utils"
 import { IdAndMaybeVersion, IdOnly } from "./id"
 import type { DataComponent } from "./interface"
 import { make_field_validators } from "./validate_fields"
@@ -121,55 +125,6 @@ export async function request_historical_data_components(
 }
 
 
-// export async function search_data_components_v1(
-//     get_supabase: GetSupabase,
-//     search_terms: string,
-//     /**
-//      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
-//      * Size is the number of items per page. Default is 20, min is 1, max is 101.
-//      */
-//     options: {
-//         page?: number
-//         size?: number
-//         owner_id?: string
-//     } = {},
-// ): Promise<RequestDataComponentsReturn>
-// {
-//     const { owner_id } = options
-//     const { from, to } = get_range_from_options(options)
-
-//     let supa = get_supabase()
-//         .from("data_components")
-//         // .select(`*, ts_rank(search_vector, plainto_tsquery('english', '${search_terms}')) as rank`)
-//         // .select("*, ts_rank(search_vector, plainto_tsquery('english', ?)) as rank", { count: "exact" })
-//         .select("*")
-
-//     // Unless owner_id is specified then for now we filter to exclude where
-//     // there is an owner_id to ensure no "user owned" data is shown to other
-//     // users e.g. on browse/search page
-//     if (owner_id) supa = supa.or(`owner_id.is.null,owner_id.eq.${owner_id}`)
-//     else supa = supa.is("owner_id", null)
-
-//     if (search_terms.trim())
-//     {
-//         supa = supa.textSearch("search_vector", search_terms, {
-//             config: "english",
-//             type: "websearch",
-//         })
-//     }
-
-//     return supa
-//         // .order("rank", { ascending: false })
-//         .range(from, to)
-//         .then(({ data, error }) =>
-//         {
-//             if (error) return { data: null, error }
-//             const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
-//             return { data: instances, error: null }
-//         })
-// }
-
-
 export async function search_data_components(
     get_supabase: GetSupabase,
     search_terms: string,
@@ -206,35 +161,4 @@ export async function search_data_components(
             const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
             return { data: instances, error: null }
         })
-}
-
-
-function limit_ids(ids: IdAndMaybeVersion[], min: number = 0, max: number = 1000)
-{
-    if (ids.length > max)
-    {
-        throw new Error(`Too many IDs provided, maximum is ${max} but got ${ids.length}`)
-    }
-    if (ids.length < min)
-    {
-        throw new Error(`Too few IDs provided, minium is ${min} but got ${ids.length}`)
-    }
-}
-
-
-function get_range_from_options(options: { page?: number, size?: number } = {}): { from: number, to: number }
-{
-    let { page, size } = options
-    page = Math.max(page ?? 0, 0)
-    size = clamp_page_size(size)
-    const limit = size
-    const offset = page * limit
-    const from = offset
-    const to = offset + limit - 1
-    return { from, to }
-}
-
-function clamp_page_size(size: number = 20)
-{
-    return clamp(size, 1, 101)
 }
