@@ -1,7 +1,6 @@
 import type { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { ERRORS } from "../errors.ts"
 import { deep_freeze } from "../utils/deep_freeze.ts"
-import { deindent } from "../utils/deindent.ts"
 import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 
 
@@ -12,6 +11,7 @@ interface LoadDependenciesIntoSandboxArgs
     data_components_by_id_and_version: Record<string, DataComponent>
     evaluate_code_in_sandbox: (request: EvaluationRequest) => Promise<EvaluationResponse>
     no_deep_freeze?: boolean
+    debugging?: boolean
 }
 export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandboxArgs): Promise<EvaluationResponse>
 {
@@ -28,9 +28,10 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
         return errored(ERRORS.ERR39.message + ` Expected ${dependency_ids.length} dependencies but got ${Object.keys(data_components_by_id_and_version).length}`)
     }
 
-    let js_dependencies = deindent(`
-    ${no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze.toString()}
-    `)
+    let js_dependencies = (
+        args.debugging ? "debugger;" : "" +
+        no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze.toString()
+    )
 
     for (const id of dependency_ids)
     {
