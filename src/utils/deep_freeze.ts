@@ -21,3 +21,24 @@ export function deep_freeze<T>(obj: T): T
 
     return obj
 }
+
+
+export const deep_freeze_str = `
+function deep_freeze(obj)
+{
+    if (typeof obj !== "object" || obj === null) return obj
+
+    Object.freeze(obj)
+
+    Object.getOwnPropertyNames(obj)
+        .forEach((prop) =>
+        {
+            if (obj[prop] && typeof obj[prop] === "object")
+            {
+                deep_freeze(obj[prop])
+            }
+        })
+
+    return obj
+}
+`

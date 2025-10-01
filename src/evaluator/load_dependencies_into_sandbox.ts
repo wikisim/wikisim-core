@@ -1,6 +1,6 @@
 import type { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { ERRORS } from "../errors.ts"
-import { deep_freeze } from "../utils/deep_freeze.ts"
+import { deep_freeze_str } from "../utils/deep_freeze.ts"
 import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 
 
@@ -30,7 +30,10 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
 
     let js_dependencies = (
         (args.debugging ? "debugger;\n\n" : "") +
-        (no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze.toString()) + "\n"
+        // Have to use `deep_freeze_str` here instead of importing and using
+        // `deep_freeze.toString()` directly because the code is going to be
+        // minified on build and deploy and that will break the function
+        (no_deep_freeze ? `function deep_freeze(a) { return a }` : deep_freeze_str) + "\n"
     )
 
     for (const id of dependency_ids)
