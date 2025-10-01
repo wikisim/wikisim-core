@@ -5,6 +5,7 @@ import { EvaluationRequest, EvaluationResponse } from "./interface"
 
 let next_evaluation_id = 0
 
+let evaluator_has_mounted = false
 let iframe: HTMLIFrameElement
 let resolve_iframe_loaded: (value: true | PromiseLike<true>) => void
 const iframe_loaded = new Promise<true>(resolve => {
@@ -23,6 +24,16 @@ interface ExtendedEvaluationRequest extends Omit<EvaluationRequest, "data_compon
 
 export async function evaluate_code_in_browser_sandbox(basic_request: EvaluationRequest): Promise<EvaluationResponse>
 {
+    if (!evaluator_has_mounted)
+    {
+        // This is not necessary to raise this error as the Evaluator component
+        // can be mounted afterwards, but it can help catch mistakes which
+        // otherwise just show up as timeouts with no other error or warning.
+        const error_message = "Evaluator has not mounted yet.  Please include the <Evaluator /> component in your app before executing code."
+        // console .error(error_message) // could use this instead of throwing.
+        throw new Error(error_message)
+    }
+
     let resolve: (response: EvaluationResponse) => void
     const promise_result = new Promise<EvaluationResponse>(resolv => resolve = resolv)
     const request: ExtendedEvaluationRequest = {
@@ -105,6 +116,7 @@ export function Evaluator()
 {
     useEffect(() => {
         const { handle_message_from_iframe } = setup_sandboxed_iframe()
+        evaluator_has_mounted = true
 
         return () =>
         {
