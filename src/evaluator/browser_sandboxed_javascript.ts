@@ -115,15 +115,8 @@ async function request_next_evaluation(request: ExtendedEvaluationRequest)
 export function Evaluator()
 {
     useEffect(() => {
-        const { handle_message_from_iframe } = setup_sandboxed_iframe()
-        evaluator_has_mounted = true
-
-        return () =>
-        {
-            window.removeEventListener("message", handle_message_from_iframe)
-            // Remove sandboxed iframe
-            document.body.removeChild(iframe)
-        }
+        const { cleanup } = setup_sandboxed_iframe()
+        return cleanup
     }, [])
 
     return null
@@ -236,5 +229,14 @@ export function setup_sandboxed_iframe(logging = false)
     }
     window.addEventListener("message", handle_message_from_iframe)
 
-    return { handle_message_from_iframe }
+    evaluator_has_mounted = true
+
+    function cleanup()
+    {
+        window.removeEventListener("message", handle_message_from_iframe)
+        // Remove sandboxed iframe
+        document.body.removeChild(iframe)
+    }
+
+    return { cleanup }
 }
