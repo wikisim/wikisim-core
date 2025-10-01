@@ -82,7 +82,10 @@ export async function request_data_components(
 export async function request_historical_data_components(
     get_supabase: GetSupabase,
     /**
-     * Must provide at least one IdAndVersion or IdOnly. Max 1000 IDs
+     * Provide 0 or more IdAndVersion and or IdOnly. Max 1000 IDs.
+     * When no IDs are provided then an empty array is returned immediately,
+     * this is useful for simplifying code to load
+     * `data_component.recursive_dependency_ids` when this list is empty.
      */
     ids: IdAndMaybeVersion[],
     /**
@@ -95,6 +98,8 @@ export async function request_historical_data_components(
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
+    if (ids.length === 0) return Promise.resolve({ data: [], error: null })
+
     limit_ids(ids, 1)
     const { from, to } = get_range_from_options(options)
 
