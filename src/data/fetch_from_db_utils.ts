@@ -1,4 +1,4 @@
-import { clamp } from "../utils/clamp"
+import { clamp } from "../utils/clamp.ts"
 import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id.ts"
 
 
