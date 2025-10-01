@@ -9,7 +9,7 @@ import {
     limit_ids,
     make_or_clause_for_ids,
 } from "./fetch_from_db_utils"
-import { IdAndMaybeVersion, IdOnly } from "./id"
+import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
 import type { DataComponent } from "./interface"
 import { make_field_validators } from "./validate_fields"
 
@@ -161,4 +161,49 @@ export async function search_data_components(
             const instances = data.map(d => hydrate_data_component_from_json(d, field_validators))
             return { data: instances, error: null }
         })
+}
+
+
+export async function request_versioned_data_component_and_dependencies(
+    get_supabase: GetSupabase,
+    id: IdAndVersion,
+): Promise<RequestDataComponentsReturn>
+{
+    let component: DataComponent | undefined = undefined
+
+    return request_historical_data_components(get_supabase, [id])
+    .then(response =>
+    {
+        if (response.error) return response
+
+        component = response.data[0]
+        if (!component || response.data.length !== 1)
+        {
+            return {
+                data: null,
+                error: new Error(`Expected one data component but got ${response.data.length}.`)
+            }
+        }
+
+        // Fetch dependencies
+        return request_historical_data_components(get_supabase, [
+            ...(component.recursive_dependency_ids || [])
+        ])
+    })
+    .then(response =>
+    {
+        if (response.error) return response
+
+        const dependencies = response.data
+        if (dependencies.length !== (component!.recursive_dependency_ids || []).length)
+        {
+            return {
+                data: null,
+                error: new Error(`Expected ${ (component!.recursive_dependency_ids || []).length } dependencies but got ${dependencies.length}.`)
+            }
+        }
+
+        const all_data = [component!, ...dependencies]
+        return { data: all_data, error: null }
+    })
 }
