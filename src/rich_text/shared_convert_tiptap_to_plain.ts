@@ -20,7 +20,7 @@ export function shared_convert_tiptap_text_to_plain_text(parser: GenericDOMParse
     {
         if (node.nodeType === 3) //Node.TEXT_NODE)
         {
-            return (node.textContent || "").trim()
+            return (node.textContent?.replace(/^@/, "") || "").trim()
         }
         if (node.nodeType === 1) //Node.ELEMENT_NODE)
         {

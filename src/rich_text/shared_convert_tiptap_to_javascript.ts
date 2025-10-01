@@ -23,10 +23,13 @@ export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMPars
             const tag = (node as Element).tagName
             if (tag === "BR") return "\n"
 
-            if (tag === "SPAN" && (node as Element).classList.contains("mention-chip"))
+            if ((tag === "SPAN" || tag === "A") && (node as Element).classList.contains("mention-chip"))
             {
                 const data_id_and_maybe_version = (node as Element).getAttribute("data-id")
-                if (!data_id_and_maybe_version) return `"mention chip is missing data-id attribute"`
+                if (!data_id_and_maybe_version)
+                {
+                    return `"mention chip is missing data-id attribute"`
+                }
 
                 const data_id_and_version = parse_id(data_id_and_maybe_version)
                 if (data_id_and_version instanceof IdOnly)

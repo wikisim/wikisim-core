@@ -14,8 +14,8 @@ export function shared_get_referenced_ids_from_tiptap (parser: GenericDOMParser,
     {
         if (node.nodeType === 1) //Node.ELEMENT_NODE)
         {
-            const tag = (node as Element).tagName.toLowerCase()
-            if (tag === "span" && (node as Element).classList.contains("mention-chip"))
+            const tag = (node as Element).tagName
+            if ((tag === "SPAN" || tag === "A") && (node as Element).classList.contains("mention-chip"))
             {
                 const data_id_and_version = (node as Element).getAttribute("data-id")
                 if (data_id_and_version) ids.add(data_id_and_version)

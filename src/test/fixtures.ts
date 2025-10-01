@@ -3,16 +3,18 @@ import type { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { init_data_component, init_new_data_component } from "../data/modify.ts"
 
 
-export function tiptap_mention_chip(args: {title: string, id: IdAndMaybeVersion } | string): string
+export function tiptap_mention_chip(args: { title: string, id: IdAndMaybeVersion | string } | string, tag: "span" | "a" = "a"): string
 {
-    if (typeof args === "string")
+    const id_str = typeof args === "string" ? parse_id(args).to_str()
+        : typeof args.id === "string" ? parse_id(args.id) : args.id.to_str()
+    const title = typeof args === "string" ? `Some title for ${args}` : args.title
+
+    if (tag === "a")
     {
-        const id_str = parse_id(args).to_str()
-        const title = `Some title for ${args}`
-        return `<span class="mention-chip" data-type="customMention" data-id="${id_str}" data-label="${title}">@${title}</span>`
+        return `<a class="mention-chip" data-id="${id_str}">${title}</a>`
     }
 
-    return `<span class="mention-chip" data-type="customMention" data-id="${args.id.to_str()}" data-label="${args.title}">@${args.title}</span>`
+    return `<span class="mention-chip" data-type="customMention" data-id="${id_str}" data-label="${title}">@${title}</span>`
 }
 
 

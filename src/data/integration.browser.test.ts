@@ -781,7 +781,10 @@ describe("when user logged in", function ()
             const data_component: DataComponent = {
                 ...data_component_fixture,
                 editor_id: user_id,
-                input_value: `<p>value = <span class="mention-chip" data-type="customMention" data-id="-3v1" data-label="Some Number">@Some Number</span>/10</p><p><span class="mention-chip" data-type="customMention" data-id="-2v1" data-label="increment">@increment</span>(value)</p>`,
+                // TODO remove the `span` tag for tiptap_mention_chip when
+                // existing content has been updated to use `a` tags for
+                // mention chips
+                input_value: `<p>value = ${tiptap_mention_chip({ title: "Some Number", id: "-3v1" }, "span")}/10</p><p>${tiptap_mention_chip({ title: "increment", id: "-2v1" }, "a")}(value)</p>`,
                 function_arguments: [],
                 test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
             }
