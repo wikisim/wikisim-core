@@ -9,7 +9,8 @@
         "test": "mocha",
         "check_compile": "npx tsc --noEmit",
         "lint": "eslint",
-        "check": "pnpm run test && pnpm run check_compile && pnpm run lint"
+        "check": "pnpm run test && pnpm run check_compile && pnpm run lint",
+        "update_supabase_types": "node ./scripts/update_interface.cjs"
     },
     "dependencies": {
         "@supabase/supabase-js": "2.52.0",

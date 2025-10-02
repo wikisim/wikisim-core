@@ -494,6 +494,7 @@ export type Database = {
         | "datetime_range"
         | "number_array"
         | "function"
+        | "interactable"
       data_component_version_type: "minor" | "rollback"
       search_data_components_filter_by_wiki_or_owned: "wiki" | "owned"
       search_data_components_order_by:
@@ -718,6 +719,7 @@ export const Constants = {
         "datetime_range",
         "number_array",
         "function",
+        "interactable"
       ],
       data_component_version_type: ["minor", "rollback"],
       search_data_components_filter_by_wiki_or_owned: ["wiki", "owned"],
