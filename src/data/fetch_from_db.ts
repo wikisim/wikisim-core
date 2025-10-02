@@ -125,6 +125,40 @@ export async function request_historical_data_components(
 }
 
 
+export type RequestLatestDataComponentVersionReturn =
+{
+    data: IdAndVersion
+    error: null
+} | {
+    data: null
+    error: PostgrestError | Error
+}
+export async function request_latest_data_component_version(
+    get_supabase: GetSupabase,
+    id: IdAndMaybeVersion,
+): Promise<RequestLatestDataComponentVersionReturn>
+{
+    return get_supabase()
+        .from("data_components")
+        .select("version_number")
+        .eq("id", id.id)
+        .then(({ data, error }) =>
+        {
+            if (error) return { data: null, error }
+            if (data.length === 0)
+            {
+                return {
+                    data: null,
+                    error: new Error(`No data component found with id ${id.id}.`),
+                }
+            }
+            const version = data[0]!.version_number
+            const component_id = new IdAndVersion(id.id, version)
+            return { data: component_id, error: null }
+        })
+}
+
+
 export async function search_data_components(
     get_supabase: GetSupabase,
     search_terms: string,
