@@ -65,4 +65,5 @@ export const ERRORS =
     ERR38: new TSError("ERR38", "ERR38. Insufficient data_component_history matches during get_data_components_by_id_and_version."),
     ERR39: new TSError("ERR39", "ERR39. Mismatching dependencies in load_dependencies_into_sandbox."),
     ERR40: new TSError("ERR40", "ERR40. Missing dependency in load_dependencies_into_sandbox."),
+    ERR41: new TSError("ERR41", "ERR41. index.html not found in the uploaded files."),
 }
