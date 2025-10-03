@@ -52,7 +52,8 @@ export const ERRORS =
     ERR25: new PostgreSQLError("ERR25", "ERR25. No secrets found for key_name: %"),
     ERR27: new TSError("ERR27", "ERR27. Failed to calculate result value."),
     ERR28: new TSError("ERR28", "ERR28. Missing or invalid Authorization header."),
-    ERR29: new TSError("ERR29", "ERR29. Unexpected error during ef_insert_data_component_v2."),
+    ERR29_insert: new TSError("ERR29.insert", "ERR29.insert. Unexpected error during ef_insert_data_component_v2."),
+    ERR29_update: new TSError("ERR29.update", "ERR29.update. Unexpected error during ef_update_data_component_v2."),
     ERR30: new PostgreSQLError("ERR30", "ERR30. Invalid user name. Must be 4-32 characters long and only contain letters, numbers, and underscores."),
     ERR31: new PostgreSQLError("ERR31", "ERR31. This user name is reserved and cannot be used."),
     ERR32: new PostgreSQLError("ERR32", "ERR32. This user name is too similar to a reserved name and cannot be used."),
@@ -66,4 +67,5 @@ export const ERRORS =
     ERR39: new TSError("ERR39", "ERR39. Mismatching dependencies in load_dependencies_into_sandbox."),
     ERR40: new TSError("ERR40", "ERR40. Missing dependency in load_dependencies_into_sandbox."),
     ERR41: new TSError("ERR41", "ERR41. index.html not found in the uploaded files."),
+    ERR42: new TSError("ERR42", "ERR42. Unexpected error during ef_upload_interactable_files."),
 }
