@@ -74,4 +74,5 @@ export const ERRORS =
     ERR43: new TSError("ERR43", "ERR43. No files found in the upload."),
     ERR44: new TSError("ERR44", "ERR44. Wrong format of payload."),
     ERR45: new TSError("ERR45", "ERR45. File size exceeds maximum allowed size of % MB."),
+    ERR46: new TSError("ERR46", "ERR46. wikisim-server encountered unexpected error."),
 }
