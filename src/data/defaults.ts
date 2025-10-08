@@ -1,4 +1,4 @@
-import { NUMBER_DISPLAY_TYPES_OBJ, VALUE_TYPES_OBJ } from "./interface"
+import { NUMBER_DISPLAY_TYPES_OBJ, VALUE_TYPES_OBJ } from "./interface.ts"
 
 
 export const DEFAULTS = {

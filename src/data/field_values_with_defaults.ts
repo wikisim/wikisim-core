@@ -1,10 +1,10 @@
-import { DEFAULTS } from "./defaults"
+import { DEFAULTS } from "./defaults.ts"
 import {
     NUMBER_DISPLAY_TYPES_OBJ,
     NumberDisplayType,
     VALUE_TYPES_OBJ,
     ValueType,
-} from "./interface"
+} from "./interface.ts"
 
 
 

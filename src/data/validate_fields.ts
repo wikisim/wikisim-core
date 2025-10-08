@@ -151,7 +151,7 @@ export function make_field_validators(z: any) //typeof import("zod"))
     function validate_fields_given_value_type<V extends (DataComponent | NewDataComponent)>(data_component: V): V
     {
         const value_type = valid_value_type(data_component.value_type)
-        const schema = schemas_by_value_type[value_type]
+        const schema: any = schemas_by_value_type[value_type]
         // Use .parse to strip unknown fields
         return schema.parse(data_component) as V
     }
