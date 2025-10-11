@@ -7,6 +7,8 @@ import type {
     ClientUpdateDataComponentV2Response,
     EFInsertDataComponentV2Args,
     EFUpdateDataComponentV2Args,
+    EFUploadInteractableFilesMap,
+    UploadInteractableFilesResponse
 } from "../supabase/edge_functions"
 import {
     flatten_data_component_to_json,
@@ -128,6 +130,43 @@ export async function update_data_component (get_supabase: GetSupabase, data_com
             }
 
             return { data: hydrate_data_component_from_json(data[0]!, field_validators), error: null }
+        })
+}
+
+
+export type UploadedFilePathsToIDsMapResponse = {
+    data: null
+    error: ErrorResponse
+} | {
+    data: { [file_path: string]: string } // map of file_path to Supabase storage's file_id
+    error: null
+}
+export async function upload_interactable_files(get_supabase: GetSupabase, file_map: EFUploadInteractableFilesMap): Promise<UploadedFilePathsToIDsMapResponse>
+{
+    const headers = await get_headers(get_supabase)
+
+    const form_data = new FormData()
+    for (const [path, file] of Object.entries(file_map))
+    {
+        form_data.append(path, file)
+    }
+
+    return get_supabase()
+        .functions.invoke("ef_upload_interactable_files", {
+            method: "POST",
+            headers,
+            body: form_data,
+        })
+        .then(async resp =>
+        {
+            const { data, error, response } = resp as UploadInteractableFilesResponse
+
+            if (error !== null && error !== undefined)
+            {
+                return await handle_error(error, response)
+            }
+
+            return { data, error: null }
         })
 }
 
