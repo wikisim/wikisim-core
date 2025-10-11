@@ -267,6 +267,24 @@ export type Database = {
           },
         ]
       }
+      public_storage_files_metadata: {
+        Row: {
+          allowed: boolean
+          file_hash_filename: string
+          file_id: string
+        }
+        Insert: {
+          allowed?: boolean
+          file_hash_filename: string
+          file_id: string
+        }
+        Update: {
+          allowed?: boolean
+          file_hash_filename?: string
+          file_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           id: string
@@ -424,6 +442,10 @@ export type Database = {
           version_rolled_back_to: number
           version_type: Database["public"]["Enums"]["data_component_version_type"]
         }[]
+      }
+      set_owner_of_file: {
+        Args: { file_id: string; server_secret: string }
+        Returns: undefined
       }
       update_data_component_v2: {
         Args: {
@@ -719,7 +741,7 @@ export const Constants = {
         "datetime_range",
         "number_array",
         "function",
-        "interactable"
+        "interactable",
       ],
       data_component_version_type: ["minor", "rollback"],
       search_data_components_filter_by_wiki_or_owned: ["wiki", "owned"],
