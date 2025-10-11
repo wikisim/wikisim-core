@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 import { IdOnly, parse_id, REGEX_MATCH_IDS } from "../data/id.ts"
 import { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 

@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 import { IdAndVersion, OrderedUniqueIdAndVersionList } from "../data/id.ts"
 import { ERRORS } from "../errors.ts"
 import { GenericDOMParser, GenericNode } from "./generic_interface.ts"
