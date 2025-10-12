@@ -31,6 +31,18 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
         timeout_ms: args.timeout_ms,
     }
 
+
+    if (args.evaluate_code_in_sandbox)
+    {
+        const load_dependencies_response = await load_dependencies_into_sandbox({
+            component,
+            data_components_by_id_and_version: args.data_components_by_id_and_version,
+            evaluate_code_in_sandbox: args.evaluate_code_in_sandbox,
+        })
+        if (load_dependencies_response.error) return load_dependencies_response
+    }
+
+
     if (component.value_type === "function")
     {
         return format_function_input_value_string({
@@ -53,14 +65,6 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
         end_time: 0,
         error: null,
     })
-
-
-    const load_dependencies_response = await load_dependencies_into_sandbox({
-        component,
-        data_components_by_id_and_version: args.data_components_by_id_and_version,
-        evaluate_code_in_sandbox: args.evaluate_code_in_sandbox,
-    })
-    if (load_dependencies_response.error) return load_dependencies_response
 
     return await args.evaluate_code_in_sandbox(basic_request)
 }
