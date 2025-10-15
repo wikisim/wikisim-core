@@ -1,23 +1,20 @@
 import type { FunctionArgument } from "../data/interface.ts"
 import { deindent } from "../utils/deindent.ts"
-import type { EvaluationRequest } from "./interface.ts"
 
 
-interface FunctionToStringEvaluationRequest extends EvaluationRequest
+interface FunctionToStringEvaluationRequest
 {
+    js_input_value: string
     function_arguments: FunctionArgument[]
 }
 
 export function format_function_input_value_string(basic_request: FunctionToStringEvaluationRequest)
 {
     const body = function_body(basic_request.js_input_value).trim()
-    const first_line_sans_body = get_function_signature(basic_request.function_arguments) + " => "
-    const formatted_function = !body ? "" : first_line_sans_body + body
+    const function_signature = get_function_signature(basic_request.function_arguments)
+    const formatted_function = !body ? "" : (function_signature + " => " + body)
 
-    return {
-        result: formatted_function,
-        first_line_sans_body,
-    }
+    return formatted_function
 }
 
 
@@ -40,21 +37,16 @@ function function_body(value: string): string
 {
     const trimmed = deindent(value)
 
-    if (trimmed.includes("\n"))
+    const lines = trimmed.split("\n")
+
+    // Check if last line has a return statement
+    const last_line = lines[lines.length - 1]!
+    if (!last_line.trim().startsWith("return "))
     {
-        const lines = trimmed.split("\n")
-
-        // Check if last line has a return statement
-        const last_line = lines[lines.length - 1]!
-        if (!last_line.trim().startsWith("return "))
-        {
-            lines[lines.length - 1] = "return " + last_line
-        }
-
-        const indented = lines.map(line => "    " + line).join("\n")
-
-        return `{\n${indented}\n}`
+        lines[lines.length - 1] = "return " + last_line
     }
 
-    return trimmed
+    const indented = lines.map(line => "    " + line).join("\n")
+
+    return trimmed ? `{\n${indented}\n}` : ""
 }

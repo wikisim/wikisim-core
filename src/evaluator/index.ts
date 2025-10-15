@@ -51,7 +51,7 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
         })
 
         return {
-            ...result,
+            result,
             error: null,
 
             // TODO: remove these fields from the EvaluationResponse interface

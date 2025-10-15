@@ -3,7 +3,6 @@ import { expect } from "chai"
 import { FunctionArgument } from "../data/interface"
 import { deindent } from "../utils/deindent"
 import { format_function_input_value_string } from "./format_function"
-import { EvaluationRequest } from "./interface"
 
 
 describe("format_function_input_value_string", () =>
@@ -18,13 +17,12 @@ describe("format_function_input_value_string", () =>
 
     it("formats a single line function correctly", () =>
     {
-        const basic_request: EvaluationRequest = {
-            requested_at: 0,
+        const basic_request = {
             js_input_value: "Math.max(value, min)",
+            function_arguments,
         }
-        const { result, first_line_sans_body } = format_function_input_value_string({ ...basic_request, function_arguments })
-        expect(result).to.equal("(min = 0, value) => Math.max(value, min)")
-        expect(first_line_sans_body).to.equal("(min = 0, value) => ")
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals("(min = 0, value) => {\n    return Math.max(value, min)\n}")
     })
 
 
@@ -33,43 +31,42 @@ describe("format_function_input_value_string", () =>
         const function_arguments: FunctionArgument[] = [
             { id: 0, name: "min", default_value: "" }
         ]
-        const basic_request: EvaluationRequest = {
-            requested_at: 0,
+        const basic_request = {
             js_input_value: "Math.max(1, min)",
+            function_arguments,
         }
-        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
-        expect(result).to.equal("(min) => Math.max(1, min)")
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals("(min) => {\n    return Math.max(1, min)\n}")
     })
 
 
     it("formats a multi-line function with a return correctly", () =>
     {
-        const basic_request: EvaluationRequest = {
-            requested_at: 0,
+        const basic_request = {
             js_input_value: `
             result = Math.max(min, value)
             return result`,
+            function_arguments,
         }
-        const { result, first_line_sans_body } = format_function_input_value_string({ ...basic_request, function_arguments })
-        expect(result).to.equal(deindent(`
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals(deindent(`
         (min = 0, value) => {
             result = Math.max(min, value)
             return result
         }`))
-        expect(first_line_sans_body).to.equal("(min = 0, value) => ")
     })
 
 
     it("formats a multi-line function without a return by auto inserting return", () =>
     {
-        const basic_request: EvaluationRequest = {
-            requested_at: 0,
+        const basic_request = {
             js_input_value: `
             result = Math.max(min, value)
             result + 1`,
+            function_arguments,
         }
-        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
-        expect(result).to.equal(deindent(`
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals(deindent(`
         (min = 0, value) => {
             result = Math.max(min, value)
             return result + 1
@@ -82,11 +79,11 @@ describe("format_function_input_value_string", () =>
         const function_arguments: FunctionArgument[] = [
             { id: 0, name: "min", default_value: "" }
         ]
-        const basic_request: EvaluationRequest = {
-            requested_at: 0,
+        const basic_request = {
             js_input_value: "",
+            function_arguments,
         }
-        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
-        expect(result).to.equal("")
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals("")
     })
 })
