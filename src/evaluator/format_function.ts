@@ -11,10 +11,12 @@ interface FunctionToStringEvaluationRequest extends EvaluationRequest
 export function format_function_input_value_string(basic_request: FunctionToStringEvaluationRequest): EvaluationResponse
 {
     const body = function_body(basic_request.js_input_value).trim()
-    const formatted_function = !body ? "" : function_signature(basic_request.function_arguments) + " => " + body
+    const function_signature = get_function_signature(basic_request.function_arguments) + " => "
+    const formatted_function = !body ? "" : function_signature + body
 
     return {
         result: formatted_function,
+        function_signature,
         error: null,
 
         // TODO: remove these fields from the EvaluationResponse interface
@@ -27,7 +29,7 @@ export function format_function_input_value_string(basic_request: FunctionToStri
 }
 
 
-function function_signature(function_arguments: FunctionArgument[]): string
+function get_function_signature(function_arguments: FunctionArgument[]): string
 {
     const formatted_args = function_arguments.map(arg =>
     {
