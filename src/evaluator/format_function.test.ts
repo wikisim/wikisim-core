@@ -22,8 +22,9 @@ describe("format_function_input_value_string", () =>
             requested_at: 0,
             js_input_value: "Math.max(value, min)",
         }
-        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
+        const { result, first_line_sans_body } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal("(min = 0, value) => Math.max(value, min)")
+        expect(first_line_sans_body).to.equal("(min = 0, value) => ")
     })
 
 
@@ -49,12 +50,13 @@ describe("format_function_input_value_string", () =>
             result = Math.max(min, value)
             return result`,
         }
-        const { result } = format_function_input_value_string({ ...basic_request, function_arguments })
+        const { result, first_line_sans_body } = format_function_input_value_string({ ...basic_request, function_arguments })
         expect(result).to.equal(deindent(`
         (min = 0, value) => {
             result = Math.max(min, value)
             return result
         }`))
+        expect(first_line_sans_body).to.equal("(min = 0, value) => ")
     })
 
 

@@ -16,11 +16,9 @@ export type MinimalEvaluationResponse =
 } & (
     {
         result: string
-        function_signature: string
         error: null
     } | {
         result: null
-        function_signature: null
         error: string
     }
 )

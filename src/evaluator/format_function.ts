@@ -1,6 +1,6 @@
 import type { FunctionArgument } from "../data/interface.ts"
 import { deindent } from "../utils/deindent.ts"
-import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
+import type { EvaluationRequest } from "./interface.ts"
 
 
 interface FunctionToStringEvaluationRequest extends EvaluationRequest
@@ -8,23 +8,15 @@ interface FunctionToStringEvaluationRequest extends EvaluationRequest
     function_arguments: FunctionArgument[]
 }
 
-export function format_function_input_value_string(basic_request: FunctionToStringEvaluationRequest): EvaluationResponse
+export function format_function_input_value_string(basic_request: FunctionToStringEvaluationRequest)
 {
     const body = function_body(basic_request.js_input_value).trim()
-    const function_signature = get_function_signature(basic_request.function_arguments) + " => "
-    const formatted_function = !body ? "" : function_signature + body
+    const first_line_sans_body = get_function_signature(basic_request.function_arguments) + " => "
+    const formatted_function = !body ? "" : first_line_sans_body + body
 
     return {
         result: formatted_function,
-        function_signature,
-        error: null,
-
-        // TODO: remove these fields from the EvaluationResponse interface
-        evaluation_id: 0,
-        js_input_value: basic_request.js_input_value,
-        requested_at: Date.now(),
-        start_time: Date.now(),
-        end_time: 0,
+        first_line_sans_body,
     }
 }
 
