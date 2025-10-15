@@ -29,6 +29,17 @@ describe("to_javascript_reference", function ()
     })
 
 
+    it("should trim leading and trailing underscores", function ()
+    {
+        const component = init_data_component({
+            id: new IdAndVersion(101, 2),
+            title: `  My Component  `,
+        })
+
+        expect(to_javascript_reference(component)).equals("My_Component")
+    })
+
+
     it("should ignore effectively empty titles", function ()
     {
         const component = init_data_component({
