@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import { IdOnly, parse_id, REGEX_MATCH_IDS } from "../data/id.ts"
+import { IdOnly, parse_id } from "../data/id.ts"
 import { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 
 
@@ -8,7 +8,10 @@ export function shared_convert_tiptap_text_to_javascript (parser: GenericDOMPars
 {
     // console .log("Converting tiptap to javascript:", tiptap_text, data_component_by_id_and_version)
 
-    tiptap_text = tiptap_text.replaceAll(REGEX_MATCH_IDS, "_d$1v$2")
+    // 2025-10-16 Previously we would replace d123v2 with _d123v2
+    // but to allow for the experimental Monaco CodeEditor to work
+    // more easily we have disabled this behavior for now
+    // tiptap_text = tiptap_text.replaceAll(REGEX_MATCH_IDS, "_d$1v$2")
     const doc = parser.parseFromString(tiptap_text, "text/html")
     if (!doc) return "Error: Unable to parse text, no document"
 

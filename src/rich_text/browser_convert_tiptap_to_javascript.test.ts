@@ -40,12 +40,19 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 expect(parseFloat(plain_text)).deep.equals(NaN)
             })
 
-            it("should modify plain text that would otherwise be valid ids", () =>
+            it("should not modify plain text that would otherwise be valid ids", () =>
             {
+                // 2025-10-16 Previously we would replace d123v2 with _d123v2
+                // but to allow for the experimental Monaco CodeEditor to work
+                // more easily we have disabled this behavior for now
+                const enabled = false
                 const tiptap_text = `
                     <p>d_123v2 + d123v2 + ${tiptap_mention_chip("1003v2", tag)} + d678v3</p>`
                 const plain_text = browser_convert_tiptap_to_javascript(tiptap_text)
-                expect(plain_text).equals("_d123v2 + _d123v2 + d1003v2 + _d678v3")
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                expect(plain_text).equals(enabled
+                    ? "_d123v2 + _d123v2 + d1003v2 + _d678v3"
+                    : "d_123v2 + d123v2 + d1003v2 + d678v3")
                 expect(parseFloat(plain_text)).deep.equals(NaN)
             })
         })
@@ -97,17 +104,6 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 // Note the ";" in the "\n;" is only present for when we wrap
                 // functions in parentheses AND there is a newline before them.
                 expect(plain_text).equals(`value = 1e7/1e8\nvalue2 = 2\nd1019v3(value, value2)`)
-            })
-        })
-
-
-        describe("replacing any text that matches variable names for dependencies", () =>
-        {
-            it("should replace d123v4 with _d123v4", () =>
-            {
-                const tiptap_text = `<p>a = 1 + d123v4</p>`
-                const plain_text = browser_convert_tiptap_to_javascript(tiptap_text)
-                expect(plain_text).equals(`a = 1 + _d123v4`, "variable names for dependencies should be replaced to avoid confusion")
             })
         })
     })
