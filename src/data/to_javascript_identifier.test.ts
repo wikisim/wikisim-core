@@ -18,14 +18,14 @@ describe("to_javascript_identifier", function ()
     })
 
 
-    it("should limit the title to 30 characters", function ()
+    it("should limit the title to 50 characters", function ()
     {
         const component = init_data_component({
             id: new IdAndVersion(101, 2),
-            title: `  My Component ,./<>?;'\\:"|[]{}!@£#$%^&*()-=_+\`~ with_spaces25272931`,
+            title: `  My Component ,./<>?;'\\:"|[]{}!@£#$%^&*()-=_+\`~ with_spaces_6_8_0_2_4_6_8_0_2_4_6_8_0123`,
         })
 
-        expect(to_javascript_identifier(component)).equals("My_Component_with_spaces252729")
+        expect(to_javascript_identifier(component)).equals("My_Component_with_spaces_6_8_0_2_4_6_8_0_2_4_6_8_0")
     })
 
 
