@@ -40,28 +40,28 @@ describe("get_global_js_lines", () =>
              *
              * https://wikisim.org/wiki/12v3
              */
-            declare var d12v3: any;
+            declare const d12v3: any;
             /**
              * Component 45 * / description
              *
              * https://wikisim.org/wiki/45v6
              */
-            declare var d45v6: any;
+            declare const d45v6: any;
             /**
              * Component 12 description
              *
              * https://wikisim.org/wiki/12v3
              */
-            declare var Some_normal_title: any; // 12v3
+            declare const Some_normal_title: any; // 12v3
             /**
              * Component 45 * / description
              *
              * https://wikisim.org/wiki/45v6
              */
-            declare var u_6_Some_StRaNgE_t_i_t_l_e: any; // 45v6
+            declare const u_6_Some_StRaNgE_t_i_t_l_e: any; // 45v6
             // function args for auto-complete
-            declare var arg1: any;
-            declare var arg2: any;
+            declare const arg1: any;
+            declare const arg2: any;
         `))
     })
 })

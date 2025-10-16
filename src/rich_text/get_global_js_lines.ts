@@ -20,7 +20,7 @@ export function get_global_js_lines(
              *
              * https://wikisim.org/wiki/${id}
              */
-            declare var ${"d" + id}: any;
+            declare const ${"d" + id}: any;
             `)
     })
 
@@ -29,14 +29,14 @@ export function get_global_js_lines(
         Object.values(data_component_dependencies_by_id)
         .forEach(component =>
         {
-            dependencies_and_aliases.push(js_component_ref(component, "declare var"))
+            dependencies_and_aliases.push(js_component_ref(component, "declare const"))
         })
     }
 
     const function_args_for_auto_complete = [
         `// function args for auto-complete`,
         ...Object.entries(function_arguments)
-            .map(([_, arg]) => `declare var ${arg.name}: any;`)
+            .map(([_, arg]) => `declare const ${arg.name}: any;`)
     ]
 
     return [
@@ -46,18 +46,18 @@ export function get_global_js_lines(
 }
 
 
-export function js_component_ref(component: DataComponent, type: "declare var" | "const"): string
+export function js_component_ref(component: DataComponent, type: "declare const" | "const"): string
 {
     const id = component.id.to_str()
     const description = get_safe_description(component)
 
-    if (type === "declare var") return deindent(`
+    if (type === "declare const") return deindent(`
         /**
          * ${description}
          *
          * https://wikisim.org/wiki/${id}
          */
-        declare var ${to_javascript_identifier(component)}: any; // ${id}
+        declare const ${to_javascript_identifier(component)}: any; // ${id}
     `)
 
     return deindent(`
