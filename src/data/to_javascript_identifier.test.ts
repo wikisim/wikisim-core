@@ -2,10 +2,10 @@ import { expect } from "chai"
 
 import { IdAndVersion } from "./id"
 import { init_data_component } from "./modify"
-import { to_javascript_reference } from "./to_javascript_reference"
+import { to_javascript_identifier } from "./to_javascript_identifier"
 
 
-describe("to_javascript_reference", function ()
+describe("to_javascript_identifier", function ()
 {
     it("should return a javascript safe id", function ()
     {
@@ -14,7 +14,7 @@ describe("to_javascript_reference", function ()
             title: `  My Component ,./<>?;'\\:"|[]{}!@£#$%^&*()-=_+\`~ with_spaces`,
         })
 
-        expect(to_javascript_reference(component)).equals("My_Component_with_spaces")
+        expect(to_javascript_identifier(component)).equals("My_Component_with_spaces")
     })
 
 
@@ -25,7 +25,7 @@ describe("to_javascript_reference", function ()
             title: `  My Component ,./<>?;'\\:"|[]{}!@£#$%^&*()-=_+\`~ with_spaces25272931`,
         })
 
-        expect(to_javascript_reference(component)).equals("My_Component_with_spaces252729")
+        expect(to_javascript_identifier(component)).equals("My_Component_with_spaces252729")
     })
 
 
@@ -36,7 +36,7 @@ describe("to_javascript_reference", function ()
             title: `  My Component  `,
         })
 
-        expect(to_javascript_reference(component)).equals("My_Component")
+        expect(to_javascript_identifier(component)).equals("My_Component")
     })
 
 
@@ -47,6 +47,6 @@ describe("to_javascript_reference", function ()
             title: `  ,./<>   `,
         })
 
-        expect(to_javascript_reference(component)).equals("d101v2")
+        expect(to_javascript_identifier(component)).equals("d101v2")
     })
 })
