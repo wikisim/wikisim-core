@@ -18,9 +18,11 @@ describe("browser_get_referenced_ids_from_tiptap", () =>
     {
         it(`should get data component ids from tiptap text with "${tag}" HTML tag`, () =>
         {
+            const d1003v1 = tiptap_mention_chip({ id: new IdAndVersion(1003, 1), title: "variable a" }, tag)
             const tiptap_text = `
                 <p>
-                    ${tiptap_mention_chip({ id: new IdAndVersion(1003, 1), title: "variable a" }, tag)}
+                    ${d1003v1}
+                    + ${d1003v1} // test deduplication
                     + ${tiptap_mention_chip({ id: new IdAndVersion(-2, 1), title: "variable b" }, tag)}
                     + 2
                 </p>`

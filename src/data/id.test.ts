@@ -103,6 +103,7 @@ describe("extract_ids_from_text", () =>
     {
         const text = `
             d1003v1+d1003v2-d1003v3
+            + d1003v2 // test deduplication
             d4006v4.5*d5007v5/d6008v6
             d7009v7,d8000v8,d_9000v9;
             somed123v123

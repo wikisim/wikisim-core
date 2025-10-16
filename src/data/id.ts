@@ -141,12 +141,14 @@ export function extract_ids_from_text(text: string): IdAndVersion[]
     for (const match of text.matchAll(REGEX_MATCH_IDS))
     {
         const is_negative = match[1] === "_" ? -1 : 1
-        const id = parseInt(match[2]!, 10)
+        const id_int = parseInt(match[2]!, 10)
         const version = parseInt(match[3]!, 10)
-        ids.push(new IdAndVersion(id * is_negative, version))
+        ids.push(new IdAndVersion(id_int * is_negative, version))
     }
 
-    return ids
+    const ids_set = new OrderedUniqueIdAndVersionList()
+    ids_set.add_multiple(ids)
+    return ids_set.get_all()
 }
 
 
