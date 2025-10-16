@@ -104,13 +104,12 @@ describe("extract_ids_from_text", () =>
         const text = `
             d1003v1+d1003v2-d1003v3
             d4006v4.5*d5007v5/d6008v6
-            d7009v7,d8000v8;
+            d7009v7,d8000v8,d_9000v9;
             somed123v123
             d123v123thing
         `
 
         const ids = extract_ids_from_text(text)
-        expect(ids).to.have.length(8)
         expect(ids.map(id => id.to_str())).to.deep.equal([
             "1003v1",
             "1003v2",
@@ -120,6 +119,7 @@ describe("extract_ids_from_text", () =>
             "6008v6",
             "7009v7",
             "8000v8",
+            "-9000v9",
         ])
     })
 })
