@@ -7,9 +7,10 @@ import { upsert_js_component_const } from "./get_global_js_lines"
 import { tiptap_mention_chip } from "./tiptap_mention_chip"
 
 
-export function convert_text_type(input_value: string): string
+export function convert_text_type(input_value: string, to_type?: "tiptap" | "typescript"): string
 {
     const from_type = determine_input_value_text_type(input_value)
+    if (from_type === to_type) return input_value
 
     return from_type === "tiptap"
         ? convert_tiptap_to_typescript(input_value)
