@@ -32,6 +32,8 @@ function convert_tiptap_to_typescript(input_value: string): string
         typescript = upsert_js_component_const({ id, title }, typescript)
     })
 
+    typescript = typescript.replaceAll("\u00A0", " ") // replace non-breaking spaces with normal spaces
+
     return typescript
 }
 
@@ -59,7 +61,8 @@ function convert_typescript_to_tiptap(input_value: string): string
         }
         else
         {
-            lines_to_keep.push(line)
+            const preserved_spaces_line = preserve_leading_spaces(line, "text")
+            lines_to_keep.push(preserved_spaces_line)
         }
     }
 
@@ -73,4 +76,38 @@ function convert_typescript_to_tiptap(input_value: string): string
     })
 
     return tiptap
+}
+
+
+
+/**
+ * function preserve_leading_spaces
+ *
+ * Will replace multiple spaces with a nbsp and a space.
+ *
+ * This code is necessary otherwise leading spaces will not be
+ * preserved in text.  However it has very strange, hard to
+ * predict behaviour:
+ *          line1            ==>   line1
+ *          {                ==>   {
+ *              return {     ==>   return {    // <-- Wrong indentation
+ *              }            ==>       }
+ *          }                ==>   }
+ *
+ * Not yet happy with this implementation because:
+ *   * No tests
+ *   * Not easy to manually reproduce in browser
+ *   * Converts all double spaces, not just leading ones
+ *   * Have not test with mixed tabs and spaces, or mixed nbsp and spaces
+ */
+export function preserve_leading_spaces(input: string, type: "html" | "text"): string
+{
+    if (type === "html")
+    {
+        return input.replace(/ {2}/g, "&nbsp; ")
+    }
+    else
+    {
+        return input.replace(/ {2}/g, "\u00A0 ")
+    }
 }
