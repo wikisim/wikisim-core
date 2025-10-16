@@ -86,6 +86,43 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         expect(hydrated.function_arguments).equals(undefined, "empty list of function_arguments should flatten and hydrate to undefined")
         expect(hydrated.scenarios).equals(undefined, "empty list of scenarios should flatten and hydrate to undefined")
     })
+
+    it("non lists should return JSON list", function ()
+    {
+        const new_data_component = new_data_component_all_fields_set()
+
+        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component)
+        expect(hydrated.recursive_dependency_ids).deep.equals([
+            {
+                id: -5,
+                version: 1,
+            },
+            {
+                id: -6,
+                version: 2,
+            }
+        ], "list of recursive_dependency_ids should flatten and hydrate")
+        expect(hydrated.label_ids).deep.equals([-2, -3], "list of label_ids should flatten and hydrate")
+        expect(hydrated.dimension_ids).deep.equals([
+            {
+                id: -1,
+                version: 1,
+            }
+        ], "list of dimension_ids should flatten and hydrate")
+        expect(hydrated.function_arguments).deep.equals([
+            {
+                default_value: "123",
+                id: 0,
+                name: "arg1",
+            }
+        ], "list of function_arguments should flatten and hydrate")
+        expect(hydrated.scenarios).deep.equals([
+            {
+                id: 0,
+                values: { arg1: { value: "456" } },
+            }
+        ], "list of scenarios should flatten and hydrate")
+    })
 })
 
 
