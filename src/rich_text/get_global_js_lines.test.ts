@@ -17,11 +17,13 @@ describe("get_global_js_lines", () =>
             "12v3": init_data_component({
                 id: "12v3",
                 title: "Some normal title",
+                plain_title: "Some normal title",
                 plain_description: "Component 12 description",
             }),
             "45v6": init_data_component({
                 id: "45v6",
                 title: "  $u%6_(Some StRaNgE t-i-t-l-e)",
+                plain_title: "  $u%6_(Some StRaNgE t-i-t-l-e)",
                 plain_description: "Component 45 */ description",
             }),
         }
@@ -36,12 +38,16 @@ describe("get_global_js_lines", () =>
         // Check that component declarations are included
         expect(js_lines).equals(deindent(`
             /**
+             * Some normal title
+             *
              * Component 12 description
              *
              * https://wikisim.org/wiki/12v3
              */
             declare const d12v3: any;
             /**
+             * $u%6_(Some StRaNgE t-i-t-l-e)
+             *
              * Component 45 * / description
              *
              * https://wikisim.org/wiki/45v6

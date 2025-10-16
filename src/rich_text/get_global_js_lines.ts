@@ -13,9 +13,12 @@ export function get_global_js_lines(
     const dependencies_and_aliases = Object.entries(data_component_dependencies_by_id)
     .map(([id, component]) =>
     {
-        const description = get_safe_description(component)
+        const title = get_jsdoc_safe_text(component.plain_title)
+        const description = get_jsdoc_safe_text(component.plain_description)
         return deindent(`
             /**
+             * ${title}
+             *
              * ${description}
              *
              * https://wikisim.org/wiki/${id}
@@ -49,7 +52,7 @@ export function get_global_js_lines(
 export function js_component_ref(component: DataComponent, type: "declare const" | "const"): string
 {
     const id = component.id.to_str()
-    const description = get_safe_description(component)
+    const description = get_jsdoc_safe_text(component.plain_description)
 
     if (type === "declare const") return deindent(`
         /**
@@ -95,7 +98,10 @@ function js_component_ref_as_const(component: Pick<DataComponent, "id" | "title"
 }
 
 
-function get_safe_description(component: DataComponent): string
+function get_jsdoc_safe_text(text: string): string
 {
-    return truncate(component.plain_description.replaceAll("*/", "* /"), 200)
+    const processed_text = text.trim()
+        .replaceAll("*/", "* /")
+        .replaceAll(/\n|\r/g, "")
+    return truncate(processed_text, 200)
 }
