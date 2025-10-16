@@ -1,7 +1,7 @@
 import { DataComponent } from "./interface.ts"
 
 
-export function to_javascript_identifier(component: DataComponent): string
+export function to_javascript_identifier(component: Pick<DataComponent, "id" | "title">): string
 {
     let safe_title = component.title//.toLowerCase()
         .replace(/[^a-z0-9_]+/gi, "_")  // Replace non-alphanumeric characters with underscores

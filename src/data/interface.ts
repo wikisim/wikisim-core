@@ -174,3 +174,6 @@ export function is_new_data_component(data_component?: DataComponent | NewDataCo
 {
     return !!data_component && "temporary_id" in data_component && data_component.temporary_id instanceof TempId
 }
+
+
+export type DataComponentsById = Record<string, DataComponent>

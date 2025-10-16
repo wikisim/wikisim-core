@@ -1,7 +1,7 @@
 import { expect } from "chai"
 
 import { IdAndVersion, IdOnly } from "../data/id"
-import { tiptap_mention_chip } from "../test/fixtures"
+import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
 import {
     browser_get_referenced_ids_from_tiptap,
 } from "./browser_get_referenced_ids_from_tiptap"

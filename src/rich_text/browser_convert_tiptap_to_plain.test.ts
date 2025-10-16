@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { tiptap_mention_chip } from "../test/fixtures"
+import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
 import { browser_convert_tiptap_to_plain } from "./browser_convert_tiptap_to_plain"
 
 

@@ -133,6 +133,7 @@ export function all_are_id_and_version(ids: IdAndMaybeVersion[]): ids is IdAndVe
 
 
 // The `_?` in the regex is to allow for negative ids in tests
+// Will match strings like d12v3, d_12v3
 export const REGEX_MATCH_IDS = /(?<=^|[^A-Za-z0-9_])d(_?)(\d+)v(\d+)(?=[^A-Za-z0-9_]|$)/gim
 export function extract_ids_from_text(text: string): IdAndVersion[]
 {

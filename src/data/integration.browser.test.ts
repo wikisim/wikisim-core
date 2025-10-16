@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from "chai"
 
+import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
 import { __testing__, get_supabase } from "../supabase/browser"
-import { tiptap_mention_chip } from "../test/fixtures"
 import { deep_equals } from "../utils/deep_equals"
 import { deindent } from "../utils/deindent"
 import {
