@@ -18,7 +18,7 @@ export type RequestDependenciesAndSetupSandboxResponse =
     component: DataComponent
 }
 
-export function request_dependencies_and_setup_sandbox(get_supabase: GetSupabase, id: IdAndVersion): Promise<RequestDependenciesAndSetupSandboxResponse>
+export function request_dependencies_and_setup_sandbox(get_supabase: GetSupabase, id: IdAndVersion, debugging = false): Promise<RequestDependenciesAndSetupSandboxResponse>
 {
     let component: DataComponent
 
@@ -50,7 +50,7 @@ export function request_dependencies_and_setup_sandbox(get_supabase: GetSupabase
             component,
             data_components_by_id_and_version,
             evaluate_code_in_sandbox: evaluate_code_in_browser_sandbox,
-            debugging: true,
+            debugging,
         })
         .then(sandbox_response =>
         {
