@@ -55,7 +55,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
         if (scenario_value?.iterate_over)
         {
             javascript += indent(`// iterate over argument "${input.name}"\n`, INDENTATION, indentation_level)
-            javascript += indent(`labels = ${scenario_value.value}\n`, INDENTATION, indentation_level)
+            javascript += indent(`labels = ${scenario_value.value.trim() || "[]"}\n`, INDENTATION, indentation_level)
             javascript += indent(`results = labels.map(${input.name} =>\n{\n`, INDENTATION, indentation_level)
             indentation_level++
 
@@ -64,7 +64,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
         }
         else
         {
-            args.push(scenario_value ? scenario_value.value : "undefined")
+            args.push(scenario_value?.value.trim() || "undefined")
         }
     })
 

@@ -105,4 +105,53 @@ describe("prepare_scenario_javascript", () =>
 
         // expect(javascript).equals(expected)
     })
+
+
+    it("should handle empty value strings", () =>
+    {
+        const scenario = scenario_fixture()
+        scenario.values["min"] = { value: "" }
+        const component = component_fixture(scenario)
+
+        const javascript = prepare_scenario_javascript({ component, scenario })
+        const expected = deindent(`
+            function calc()
+            {
+                func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
+
+                return func(undefined, 5, undefined);
+            }
+            calc();
+        `)
+
+        expect(javascript).equals(expected)
+    })
+
+
+    it("should handle empty value for interate", () =>
+    {
+        const scenario = scenario_fixture()
+        scenario.values["min"] = { value: "", iterate_over: true }
+        const component = component_fixture(scenario)
+
+        const javascript = prepare_scenario_javascript({ component, scenario })
+        const expected = deindent(`
+            function calc()
+            {
+                func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
+
+                // iterate over argument "min"
+                labels = []
+                results = labels.map(min =>
+                {
+                    return func(min, 5, undefined);
+                });
+
+                return { labels, results };
+            }
+            calc();
+        `)
+
+        expect(javascript).equals(expected)
+    })
 })
