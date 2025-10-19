@@ -29,6 +29,7 @@ export function make_field_validators(z: any) //typeof import("zod"))
         const ScenarioValueSchema = z.object({
             value: z.string(),
             iterate_over: z.boolean().optional(),
+            use_previous_result: z.boolean().optional(),
         })
 
         const ScenarioValuesSchema = z.record(z.string(), ScenarioValueSchema)

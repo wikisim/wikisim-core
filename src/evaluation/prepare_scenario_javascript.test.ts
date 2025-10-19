@@ -40,7 +40,11 @@ describe("prepare_scenario_javascript", () =>
         {
             func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
 
-            return func(undefined, 5, undefined);
+            let result = undefined;
+
+            result = func(undefined, 5, undefined);
+
+            return result;
         }
         calc();
         `)
@@ -61,11 +65,16 @@ describe("prepare_scenario_javascript", () =>
         {
             func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
 
+            let result = undefined;
+            const results = [];
+
             // iterate over argument "value"
-            labels = [1,2,3]
-            results = labels.map(value =>
+            const labels = [1,2,3];
+
+            labels.forEach(value =>
             {
-                return func(undefined, value, undefined);
+                result = func(undefined, value, undefined);
+                results.push(result);
             });
 
             return { labels, results };
@@ -119,7 +128,11 @@ describe("prepare_scenario_javascript", () =>
             {
                 func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
 
-                return func(undefined, 5, undefined);
+                let result = undefined;
+
+                result = func(undefined, 5, undefined);
+
+                return result;
             }
             calc();
         `)
@@ -140,11 +153,16 @@ describe("prepare_scenario_javascript", () =>
             {
                 func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
 
+                let result = undefined;
+                const results = [];
+
                 // iterate over argument "min"
-                labels = []
-                results = labels.map(min =>
+                const labels = [];
+
+                labels.forEach(min =>
                 {
-                    return func(min, 5, undefined);
+                    result = func(min, 5, undefined);
+                    results.push(result);
                 });
 
                 return { labels, results };
@@ -153,5 +171,78 @@ describe("prepare_scenario_javascript", () =>
         `)
 
         expect(javascript).equals(expected)
+    })
+
+
+    describe("use_previous_result", () =>
+    {
+        it("should implement use_previous_result", () =>
+        {
+            const scenario = scenario_fixture()
+            scenario.values["min"] = { value: "[1, 2, 3]", iterate_over: true }
+            scenario.values["offset"] = { value: "", use_previous_result: true }
+            const component = component_fixture(scenario)
+
+            const javascript = prepare_scenario_javascript({ component, scenario })
+            const expected = deindent(`
+                function calc()
+                {
+                    func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
+
+                    // Set initial result to "offset" argument value
+                    let result = undefined;
+                    const results = [];
+
+                    // iterate over argument "min"
+                    const labels = [1, 2, 3];
+
+                    labels.forEach(min =>
+                    {
+                        result = func(min, 5, result);
+                        results.push(result);
+                    });
+
+                    return { labels, results };
+                }
+                calc();
+            `)
+
+            expect(javascript).equals(expected)
+        })
+
+
+        it("should support using value as initial value for use_previous_result", () =>
+        {
+            const scenario = scenario_fixture()
+            scenario.values["min"] = { value: "[1, 2, 3]", iterate_over: true }
+            scenario.values["offset"] = { value: "456", use_previous_result: true }
+            const component = component_fixture(scenario)
+
+            const javascript = prepare_scenario_javascript({ component, scenario })
+            const expected = deindent(`
+                function calc()
+                {
+                    func = (min = 0, value, offset = 10) => Math.max(value, min) + offset;
+
+                    // Set initial result to "offset" argument value
+                    let result = 456;
+                    const results = [];
+
+                    // iterate over argument "min"
+                    const labels = [1, 2, 3];
+
+                    labels.forEach(min =>
+                    {
+                        result = func(min, 5, result);
+                        results.push(result);
+                    });
+
+                    return { labels, results };
+                }
+                calc();
+            `)
+
+            expect(javascript).equals(expected)
+        })
     })
 })

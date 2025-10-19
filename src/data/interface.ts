@@ -58,6 +58,7 @@ export interface ScenarioValue
 {
     value: string
     iterate_over?: boolean
+    use_previous_result?: boolean
 }
 export interface ScenarioValues
 {

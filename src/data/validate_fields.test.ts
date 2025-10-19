@@ -104,7 +104,7 @@ describe("validate_scenarios_from_json", () =>
             },
             {
                 values: {
-                    argA: { value: "valueA" },
+                    argA: { value: "valueA", use_previous_result: true },
                 },
                 // description, expected_result, and expectation_met are optional
             },
@@ -126,7 +126,7 @@ describe("validate_scenarios_from_json", () =>
             },
             {
                 values: {
-                    argA: { value: "valueA" },
+                    argA: { value: "valueA", use_previous_result: true },
                 },
             },
             {
