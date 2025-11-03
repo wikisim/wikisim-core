@@ -1,6 +1,7 @@
 import { IdAndVersion } from "../data/id.ts"
 import type { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { init_data_component, init_new_data_component } from "../data/modify.ts"
+import { EvaluationResponse } from "../evaluator/interface.ts"
 
 
 export function new_data_component_all_fields_set(overrides: Partial<NewDataComponent> = {}): NewDataComponent
@@ -67,4 +68,26 @@ export function data_component_all_fields_set(overrides: Partial<DataComponent> 
         ...rest_new_data_component,
         ...overrides,
     })
+}
+
+
+type FixtureEvaluationResponseOverrides = Omit<Partial<EvaluationResponse>, "result" | "error"> & ({
+    result?: string
+    error?: null
+} | {
+    result: null
+    error: string
+})
+export function fixture_evaluation_response(overrides?: FixtureEvaluationResponseOverrides): EvaluationResponse
+{
+    return {
+        evaluation_id: 123,
+        result: "3",
+        error: null,
+        js_input_value: "1 + 2",
+        requested_at: 1762000000000,
+        start_time: 1762000000100,
+        end_time: 1762000000200,
+        ...overrides,
+    }
 }
