@@ -39,9 +39,14 @@ function function_body(value: string): string
 
     const lines = trimmed.split("\n")
 
-    // Check if last line has a return statement
+    // Check if any line starts with a return statement
+    // This is a simple check and will not cover cases such as when there is
+    // a return statement inside a block or function, inside a conditional,
+    // inside a multi-line string or comment, etc.
+    const has_return_statement = lines.some(line => line.trim().startsWith("return "))
+
     const last_line = lines[lines.length - 1]!
-    if (!last_line.trim().startsWith("return "))
+    if (!has_return_statement && !last_line.trim().startsWith("return "))
     {
         lines[lines.length - 1] = "return " + last_line
     }

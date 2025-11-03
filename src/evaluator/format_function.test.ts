@@ -73,6 +73,26 @@ describe("format_function_input_value_string", () =>
         }`))
     })
 
+    it("does not auto auto insert return if return already mentioned in function body", () =>
+    {
+        const basic_request = {
+            js_input_value: `
+            return {
+                a: min,
+                b: value
+            }`,
+            function_arguments,
+        }
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals(deindent(`
+        (min = 0, value) => {
+            return {
+                a: min,
+                b: value
+            }
+        }`))
+    })
+
 
     it("does not make empty functions", () =>
     {
