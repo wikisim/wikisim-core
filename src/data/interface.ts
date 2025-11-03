@@ -67,16 +67,22 @@ export interface ScenarioValues
 
 export type DBScenario = DBInlineScenario
 
+// export type ExpectationType = "auto" | "graphable" | "exact_json_match" | "selected_attributes"
 export interface DBInlineScenario
 {
     description?: string
     values: ScenarioValues
+    // /**
+    //  * Defaults to "auto" if not provided.  auto currently chooses between
+    //  * "graphable" and "exact_json_match" based on whether the expected_result
+    //  * can be parsed as graphable data, if not it falls back to exact_json_match.
+    //  */
+    // expectation_type?: ExpectationType
     expected_result?: string
     expectation_met?: boolean
 }
 
-export type Scenario = InlineScenario
-export interface InlineScenario extends DBInlineScenario
+export interface Scenario extends DBInlineScenario
 {
     id: number // temporary id, not stored to DB
 }
