@@ -43,7 +43,7 @@ function function_body(value: string): string
     // This is a simple check and will not cover cases such as when there is
     // a return statement inside a block or function, inside a conditional,
     // inside a multi-line string or comment, etc.
-    const has_return_statement = lines.some(line => line.trim().startsWith("return "))
+    const has_return_statement = lines.some(line => line.trim().includes("return "))
 
     const last_line = lines[lines.length - 1]!
     if (!has_return_statement && !last_line.trim().startsWith("return "))

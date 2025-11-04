@@ -95,6 +95,23 @@ describe("format_function_input_value_string", () =>
         }`))
     })
 
+    it("does not auto insert return if return already mentioned in function body - test 2", () =>
+    {
+        const basic_request = {
+            js_input_value: `
+            if (!state) return initialise_state()
+            else
+            `,
+            function_arguments,
+        }
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals(deindent(`
+        (min = 0, value) => {
+            if (!state) return initialise_state()
+            else
+        }`))
+    })
+
     it("auto inserts return even if no value is present to return", () =>
     {
         const basic_request = {
