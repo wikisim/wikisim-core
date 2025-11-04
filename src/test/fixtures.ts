@@ -36,14 +36,14 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
         dimension_ids: [ new IdAndVersion(-1, 1) ],
         function_arguments: [
             {
-                id: 0,
+                local_temp_id: 0,
                 name: "arg1",
                 default_value: "123",
             }
         ],
         scenarios: [
             {
-                id: 0,
+                local_temp_id: 0,
                 values: { arg1: { value: "456" } },
             }
         ],

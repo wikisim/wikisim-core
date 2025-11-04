@@ -10,8 +10,8 @@ describe("format_function_input_value_string", () =>
     const function_arguments: FunctionArgument[] = [
         // Swap around the order to ensure formatting uses argument
         // positions not names
-        { id: 0, name: "min", default_value: "0" },
-        { id: 1, name: "value" },
+        { local_temp_id: 0, name: "min", default_value: "0" },
+        { local_temp_id: 1, name: "value" },
     ]
 
 
@@ -29,7 +29,7 @@ describe("format_function_input_value_string", () =>
     it("does not use empty default_value", () =>
     {
         const function_arguments: FunctionArgument[] = [
-            { id: 0, name: "min", default_value: "" }
+            { local_temp_id: 0, name: "min", default_value: "" }
         ]
         const basic_request = {
             js_input_value: "Math.max(1, min)",
@@ -97,7 +97,7 @@ describe("format_function_input_value_string", () =>
     it("does not make empty functions", () =>
     {
         const function_arguments: FunctionArgument[] = [
-            { id: 0, name: "min", default_value: "" }
+            { local_temp_id: 0, name: "min", default_value: "" }
         ]
         const basic_request = {
             js_input_value: "",

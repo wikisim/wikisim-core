@@ -50,7 +50,7 @@ export interface DBFunctionArgument
 }
 export interface FunctionArgument extends DBFunctionArgument
 {
-    id: number // temporary id, not stored to DB
+    local_temp_id: number // temporary id, not stored to DB
 }
 
 
@@ -84,7 +84,7 @@ export interface DBInlineScenario
 
 export interface Scenario extends DBInlineScenario
 {
-    id: number // temporary id, not stored to DB
+    local_temp_id: number // temporary id, not stored to DB
 }
 
 

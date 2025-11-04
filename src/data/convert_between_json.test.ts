@@ -2,6 +2,7 @@
 import { expect } from "chai"
 import { z } from "zod"
 
+import { DataComponentAsJSON, NewDataComponentAsJSON } from "../supabase"
 import {
     data_component_all_fields_set,
     new_data_component_all_fields_set,
@@ -28,7 +29,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         data_component.plain_title = ""
         data_component.plain_description = ""
 
-        const hydrated: DataComponent = helper_flatten_to_json_and_hydrate(data_component)
+        const hydrated: DataComponent = helper_flatten_to_json_and_hydrate(data_component).hydrated
         expect(hydrated).deep.equals(data_component)
     })
 
@@ -40,7 +41,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         new_data_component.plain_title = ""
         new_data_component.plain_description = ""
 
-        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component)
+        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component).hydrated
         expect(hydrated).deep.equals(new_data_component)
     })
 
@@ -79,7 +80,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         new_data_component.function_arguments = []
         new_data_component.scenarios = []
 
-        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component)
+        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component).hydrated
         expect(hydrated.recursive_dependency_ids).equals(undefined, "empty list of recursive_dependency_ids should flatten and hydrate to undefined")
         expect(hydrated.label_ids).equals(undefined, "empty list of label_ids should flatten and hydrate to undefined")
         expect(hydrated.dimension_ids).equals(undefined, "empty list of dimension_ids should flatten and hydrate to undefined")
@@ -87,11 +88,12 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         expect(hydrated.scenarios).equals(undefined, "empty list of scenarios should flatten and hydrate to undefined")
     })
 
-    it("non lists should return JSON list", function ()
+    it("lists should be returned successfully", function ()
     {
         const new_data_component = new_data_component_all_fields_set()
 
-        const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component)
+        const result = helper_flatten_to_json_and_hydrate(new_data_component)
+        const hydrated: NewDataComponent = result.hydrated
         expect(hydrated.recursive_dependency_ids).deep.equals([
             {
                 id: -5,
@@ -102,6 +104,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
                 version: 2,
             }
         ], "list of recursive_dependency_ids should flatten and hydrate")
+
         expect(hydrated.label_ids).deep.equals([-2, -3], "list of label_ids should flatten and hydrate")
         expect(hydrated.dimension_ids).deep.equals([
             {
@@ -109,26 +112,41 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
                 version: 1,
             }
         ], "list of dimension_ids should flatten and hydrate")
+
         expect(hydrated.function_arguments).deep.equals([
             {
                 default_value: "123",
-                id: 0,
+                local_temp_id: 0,
                 name: "arg1",
             }
         ], "list of function_arguments should flatten and hydrate")
+
+        expect(result.flattened.function_arguments).deep.equals([
+            {
+                default_value: "123",
+                name: "arg1",
+            }
+        ], "list of function_arguments in flattened JSON should not have local_temp_id")
+
         expect(hydrated.scenarios).deep.equals([
             {
-                id: 0,
+                local_temp_id: 0,
                 values: { arg1: { value: "456" } },
             }
         ], "list of scenarios should flatten and hydrate")
+
+        expect(result.flattened.scenarios).deep.equals([
+            {
+                values: { arg1: { value: "456" } },
+            }
+        ], "list of scenarios in flattened JSON should not have local_temp_id")
     })
 })
 
 
-function helper_flatten_to_json_and_hydrate(data_component: NewDataComponent): NewDataComponent
-function helper_flatten_to_json_and_hydrate(data_component: DataComponent): DataComponent
-function helper_flatten_to_json_and_hydrate(data_component: NewDataComponent | DataComponent): NewDataComponent | DataComponent
+function helper_flatten_to_json_and_hydrate(data_component: NewDataComponent): { flattened: NewDataComponentAsJSON, hydrated: NewDataComponent }
+function helper_flatten_to_json_and_hydrate(data_component: DataComponent): { flattened: DataComponentAsJSON, hydrated: DataComponent }
+function helper_flatten_to_json_and_hydrate(data_component: NewDataComponent | DataComponent): { flattened: NewDataComponentAsJSON | DataComponentAsJSON, hydrated: NewDataComponent | DataComponent }
 {
     const flattened = flatten_new_or_data_component_to_json(data_component)
     const as_json_string = JSON.stringify(flattened) // Check it doesn't throw
@@ -138,5 +156,5 @@ function helper_flatten_to_json_and_hydrate(data_component: NewDataComponent | D
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const hydrated: DataComponent = hydrate_data_component_from_json(as_json, field_validators)
 
-    return hydrated
+    return { flattened, hydrated }
 }

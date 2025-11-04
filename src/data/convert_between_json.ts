@@ -60,11 +60,11 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
             ? data_component.dimension_ids.map(d => d.to_str())
             : null,
         function_arguments: data_component.function_arguments
-            ? data_component.function_arguments.map(({ id: _, ...args }) => args) as Json
+            ? data_component.function_arguments.map(({ local_temp_id: _, ...args }) => args) as Json
             : null,
         scenarios: data_component.scenarios
             // deno-lint-ignore no-explicit-any
-            ? data_component.scenarios.map(({ id: _, ...args }) => args as any as Json)
+            ? data_component.scenarios.map(({ local_temp_id: _, ...args }) => args as any as Json)
             : null,
 
         // Will be set by the server-side (edge function)
@@ -156,7 +156,7 @@ function hydrate_function_arguments(row: NewDataComponentAsJSON | DataComponentA
 {
     const function_arguments = validators.validate_function_arguments_from_json(row.function_arguments)
     if (!function_arguments || function_arguments.length === 0) return undefined
-    return function_arguments.map((arg, index) => ({ id: index, ...arg }) )
+    return function_arguments.map((arg, index) => ({ local_temp_id: index, ...arg }) )
 }
 
 
@@ -164,7 +164,7 @@ function hydrate_scenarios(row: NewDataComponentAsJSON | DataComponentAsJSON, va
 {
     const scenarios = validators.validate_scenarios_from_json(row.scenarios)
     if (!scenarios || scenarios.length === 0) return undefined
-    return scenarios.map((arg, index) => ({ id: index, ...arg }) )
+    return scenarios.map((arg, index) => ({ local_temp_id: index, ...arg }) )
 }
 
 
