@@ -6,11 +6,16 @@ import { EvaluationRequest, EvaluationResponse } from "./interface"
 let next_evaluation_id = 0
 
 let evaluator_has_mounted = false
-let iframe: HTMLIFrameElement
-let resolve_iframe_loaded: (value: true | PromiseLike<true>) => void
-const iframe_loaded = new Promise<true>(resolve => {
-    resolve_iframe_loaded = resolve
-})
+let resolve_iframe_loaded: (value: HTMLIFrameElement | PromiseLike<HTMLIFrameElement>) => void
+let promise_iframe_loaded: Promise<HTMLIFrameElement>
+function set_up_new_iframe_loading_promise()
+{
+    promise_iframe_loaded = new Promise<HTMLIFrameElement>(resolve => {
+        resolve_iframe_loaded = resolve
+    })
+}
+set_up_new_iframe_loading_promise()
+
 
 interface ExtendedEvaluationRequest extends Omit<EvaluationRequest, "data_component_by_id_and_version">
 {
@@ -40,6 +45,7 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
         js_input_value: basic_request.js_input_value,
         requested_at: basic_request.requested_at,
         timeout_ms: basic_request.timeout_ms ?? 1000, // Default timeout of 1000 ms
+        debugging: basic_request.debugging,
         evaluation_id: ++next_evaluation_id,
         start_time: -1,
         promise_result,
@@ -50,10 +56,10 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
     // Wait for iframe to load, with timeout
     const iframe_loading_timeout = new Promise<void>(resolve_iframe_loaded =>
     {
-        setTimeout(resolve_iframe_loaded, request.timeout_ms)
+        setTimeout(() => resolve_iframe_loaded(), request.timeout_ms)
     })
-    const loaded = await Promise.race([iframe_loaded, iframe_loading_timeout])
-    if (!loaded) return {
+    const iframe = await Promise.race([promise_iframe_loaded, iframe_loading_timeout])
+    if (!iframe) return {
         ...request,
         error: "Timeout waiting for sandboxed iframe to load.",
         result: null,
@@ -63,7 +69,6 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
 
     // Ensure evaluations are processed in order, one at a time
     await request_next_evaluation(request)
-
 
     request.start_time = performance.now()
     // type guard, should never be null unless during dev when the
@@ -115,7 +120,7 @@ async function request_next_evaluation(request: ExtendedEvaluationRequest)
 export function Evaluator()
 {
     useEffect(() => {
-        const { clean_up } = setup_sandboxed_iframe()
+        const { clean_up } = setup_sandboxed_iframe({ logging: false })
         return clean_up
     }, [])
 
@@ -123,10 +128,10 @@ export function Evaluator()
 }
 
 
-export function setup_sandboxed_iframe(logging = false)
+export function setup_sandboxed_iframe(options: { logging: boolean })
 {
     // --- Create hidden sandboxed iframe ---
-    iframe = document.createElement("iframe")
+    const iframe = document.createElement("iframe")
 
     // The sandbox attribute is key:
     // - allow-scripts: lets code inside run
@@ -148,7 +153,7 @@ export function setup_sandboxed_iframe(logging = false)
     <script>
         const console_log = (...args) =>
         {
-            if (!${logging}) return;
+            if (!${options.logging}) return;
             console .log(' [iFrame] ==========> ', ...args);
         }
 
@@ -157,6 +162,9 @@ export function setup_sandboxed_iframe(logging = false)
 
         window.addEventListener('message', (e) => {
             const payload = JSON.parse(e.data);
+
+            if (payload.debugging) debugger;
+
             console_log('received payload:', payload);
             try {
                 // Evaluate the code inside the sandboxed iframe
@@ -181,7 +189,7 @@ export function setup_sandboxed_iframe(logging = false)
     `
     iframe.srcdoc = raw_src_doc
 
-    iframe.onload = () => resolve_iframe_loaded(true)
+    iframe.onload = () => resolve_iframe_loaded(iframe)
     iframe.onerror = e => console .error('Iframe error:', e)
 
     document.body.appendChild(iframe)
@@ -236,6 +244,7 @@ export function setup_sandboxed_iframe(logging = false)
         window.removeEventListener("message", handle_message_from_iframe)
         // Remove sandboxed iframe
         document.body.removeChild(iframe)
+        set_up_new_iframe_loading_promise()
     }
 
     return { clean_up }

@@ -8,6 +8,7 @@ export interface EvaluationRequest
      * Optional timeout in milliseconds, default is 100 ms
      */
     timeout_ms?: number
+    debugging?: boolean
 }
 
 export type MinimalEvaluationResponse =

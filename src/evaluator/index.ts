@@ -15,22 +15,15 @@ interface CalculateResultValueArgs
      */
     evaluate_code_in_sandbox: undefined | ((request: EvaluationRequest) => Promise<EvaluationResponse>),
     timeout_ms?: number
+    debugging?: boolean
 }
 
 export async function calculate_result_value(args: CalculateResultValueArgs): Promise<EvaluationResponse | null>
 {
-    const { component } = args
+    const { component, debugging } = args
     const { input_value } = component
 
     if (!input_value) return Promise.resolve(null)
-
-    const js_input_value = args.convert_tiptap_to_javascript(input_value)
-    const basic_request: EvaluationRequest = {
-        js_input_value,
-        requested_at: performance.now(),
-        timeout_ms: args.timeout_ms,
-    }
-
 
     if (args.evaluate_code_in_sandbox)
     {
@@ -38,10 +31,19 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
             component,
             data_components_by_id_and_version: args.data_components_by_id_and_version,
             evaluate_code_in_sandbox: args.evaluate_code_in_sandbox,
+            debugging,
         })
         if (load_dependencies_response.error) return load_dependencies_response
     }
 
+
+    const js_input_value = args.convert_tiptap_to_javascript(input_value)
+    const basic_request: EvaluationRequest = {
+        js_input_value,
+        requested_at: performance.now(),
+        timeout_ms: args.timeout_ms,
+        debugging,
+    }
 
     if (component.value_type === "function")
     {
@@ -64,7 +66,7 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
     }
 
 
-    // When on edge function, args.evaluate_code_in_sandbox will be undefined so
+    // When on edge function `args.evaluate_code_in_sandbox` will be undefined so
     // we just return the result value as the args.component.result_value that
     // was given by the user.
     if (!args.evaluate_code_in_sandbox) return Promise.resolve({
