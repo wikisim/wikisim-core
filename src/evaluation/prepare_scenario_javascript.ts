@@ -29,7 +29,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     // Get function string and inputs
     const function_string = request.component.result_value || ""
     const function_inputs = request.component.function_arguments || []
-    const scenario_inputs = request.scenario.values
+    const scenario_inputs = request.scenario.values_by_temp_id
 
     // Temporarily restrict to one iterate_over input.  This could be changed in
     // future to support multiple iterate_over inputs by using nested loops
@@ -45,6 +45,8 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
         throw new Error("Can only use_previous_result on one input at a time")
     }
     const use_previous_result = use_previous_results[0]
+    const use_previous_result_temp_id = use_previous_result?.[0]
+    const use_previous_result_input = function_inputs.find(input => input.local_temp_id === use_previous_result_temp_id)
 
     // Build argument list in order, using scenario value or undefined
     // if no scenario value
@@ -57,9 +59,9 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     let javascript = indent(`func = ${function_string};\n\n`, INDENTATION, indentation_level)
 
     let initial_result_value = "undefined"
-    if (use_previous_result)
+    if (use_previous_result && use_previous_result_input)
     {
-        javascript += indent(`// Set initial result to "${use_previous_result[0]}" argument value\n`, INDENTATION, indentation_level)
+        javascript += indent(`// Set initial result to "${use_previous_result_input.name}" (local_temp_id: ${use_previous_result_temp_id}) argument value\n`, INDENTATION, indentation_level)
         initial_result_value = use_previous_result[1].value.trim() || "undefined"
     }
 
@@ -73,10 +75,10 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     // Wrap in iteration if any inputs are marked as iterate_over
     function_inputs.forEach(input =>
     {
-        const scenario_value = scenario_inputs[input.name]
+        const scenario_value = scenario_inputs[input.local_temp_id]
         if (scenario_value?.iterate_over)
         {
-            javascript += indent(`// iterate over argument "${input.name}"\n`, INDENTATION, indentation_level)
+            javascript += indent(`// iterate over argument "${input.name}" (local_temp_id: ${input.local_temp_id})\n`, INDENTATION, indentation_level)
             javascript += indent(`const labels = ${scenario_value.value.trim() || "[]"};\n\n`, INDENTATION, indentation_level)
 
             javascript += indent(`labels.forEach(${input.name} =>\n{`, INDENTATION, indentation_level)
@@ -111,7 +113,7 @@ function prepare_function_call_javascript(request: ScenarioCalculationRequest): 
     // Close any iteration blocks
     function_inputs.forEach((input) =>
     {
-        const scenario_value = scenario_inputs[input.name]
+        const scenario_value = scenario_inputs[input.local_temp_id]
         if (scenario_value?.iterate_over)
         {
             indentation_level--
