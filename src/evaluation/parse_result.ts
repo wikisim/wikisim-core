@@ -2,9 +2,10 @@ import { Json } from "../supabase/interface"
 import { LabelsAndResults } from "./interface"
 
 
-export function result_string_to_json(result: string | undefined): { parsed: Json } | false
+export function result_string_to_json(result: string | undefined): { parsed: Json | undefined } | false
 {
     if (!result) return false
+    if (result === "undefined") return { parsed: undefined }
 
     try
     {
@@ -18,7 +19,7 @@ export function result_string_to_json(result: string | undefined): { parsed: Jso
 }
 
 
-export function assert_result_json_is_graphable(json: Json): LabelsAndResults | false
+export function assert_result_json_is_graphable(json: Json | undefined): LabelsAndResults | false
 {
     if (typeof json !== "object" || json === null) return false
 
