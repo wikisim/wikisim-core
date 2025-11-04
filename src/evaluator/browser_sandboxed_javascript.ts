@@ -1,5 +1,6 @@
 import { useEffect } from "preact/hooks"
 
+import { get_current_debugging_state } from "../state/debugging"
 import { EvaluationRequest, EvaluationResponse } from "./interface"
 
 
@@ -45,7 +46,8 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
         js_input_value: basic_request.js_input_value,
         requested_at: basic_request.requested_at,
         timeout_ms: basic_request.timeout_ms ?? 1000, // Default timeout of 1000 ms
-        debugging: basic_request.debugging,
+        debugging: basic_request.debugging ?? get_current_debugging_state().debugging_enabled,
+        logging: basic_request.logging ?? get_current_debugging_state().logging_enabled,
         evaluation_id: ++next_evaluation_id,
         start_time: -1,
         promise_result,
@@ -151,9 +153,10 @@ export function setup_sandboxed_iframe(options: { logging: boolean })
     </script>
 
     <script>
+        const logging = { enabled: ${options.logging} };
         const console_log = (...args) =>
         {
-            if (!${options.logging}) return;
+            if (!logging.enabled) return;
             console .log(' [iFrame] ==========> ', ...args);
         }
 
@@ -164,6 +167,7 @@ export function setup_sandboxed_iframe(options: { logging: boolean })
             const payload = JSON.parse(e.data);
 
             if (payload.debugging) debugger;
+            if (payload.logging !== undefined) logging.enabled = payload.logging;
 
             console_log('received payload:', payload);
             try {

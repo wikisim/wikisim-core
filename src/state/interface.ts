@@ -1,8 +1,10 @@
+import { DebuggingState } from "./debugging/interface"
 import { UserAuthSessionState } from "./user_auth_session/interface"
 
 
 export interface RootCoreState
 {
+    debugging: DebuggingState
     user_auth_session: UserAuthSessionState
 }
 

@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
 
 import { get_supabase, GetSupabase } from "../supabase/browser"
-// import * as data_components from "./data_components"
+import * as debugging from "./debugging"
 import type { RootCoreState } from "./interface"
 import * as user_auth_session from "./user_auth_session"
 
@@ -30,11 +30,10 @@ export const get_new_core_store = (dependencies?: CoreStoreDependencies) =>
     dependencies = dependencies || default_dependencies()
 
     const core_store = create<RootCoreState>()(immer((set, get) => ({
-        // data_components: data_components.initial_state(set, get),
+        debugging: debugging.initial_state(),
         user_auth_session: user_auth_session.initial_state(set, get, dependencies.get_supabase),
     })))
 
-    // data_components.subscriptions(core_store, dependencies.get_supabase)
     user_auth_session.subscriptions(core_store, dependencies.get_supabase)
 
     return core_store

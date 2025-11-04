@@ -9,6 +9,7 @@ export interface EvaluationRequest
      */
     timeout_ms?: number
     debugging?: boolean
+    logging?: boolean
 }
 
 export type MinimalEvaluationResponse =
