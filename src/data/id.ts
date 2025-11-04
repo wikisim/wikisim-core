@@ -9,7 +9,7 @@ export class IdOnly
         const parsed_id = typeof id === "string" ? parseInt(id, 10) : id
         if (isNaN(parsed_id))
         {
-            throw new Error(`id must be a valid number but got "${id}"`)
+            throw new Error(ERRORS.ERR47.message + `"${id}"`)
         }
         this.id = parsed_id
     }
@@ -40,11 +40,11 @@ export class IdAndVersion
         const parsed_version = typeof version === "string" ? parseInt(version, 10) : version
         if (isNaN(parsed_id))
         {
-            throw new Error(`id must be a valid number but got "${id}"`)
+            throw new Error(ERRORS.ERR47.message + `"${id}"`)
         }
         if (isNaN(parsed_version) || parsed_version < 1)
         {
-            throw new Error(`version must be a valid number >= 1 but got "${version}"`)
+            throw new Error(ERRORS.ERR48.message + `"${version}"`)
         }
         this.id = parsed_id
         this.version = parsed_version

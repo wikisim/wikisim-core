@@ -62,12 +62,12 @@ describe("parse_id", () =>
 
     it("should throw an error when parsing an invalid id", () =>
     {
-        expect(() => parse_id("abc")).to.throw(`id must be a valid number but got "abc"`)
+        expect(() => parse_id("abc")).to.throw(`ID must be a valid number but got "abc"`)
     })
 
     it("should throw an error when parsing an invalid version", () =>
     {
-        expect(() => parse_id("123vabc")).to.throw(`version must be a valid number >= 1 but got "abc"`)
+        expect(() => parse_id("123vabc")).to.throw(`Version must be a valid number >= 1 but got "abc"`)
     })
 
     it("should return itself when IdOnly passed to parse_id function", () =>
