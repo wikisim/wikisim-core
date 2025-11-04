@@ -12,7 +12,7 @@ export function format_function_input_value_string(basic_request: FunctionToStri
 {
     const body = function_body(basic_request.js_input_value).trim()
     const function_signature = get_function_signature(basic_request.function_arguments)
-    const formatted_function = !body ? "" : (function_signature + " => " + body)
+    const formatted_function = (function_signature + " => " + body)
 
     return formatted_function
 }
@@ -48,10 +48,10 @@ function function_body(value: string): string
     const last_line = lines[lines.length - 1]!
     if (!has_return_statement && !last_line.trim().startsWith("return "))
     {
-        lines[lines.length - 1] = "return " + last_line
+        lines[lines.length - 1] = "return" + (last_line ? " " + last_line : "")
     }
 
     const indented = lines.map(line => "    " + line).join("\n")
 
-    return trimmed ? `{\n${indented}\n}` : ""
+    return `{\n${indented}\n}`
 }

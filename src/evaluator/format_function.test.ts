@@ -73,14 +73,16 @@ describe("format_function_input_value_string", () =>
         }`))
     })
 
-    it("does not auto auto insert return if return already mentioned in function body", () =>
+    it("does not auto insert return if return already mentioned in function body", () =>
     {
         const basic_request = {
             js_input_value: `
             return {
                 a: min,
                 b: value
-            }`,
+            }
+
+            `,
             function_arguments,
         }
         const result = format_function_input_value_string(basic_request)
@@ -93,8 +95,24 @@ describe("format_function_input_value_string", () =>
         }`))
     })
 
+    it("auto inserts return even if no value is present to return", () =>
+    {
+        const basic_request = {
+            js_input_value: `
 
-    it("does not make empty functions", () =>
+
+            `,
+            function_arguments,
+        }
+        const result = format_function_input_value_string(basic_request)
+        expect(result).equals(deindent(`
+        (min = 0, value) => {
+            return
+        }`))
+    })
+
+
+    it("does make empty functions", () =>
     {
         const function_arguments: FunctionArgument[] = [
             { local_temp_id: "0", name: "min", default_value: "" }
@@ -104,6 +122,9 @@ describe("format_function_input_value_string", () =>
             function_arguments,
         }
         const result = format_function_input_value_string(basic_request)
-        expect(result).equals("")
+        expect(result).equals(deindent(`
+        (min) => {
+            return
+        }`))
     })
 })
