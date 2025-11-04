@@ -687,25 +687,25 @@ describe("when user logged in", function ()
             function_arguments: [
                 // `id` values will be ignored on insert and update but we set them
                 // here to make it easier to compare the entire object later
-                { local_temp_id: 0, name: "a" },
-                { local_temp_id: 1, name: "b", default_value: "1" },
+                { local_temp_id: "0", name: "a" },
+                { local_temp_id: "1", name: "b", default_value: "1" },
             ],
             scenarios: [
                 {
-                    local_temp_id: 0,
+                    local_temp_id: "0",
                     description: "basic addition",
-                    values: {
-                        a: { value: "2" },
-                        b: { value: "-3" },
+                    values_by_temp_id: {
+                        "0": { value: "2" },
+                        "1": { value: "-3" },
                     },
                     expected_result: "-1",
                     expectation_met: true,
                 },
                 {
-                    local_temp_id: 1,
+                    local_temp_id: "1",
                     description: "use default to increment",
-                    values: {
-                        a: { value: "5" },
+                    values_by_temp_id: {
+                        "0": { value: "5" },
                     },
                     expected_result: "6",
                     expectation_met: true,
@@ -757,7 +757,7 @@ describe("when user logged in", function ()
                 input_value: "x + 1",
                 result_value: "", // Will be set by edge function when value_type == "function"
                 function_arguments: [
-                    { local_temp_id: 0, name: "x" },
+                    { local_temp_id: "0", name: "x" },
                 ],
                 test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title} - increment function`,
             }

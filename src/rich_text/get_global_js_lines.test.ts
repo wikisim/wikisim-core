@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { DataComponentsById } from "../data/interface"
+import { DataComponentsById, FunctionArgument } from "../data/interface"
 import { init_data_component } from "../data/modify"
 import { deindent } from "../utils/deindent"
 import {
@@ -28,12 +28,12 @@ describe("get_global_js_lines", () =>
             }),
         }
 
-        const functionArgs = [
-            { name: "arg1", id: 0 },
-            { name: "arg2", id: 1 }
+        const function_args: FunctionArgument[] = [
+            { name: "arg1", local_temp_id: "0" },
+            { name: "arg2", local_temp_id: "1" }
         ]
 
-        const js_lines = get_global_js_lines(components, functionArgs, true).join("\n")
+        const js_lines = get_global_js_lines(components, function_args, true).join("\n")
 
         // Check that component declarations are included
         expect(js_lines).equals(deindent(`
