@@ -50,7 +50,7 @@ export interface DBFunctionArgument
 }
 export interface FunctionArgument extends DBFunctionArgument
 {
-    local_temp_id: number // temporary id, not stored to DB
+    local_temp_id: string // temporary id, not stored to DB
 }
 
 
@@ -60,9 +60,13 @@ export interface ScenarioValue
     iterate_over?: boolean
     use_previous_result?: boolean
 }
-export interface ScenarioValues
+interface DBScenarioValues
 {
     [argument_name: string]: ScenarioValue
+}
+export interface TempScenarioValues
+{
+    [local_temp_id: string]: ScenarioValue
 }
 
 export type DBScenario = DBInlineScenario
@@ -71,7 +75,7 @@ export type DBScenario = DBInlineScenario
 export interface DBInlineScenario
 {
     description?: string
-    values: ScenarioValues
+    values: DBScenarioValues
     // /**
     //  * Defaults to "auto" if not provided.  auto currently chooses between
     //  * "graphable" and "exact_json_match" based on whether the expected_result
@@ -82,9 +86,10 @@ export interface DBInlineScenario
     expectation_met?: boolean
 }
 
-export interface Scenario extends DBInlineScenario
+export interface Scenario extends Omit<DBInlineScenario, "values">
 {
-    local_temp_id: number // temporary id, not stored to DB
+    values_by_temp_id: TempScenarioValues
+    local_temp_id: string // temporary id, not stored to DB
 }
 
 

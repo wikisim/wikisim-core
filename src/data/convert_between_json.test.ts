@@ -60,14 +60,13 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
 
     it("should raise an error on invalid scenarios", function ()
     {
-        const data_component = init_data_component({
-            scenarios: [
-                // @ts-expect-error
-                {},  // Missing key "values"
-            ]
-        })
+        const data_component = init_data_component()
+        const flattened = flatten_new_or_data_component_to_json(data_component)
+        flattened.scenarios = [
+            {} // Missing key "values"
+        ]
 
-        expect(() => helper_flatten_to_json_and_hydrate(data_component))
+        expect(() => hydrate_data_component_from_json(flattened, field_validators))
             .to.throw(/code": "invalid_type"/)
     })
 
@@ -113,14 +112,6 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
             }
         ], "list of dimension_ids should flatten and hydrate")
 
-        expect(hydrated.function_arguments).deep.equals([
-            {
-                default_value: "123",
-                local_temp_id: 0,
-                name: "arg1",
-            }
-        ], "list of function_arguments should flatten and hydrate")
-
         expect(result.flattened.function_arguments).deep.equals([
             {
                 default_value: "123",
@@ -128,18 +119,26 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
             }
         ], "list of function_arguments in flattened JSON should not have local_temp_id")
 
-        expect(hydrated.scenarios).deep.equals([
+        expect(hydrated.function_arguments).deep.equals([
             {
-                local_temp_id: 0,
-                values: { arg1: { value: "456" } },
+                default_value: "123",
+                local_temp_id: "0",
+                name: "arg1",
             }
-        ], "list of scenarios should flatten and hydrate")
+        ], "list of function_arguments should flatten and hydrate")
 
         expect(result.flattened.scenarios).deep.equals([
             {
                 values: { arg1: { value: "456" } },
             }
         ], "list of scenarios in flattened JSON should not have local_temp_id")
+
+        expect(hydrated.scenarios).deep.equals([
+            {
+                local_temp_id: "0",
+                values_by_temp_id: { "0": { value: "456" } },
+            }
+        ], "list of scenarios should flatten and hydrate")
     })
 })
 

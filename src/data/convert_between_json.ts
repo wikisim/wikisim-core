@@ -3,6 +3,7 @@ import type { Json } from "../supabase/interface.ts"
 import { IdAndVersion, parse_id, TempId } from "./id.ts"
 import {
     is_data_component,
+    TempScenarioValues,
     type DataComponent,
     type FunctionArgument,
     type NewDataComponent,
@@ -62,10 +63,7 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
         function_arguments: data_component.function_arguments
             ? data_component.function_arguments.map(({ local_temp_id: _, ...args }) => args) as Json
             : null,
-        scenarios: data_component.scenarios
-            // deno-lint-ignore no-explicit-any
-            ? data_component.scenarios.map(({ local_temp_id: _, ...args }) => args as any as Json)
-            : null,
+        scenarios: flatten_scenarios(data_component),
 
         // Will be set by the server-side (edge function)
         plain_title: "",
@@ -73,6 +71,29 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
 
         test_run_id: data_component.test_run_id ?? null,
     }
+}
+
+
+function flatten_scenarios(data_component: NewDataComponent): Json | null
+{
+    if (!data_component.scenarios || data_component.scenarios.length === 0) return null
+
+    return data_component.scenarios.map(({ local_temp_id: _, values_by_temp_id, ...args }) =>
+    {
+        // Find corresponding function argument names for the scenario values ids
+        const values_by_name: Record<string, unknown> = {}
+        Object.entries(values_by_temp_id).forEach(([temp_id_str, val]) =>
+        {
+            const func_arg = data_component.function_arguments?.find(fa => fa.local_temp_id === temp_id_str)
+            if (func_arg) values_by_name[func_arg.name] = val
+            // This error should never happen if the data was correctly validated
+            // on (the client and) the server before saving
+            else console.error(`flatten_scenarios: could not find function argument with local_temp_id ${temp_id_str}`)
+        })
+
+        // deno-lint-ignore no-explicit-any
+        return { ...args, values: values_by_name } as any as Json
+    })
 }
 
 
@@ -95,6 +116,8 @@ export function hydrate_data_component_from_json(row: NewDataComponentAsJSON, va
 export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
 export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
 {
+    const hydrated_function_arguments = hydrate_function_arguments(row, validators)
+
     const core = {
         owner_id: row.owner_id ?? undefined,
 
@@ -120,8 +143,8 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
         datetime_repeat_every: row.datetime_repeat_every ?? undefined,
         units: row.units ?? undefined,
         dimension_ids: hydrate_list_of_ids(row.dimension_ids),
-        function_arguments: hydrate_function_arguments(row, validators),
-        scenarios: hydrate_scenarios(row, validators),
+        function_arguments: hydrated_function_arguments,
+        scenarios: hydrate_scenarios(row, hydrated_function_arguments, validators),
 
         plain_title: row.plain_title,
         plain_description: row.plain_description,
@@ -156,15 +179,38 @@ function hydrate_function_arguments(row: NewDataComponentAsJSON | DataComponentA
 {
     const function_arguments = validators.validate_function_arguments_from_json(row.function_arguments)
     if (!function_arguments || function_arguments.length === 0) return undefined
-    return function_arguments.map((arg, index) => ({ local_temp_id: index, ...arg }) )
+    return function_arguments.map((arg, index) => ({ local_temp_id: index.toString(), ...arg }) )
 }
 
 
-function hydrate_scenarios(row: NewDataComponentAsJSON | DataComponentAsJSON, validators: FieldValidators): Scenario[] | undefined
+function hydrate_scenarios(
+    row: NewDataComponentAsJSON | DataComponentAsJSON,
+    hydrated_function_arguments: FunctionArgument[] | undefined,
+    validators: FieldValidators,
+): Scenario[] | undefined
 {
     const scenarios = validators.validate_scenarios_from_json(row.scenarios)
     if (!scenarios || scenarios.length === 0) return undefined
-    return scenarios.map((arg, index) => ({ local_temp_id: index, ...arg }) )
+
+    return scenarios.map((args, index) =>
+    {
+        const { values, ...rest } = args
+        const values_by_temp_id: TempScenarioValues = {}
+        Object.entries(values).forEach(([arg_name, val]) =>
+        {
+            const arg = hydrated_function_arguments?.find(a => a.name === arg_name)
+            if (arg) values_by_temp_id[arg.local_temp_id] = val
+            // This error should never happen if the data was correctly validated
+            // on (the client and) the server before saving
+            else console.error(`hydrate_scenarios: could not find function argument with name ${arg_name}`)
+        })
+
+        return {
+            local_temp_id: index.toString(),
+            values_by_temp_id,
+            ...rest
+        }
+    })
 }
 
 
