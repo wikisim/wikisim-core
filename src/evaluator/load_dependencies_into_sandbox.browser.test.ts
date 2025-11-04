@@ -10,11 +10,10 @@ import { load_dependencies_into_sandbox } from "./load_dependencies_into_sandbox
 
 describe("load_dependencies_into_sandbox", () =>
 {
-
     let clean_up: () => void
     before(() =>
     {
-        clean_up = setup_sandboxed_iframe().clean_up
+        clean_up = setup_sandboxed_iframe({ logging: false }).clean_up
     })
 
     after(() =>

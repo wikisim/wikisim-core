@@ -15,15 +15,16 @@ import { calculate_result_value } from "./index"
 
 describe(`calculate_result_value`, function ()
 {
-    // Enabling this timeout causes Firefox to insist on pausing and claiming
-    // the subsequent line is a breakpoint ?!
-    // this.timeout(500)
+    // Enabling this timeout previously (2025-10-01) caused Firefox to insist on
+    // pausing and claiming the subsequent line was a breakpoint but not as of 2025-11-04
+    const timeout = 500
+    this.timeout(timeout)
 
 
     let clean_up: () => void
     before(() =>
     {
-        clean_up = setup_sandboxed_iframe().clean_up
+        clean_up = setup_sandboxed_iframe({ logging: true }).clean_up
     })
 
     after(() =>
@@ -31,6 +32,16 @@ describe(`calculate_result_value`, function ()
         clean_up()
     })
 
+
+    const a_number = init_data_component({
+        id: new IdAndVersion(-3, 1),
+        value_type: "number",
+        // input_value: `<p>2</p>`,
+        result_value: `2`,
+    })
+    const data_components_by_id_and_version = {
+        [a_number.id.to_str()]: a_number,
+    }
 
     // TODO remove the `span` tag for tiptap_mention_chip when
     // existing content has been updated to use `a` tags for
@@ -40,16 +51,6 @@ describe(`calculate_result_value`, function ()
     {
         it(`can calculate a non-function value when tiptap is "${tag}" HTML tag`, async function ()
         {
-            const a_number = init_data_component({
-                id: new IdAndVersion(-3, 1),
-                value_type: "number",
-                input_value: `<p>2</p>`,
-                result_value: `2`,
-            })
-            const data_components_by_id_and_version = {
-                [a_number.id.to_str()]: a_number,
-            }
-
             const input_value = `<p>42 + ${tiptap_mention_chip(a_number, tag)}</p>`
             const component = init_data_component({
                 value_type: "number",
@@ -66,7 +67,8 @@ describe(`calculate_result_value`, function ()
                     data_components_by_id_and_version,
                     convert_tiptap_to_javascript: browser_convert_tiptap_to_javascript,
                     evaluate_code_in_sandbox: evaluate_code_in_browser_sandbox,
-                    timeout_ms: 5000,
+                    timeout_ms: timeout / 2,
+                    debugging: false,
                 })
 
                 if (!response || response.error) expect.fail(`Run ${i} ${response?.error || "Failed to calculate_result_value for non-function value"}`)
