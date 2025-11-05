@@ -77,26 +77,41 @@ describe("upsert_js_component_const", () =>
 {
     it("generates correct JS reference lines for components", () =>
     {
-        const component = init_data_component({
+        const component1 = init_data_component({
             id: "12v3",
             title: "Some normal title",
             plain_description: "Component 12 description",
         })
+        const component2 = init_data_component({
+            id: "45v6",
+            title: "some other thing",
+            plain_description: "Component 45 description",
+        })
 
         const initial_code = deindent(`
-        Some_normal_title + 123 + Some_normal_title(456)
+        Some_normal_title + 123 + Some_normal_title(789) + some_other_thing
         `)
 
-        const code = upsert_js_component_const(component, initial_code)
-        expect(code).equals(deindent(`
+        const code1 = upsert_js_component_const(component1, initial_code)
+        expect(code1).equals(deindent(`
             const Some_normal_title = d12v3 // "Some normal title"
-            Some_normal_title + 123 + Some_normal_title(456)
+
+            Some_normal_title + 123 + Some_normal_title(789) + some_other_thing
         `))
 
-        const code2 = upsert_js_component_const(component, code)
+        const code2 = upsert_js_component_const(component1, code1)
         expect(code2).equals(deindent(`
             const Some_normal_title = d12v3 // "Some normal title"
-            Some_normal_title + 123 + Some_normal_title(456)
-        `))
+
+            Some_normal_title + 123 + Some_normal_title(789) + some_other_thing
+        `), "Should not duplicate if already present")
+
+        const code3 = upsert_js_component_const(component2, code2)
+        expect(code3).equals(deindent(`
+            const some_other_thing = d45v6 // "some other thing"
+            const Some_normal_title = d12v3 // "Some normal title"
+
+            Some_normal_title + 123 + Some_normal_title(789) + some_other_thing
+        `), "Should add second component with only a single newline seperator")
     })
 })

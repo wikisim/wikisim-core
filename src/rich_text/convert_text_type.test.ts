@@ -13,6 +13,7 @@ describe("convert_text_type", () =>
     const typescript = deindent(`
         const other_comp = d_45v6 // "other comp"
         const Some_title = d_12v3 // "Some title"
+
         const a = 1
             (a + Some_title) / Some_title + other_comp`)
 

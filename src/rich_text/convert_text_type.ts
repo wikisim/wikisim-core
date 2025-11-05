@@ -3,7 +3,7 @@ import { to_javascript_identifier } from "../data/to_javascript_identifier"
 import { browser_convert_tiptap_to_javascript } from "./browser_convert_tiptap_to_javascript"
 import { browser_extract_ids_and_labels_from_tiptap } from "./browser_extract_ids_and_labels_from_tiptap"
 import { determine_input_value_text_type } from "./determine_text_type"
-import { upsert_js_component_const } from "./get_global_js_lines"
+import { match_js_component_ref_const, upsert_js_component_const } from "./get_global_js_lines"
 import { tiptap_mention_chip } from "./tiptap_mention_chip"
 
 
@@ -45,10 +45,11 @@ function convert_typescript_to_tiptap(input_value: string): string
     const lines = input_value.split("\n")
     const components: { id: IdAndVersion, js_identifier: string, title: string }[] = []
     const lines_to_keep: string[] = []
+    let processing_header = true
 
     for (const line of lines)
     {
-        const match = line.match(/^const (\w+) = d(_?)(\d+)v(\d+) \/\/ "(.+)"$/)
+        const match = line.match(match_js_component_ref_const)
         if (match)
         {
             const [, js_identifier, neg, id_str, version, title] = match
@@ -61,6 +62,11 @@ function convert_typescript_to_tiptap(input_value: string): string
         }
         else
         {
+            // This conditional allows us to drop the blank lines during / after
+            // the header reference const(s) to the js component(s).
+            if (processing_header && line.trim() === "") continue
+            processing_header = false
+
             const preserved_spaces_line = preserve_leading_spaces(line, "text")
             lines_to_keep.push(preserved_spaces_line)
         }

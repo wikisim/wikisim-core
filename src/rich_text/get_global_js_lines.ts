@@ -74,10 +74,13 @@ export function js_component_ref(component: DataComponent, type: "declare const"
 }
 
 
+export const match_js_component_ref_const = /^const (\w+) = d(_?)(\d+)v(\d+) \/\/ "(.+)"/
+
 export function upsert_js_component_const(component: Pick<DataComponent, "id" | "title">, existing_code: string): string
 {
     const ref = js_component_ref_as_const(component)
     const lines = existing_code.split("\n")
+    const has_one_or_more_refs = existing_code.trim().match(match_js_component_ref_const)
 
     for (const line of lines)
     {
@@ -87,7 +90,7 @@ export function upsert_js_component_const(component: Pick<DataComponent, "id" | 
         }
     }
 
-    return ref + "\n" + existing_code
+    return ref + "\n" + (has_one_or_more_refs ? "" : "\n") + existing_code
 }
 
 
