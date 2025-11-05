@@ -2,9 +2,9 @@ import { Json } from "../supabase/interface"
 import { LabelsAndResults } from "./interface"
 
 
-export function result_string_to_json(result: string | undefined): { parsed: Json | undefined } | false
+export function result_string_to_json(result: string | undefined): { parsed: Json | undefined } | undefined
 {
-    if (!result) return false
+    if (!result) return undefined
     if (result === "undefined") return { parsed: undefined }
 
     try
@@ -14,7 +14,7 @@ export function result_string_to_json(result: string | undefined): { parsed: Jso
     }
     catch
     {
-        return false
+        return undefined
     }
 }
 
