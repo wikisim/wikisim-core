@@ -2,7 +2,7 @@ import { DebuggingState } from "./interface"
 
 
 const state: DebuggingState = {
-    logging_enabled: true,
+    logging_enabled: false,
     debugging_enabled: false,
 }
 
