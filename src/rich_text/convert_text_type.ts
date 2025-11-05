@@ -38,7 +38,7 @@ function convert_tiptap_to_typescript(input_value: string): string
 }
 
 
-function convert_typescript_to_tiptap(input_value: string): string
+export function convert_typescript_to_tiptap(input_value: string): string
 {
     // Try to match any of the js_component_const from the beginning of the
     // input_value.  If user has moved them or edited them this won't work.

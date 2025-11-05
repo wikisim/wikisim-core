@@ -1,3 +1,5 @@
+import { convert_typescript_to_tiptap } from "../rich_text/convert_text_type.ts"
+import { determine_input_value_text_type } from "../rich_text/determine_text_type.ts"
 import type { DataComponentAsJSON, NewDataComponentAsJSON } from "../supabase/index.ts"
 import type { Json } from "../supabase/interface.ts"
 import { IdAndVersion, parse_id, TempId } from "./id.ts"
@@ -41,7 +43,7 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
         description: data_component.description,
         label_ids: data_component.label_ids ?? null,
 
-        input_value: data_component.input_value ?? null,
+        input_value: flatten_input_value(data_component),
         result_value: data_component.result_value ?? null,
         recursive_dependency_ids: data_component.recursive_dependency_ids
             ? data_component.recursive_dependency_ids.map(d => d.to_str())
@@ -71,6 +73,20 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
 
         test_run_id: data_component.test_run_id ?? null,
     }
+}
+
+
+function flatten_input_value(data_component: NewDataComponent): string | null
+{
+    let { input_value, value_type } = data_component
+    if (!input_value) return null
+    if (value_type !== "function") return input_value
+
+    if (determine_input_value_text_type(input_value) === "typescript")
+    {
+        input_value = convert_typescript_to_tiptap(input_value)
+    }
+    return input_value
 }
 
 

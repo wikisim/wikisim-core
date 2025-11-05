@@ -2,17 +2,19 @@
 import { expect } from "chai"
 import { z } from "zod"
 
+import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
 import { DataComponentAsJSON, NewDataComponentAsJSON } from "../supabase"
 import {
     data_component_all_fields_set,
     new_data_component_all_fields_set,
 } from "../test/fixtures"
+import { deindent } from "../utils/deindent"
 import {
     flatten_new_or_data_component_to_json,
     hydrate_data_component_from_json,
 } from "./convert_between_json"
 import { DataComponent, NewDataComponent } from "./interface"
-import { init_data_component } from "./modify"
+import { init_data_component, init_new_data_component } from "./modify"
 import { make_field_validators } from "./validate_fields"
 
 
@@ -139,6 +141,42 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
                 values_by_temp_id: { "0": { value: "456" } },
             }
         ], "list of scenarios should flatten and hydrate")
+    })
+
+    describe("function input_value typescript conversion to tiptap", function ()
+    {
+        const input_value = deindent(`
+            const aBc = d12v3 // "aBc"
+
+            return aBc + 5
+        `)
+
+        it("should convert javascript to tiptap format", function ()
+        {
+            const new_data_component = init_new_data_component({
+                value_type: "function", input_value
+            })
+            const result = helper_flatten_to_json_and_hydrate(new_data_component)
+            const hydrated: NewDataComponent = result.hydrated
+
+            expect(result.flattened.input_value).equals(deindent(`
+                <p>return ${tiptap_mention_chip({ title: "aBc", id: "12v3" })} + 5</p>
+            `))
+
+            expect(hydrated.input_value).equals(deindent(`
+                <p>return ${tiptap_mention_chip({ title: "aBc", id: "12v3" })} + 5</p>
+            `))
+        })
+
+        it("should not convert javascript to tiptap format when value_type is not function", function ()
+        {
+            const new_data_component = init_new_data_component({
+                value_type: "number", input_value
+            })
+            const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component).hydrated
+
+            expect(hydrated.input_value).equals(input_value)
+        })
     })
 })
 
