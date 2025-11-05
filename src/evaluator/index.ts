@@ -11,7 +11,7 @@ interface CalculateResultValueArgs
     convert_tiptap_to_javascript: (tiptap_text: string) => string,
     /**
      * When run on the edge functions we pass undefined here as we can't
-     * evaluate code in a sandbox.
+     * yet evaluate code in a sandbox on the edge functions.
      */
     evaluate_code_in_sandbox: undefined | ((request: EvaluationRequest) => Promise<EvaluationResponse>),
     timeout_ms?: number

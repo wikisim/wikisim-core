@@ -18,7 +18,7 @@ export function format_function_input_value_string(basic_request: FunctionToStri
 }
 
 
-function get_function_signature(function_arguments: FunctionArgument[]): string
+export function get_function_signature(function_arguments: FunctionArgument[]): string
 {
     const formatted_args = function_arguments.map(arg =>
     {
