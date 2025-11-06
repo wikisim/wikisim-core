@@ -1,4 +1,4 @@
-import { IdAndMaybeVersion, parse_id } from "../data/id"
+import { IdAndMaybeVersion, parse_id } from "../data/id.ts"
 
 
 export function tiptap_mention_chip(args: { title: string, id: IdAndMaybeVersion | string } | string, tag: "span" | "a" = "a"): string

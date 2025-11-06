@@ -1,10 +1,10 @@
-import { IdAndVersion, parse_id } from "../data/id"
-import { to_javascript_identifier } from "../data/to_javascript_identifier"
-import { browser_convert_tiptap_to_javascript } from "./browser_convert_tiptap_to_javascript"
-import { browser_extract_ids_and_labels_from_tiptap } from "./browser_extract_ids_and_labels_from_tiptap"
-import { determine_input_value_text_type } from "./determine_text_type"
-import { match_js_component_ref_const, upsert_js_component_const } from "./get_global_js_lines"
-import { tiptap_mention_chip } from "./tiptap_mention_chip"
+import { IdAndVersion, parse_id } from "../data/id.ts"
+import { to_javascript_identifier } from "../data/to_javascript_identifier.ts"
+import { browser_convert_tiptap_to_javascript } from "./browser_convert_tiptap_to_javascript.ts"
+import { browser_extract_ids_and_labels_from_tiptap } from "./browser_extract_ids_and_labels_from_tiptap.ts"
+import { determine_input_value_text_type } from "./determine_text_type.ts"
+import { match_js_component_ref_const, upsert_js_component_const } from "./get_global_js_lines.ts"
+import { tiptap_mention_chip } from "./tiptap_mention_chip.ts"
 
 
 export function convert_text_type(input_value: string, to_type?: "tiptap" | "typescript"): string

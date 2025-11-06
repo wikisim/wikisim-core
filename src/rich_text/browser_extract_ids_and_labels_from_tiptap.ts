@@ -1,7 +1,7 @@
 import {
     ExtractedIdsAndLabels,
     shared_extract_ids_and_labels_from_tiptap,
-} from "./shared_extract_ids_and_labels_from_tiptap"
+} from "./shared_extract_ids_and_labels_from_tiptap.ts"
 
 
 export function browser_extract_ids_and_labels_from_tiptap (tiptap_text: string): ExtractedIdsAndLabels

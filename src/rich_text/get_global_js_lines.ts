@@ -1,7 +1,7 @@
-import { DataComponent, DataComponentsById, FunctionArgument } from "../data/interface"
-import { to_javascript_identifier } from "../data/to_javascript_identifier"
-import { deindent } from "../utils/deindent"
-import { truncate } from "../utils/truncate"
+import { DataComponent, DataComponentsById, FunctionArgument } from "../data/interface.ts"
+import { to_javascript_identifier } from "../data/to_javascript_identifier.ts"
+import { deindent } from "../utils/deindent.ts"
+import { truncate } from "../utils/truncate.ts"
 
 
 export function get_global_js_lines(

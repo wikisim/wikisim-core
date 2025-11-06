@@ -1,21 +1,22 @@
+// deno-lint-ignore-file ban-ts-comment
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { expect } from "chai"
 import { z } from "zod"
 
-import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
-import { DataComponentAsJSON, NewDataComponentAsJSON } from "../supabase"
+import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip.ts"
+import { DataComponentAsJSON, NewDataComponentAsJSON } from "../supabase/index.ts"
 import {
     data_component_all_fields_set,
     new_data_component_all_fields_set,
-} from "../test/fixtures"
-import { deindent } from "../utils/deindent"
+} from "../test/fixtures.ts"
+import { deindent } from "../utils/deindent.ts"
 import {
     flatten_new_or_data_component_to_json,
     hydrate_data_component_from_json,
-} from "./convert_between_json"
-import { DataComponent, NewDataComponent } from "./interface"
-import { init_data_component, init_new_data_component } from "./modify"
-import { make_field_validators } from "./validate_fields"
+} from "./convert_between_json.ts"
+import { DataComponent, NewDataComponent } from "./interface.ts"
+import { init_data_component, init_new_data_component } from "./modify.ts"
+import { make_field_validators } from "./validate_fields.ts"
 
 
 const field_validators = make_field_validators(z)

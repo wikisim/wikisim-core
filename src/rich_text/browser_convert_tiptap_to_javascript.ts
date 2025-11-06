@@ -1,4 +1,4 @@
-import { shared_convert_tiptap_text_to_javascript } from "./shared_convert_tiptap_to_javascript"
+import { shared_convert_tiptap_text_to_javascript } from "./shared_convert_tiptap_to_javascript.ts"
 
 
 export function browser_convert_tiptap_to_javascript (tiptap_text: string): string //, data_component_by_id_and_version: Record<string, DataComponent>): string
