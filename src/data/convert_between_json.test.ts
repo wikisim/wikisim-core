@@ -116,29 +116,44 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
 
         expect(result.flattened.function_arguments).deep.equals([
             {
-                default_value: "123",
                 name: "arg1",
-            }
+                default_value: "123",
+            },
+            {
+                name: "arg2",
+                default_value: "456",
+            },
         ], "list of function_arguments in flattened JSON should not have local_temp_id")
 
         expect(hydrated.function_arguments).deep.equals([
             {
-                default_value: "123",
                 local_temp_id: "0",
                 name: "arg1",
-            }
+                default_value: "123",
+            },
+            {
+                local_temp_id: "1",
+                name: "arg2",
+                default_value: "456",
+            },
         ], "list of function_arguments should flatten and hydrate")
 
         expect(result.flattened.scenarios).deep.equals([
             {
-                values: { arg1: { value: "456" } },
+                values: {
+                    arg1: { value: "789", iterate_over: true },
+                    arg2: { value: "112", use_previous_result: true },
+                },
             }
         ], "list of scenarios in flattened JSON should not have local_temp_id")
 
         expect(hydrated.scenarios).deep.equals([
             {
                 local_temp_id: "0",
-                values_by_temp_id: { "0": { value: "456" } },
+                values_by_temp_id: {
+                    "0": { value: "789", iterate_over: true },
+                    "1": { value: "112", use_previous_result: true },
+                },
             }
         ], "list of scenarios should flatten and hydrate")
     })

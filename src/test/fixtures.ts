@@ -39,14 +39,21 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
                 local_temp_id: "0",
                 name: "arg1",
                 default_value: "123",
+            },
+            {
+                local_temp_id: "1",
+                name: "arg2",
+                default_value: "456",
             }
         ],
         scenarios: [
             {
                 local_temp_id: "0",
                 values_by_temp_id: {
-                    // This id of "0" corresponds to the function argument of name "arg1" above.
-                    "0": { value: "456" }
+                    // These ids of "0" and "1" correspond to the function
+                    // arguments of name "arg1", and "arg2" above.
+                    "0": { value: "789", iterate_over: true },
+                    "1": { value: "112", use_previous_result: true },
                 },
             }
         ],
