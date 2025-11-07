@@ -101,12 +101,15 @@ describe("validate_scenarios_from_json", () =>
                 },
                 expected_result: "expected1",
                 expectation_met: true,
+                selected_paths: [[{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }]],
+                selected_path_names: { '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"},
             },
             {
                 values: {
                     argA: { value: "valueA", use_previous_result: true },
                 },
-                // description, expected_result, and expectation_met are optional
+                // description, expected_result, expectation_met,
+                // selected_paths, and selected_path_names are optional
             },
             {
                 values: {},
@@ -123,6 +126,8 @@ describe("validate_scenarios_from_json", () =>
                 },
                 expected_result: "expected1",
                 expectation_met: true,
+                selected_paths: [[{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }]],
+                selected_path_names: { '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"},
             },
             {
                 values: {

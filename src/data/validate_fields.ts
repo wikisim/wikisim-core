@@ -39,6 +39,11 @@ export function make_field_validators(z: any) //typeof import("zod"))
             values: ScenarioValuesSchema,
             expected_result: z.string().optional(),
             expectation_met: z.boolean().optional(),
+            selected_paths: z.array(z.array(z.union([
+                z.object({ key: z.string() }),
+                z.object({ index: z.union([z.number(), z.literal("*")]) }),
+            ]))).optional(),
+            selected_path_names: z.record(z.string(), z.string()).optional(),
         })
 
 

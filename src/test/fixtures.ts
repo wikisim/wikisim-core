@@ -55,6 +55,17 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
                     "0": { value: "789", iterate_over: true },
                     "1": { value: "112", use_previous_result: true },
                 },
+                expectation_met: true,
+                // TODO, update `input_value` and exptected_result to return an
+                // actual JSON object which can match selected_paths
+                expected_result: "Modified Value",
+                description: "Some scenario description",
+                selected_paths: [
+                    [ { key: "data" }, { index: "*" }, { key: "value" }, { index: 0 } ]
+                ],
+                selected_path_names: {
+                    '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"
+                },
             }
         ],
 

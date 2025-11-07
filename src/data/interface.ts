@@ -86,8 +86,8 @@ export interface DBScenario
     expected_result?: string
     expectation_met?: boolean
 
-    // selected_paths: JSONPath[]
-    // selected_path_names: MapSelectedPathToName
+    selected_paths?: JSONPath[]
+    selected_path_names?: MapSelectedPathToName
 }
 
 export interface Scenario extends Omit<DBScenario, "values">
