@@ -69,10 +69,11 @@ export interface TempScenarioValues
     [local_temp_id: string]: ScenarioValue
 }
 
-export type DBScenario = DBInlineScenario
+export type JSONPath = ({ key: string } | { index: number | "*" })[]
+export type MapSelectedPathToName = { [path_str: string]: string }
 
 // export type ExpectationType = "auto" | "graphable" | "exact_json_match" | "selected_attributes"
-export interface DBInlineScenario
+export interface DBScenario
 {
     description?: string
     values: DBScenarioValues
@@ -84,9 +85,12 @@ export interface DBInlineScenario
     // expectation_type?: ExpectationType
     expected_result?: string
     expectation_met?: boolean
+
+    // selected_paths: JSONPath[]
+    // selected_path_names: MapSelectedPathToName
 }
 
-export interface Scenario extends Omit<DBInlineScenario, "values">
+export interface Scenario extends Omit<DBScenario, "values">
 {
     values_by_temp_id: TempScenarioValues
     local_temp_id: string // temporary id, not stored to DB
