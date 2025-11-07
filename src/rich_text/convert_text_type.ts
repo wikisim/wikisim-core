@@ -67,7 +67,7 @@ export function convert_typescript_to_tiptap(input_value: string): string
             if (processing_header && line.trim() === "") continue
             processing_header = false
 
-            const preserved_spaces_line = preserve_leading_spaces(line, "text")
+            const preserved_spaces_line = preserve_spaces(line, "text")
             lines_to_keep.push(preserved_spaces_line)
         }
     }
@@ -87,7 +87,7 @@ export function convert_typescript_to_tiptap(input_value: string): string
 
 
 /**
- * function preserve_leading_spaces
+ * function preserve_spaces
  *
  * Will replace multiple spaces with a nbsp and a space.
  *
@@ -106,14 +106,16 @@ export function convert_typescript_to_tiptap(input_value: string): string
  *   * Converts all double spaces, not just leading ones
  *   * Have not test with mixed tabs and spaces, or mixed nbsp and spaces
  */
-export function preserve_leading_spaces(input: string, type: "html" | "text"): string
+export function preserve_spaces(input: string, type: "html" | "text"): string
 {
     if (type === "html")
     {
-        return input.replace(/ {2}/g, "&nbsp; ")
+        // Run it twice to catch cases with an odd number of spaces
+        return input.replace(/ {2}/g, "&nbsp; ").replace(/ {2}/g, "&nbsp; ")
     }
     else
     {
-        return input.replace(/ {2}/g, "\u00A0 ")
+        // Run it twice to catch cases with an odd number of spaces
+        return input.replace(/ {2}/g, "\u00A0 ").replace(/ {2}/g, "\u00A0 ")
     }
 }
