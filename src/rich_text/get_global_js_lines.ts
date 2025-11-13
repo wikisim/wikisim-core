@@ -76,7 +76,7 @@ export function js_component_ref(component: DataComponent, type: "declare const"
 
 export const match_js_component_ref_const = /^const (\w+) = d(_?)(\d+)v(\d+) \/\/ "(.+)"/
 
-export function upsert_js_component_const(component: Pick<DataComponent, "id" | "title">, existing_code: string): string
+export function upsert_js_component_const(component: Pick<DataComponent, "id" | "plain_title">, existing_code: string): string
 {
     const ref = js_component_ref_as_const(component)
     const lines = existing_code.split("\n")
@@ -94,10 +94,10 @@ export function upsert_js_component_const(component: Pick<DataComponent, "id" | 
 }
 
 
-function js_component_ref_as_const(component: Pick<DataComponent, "id" | "title">): string
+function js_component_ref_as_const(component: Pick<DataComponent, "id" | "plain_title">): string
 {
     const id_js_str = component.id.to_javascript_str()
-    return `const ${to_javascript_identifier(component)} = ${id_js_str} // "${component.title}"`
+    return `const ${to_javascript_identifier(component)} = ${id_js_str} // "${component.plain_title}"`
 }
 
 

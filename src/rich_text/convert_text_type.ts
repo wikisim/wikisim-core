@@ -25,11 +25,11 @@ function convert_tiptap_to_typescript(input_value: string): string
     const javscript = browser_convert_tiptap_to_javascript(input_value)
 
     let typescript = javscript
-    ids_and_labels.data.forEach(({ id, label: title }) =>
+    ids_and_labels.data.forEach(({ id, label: plain_title }) =>
     {
-        const js_identifier = to_javascript_identifier({ id, title })
+        const js_identifier = to_javascript_identifier({ id, plain_title })
         typescript = typescript.replaceAll(id.to_javascript_str(), js_identifier)
-        typescript = upsert_js_component_const({ id, title }, typescript)
+        typescript = upsert_js_component_const({ id, plain_title }, typescript)
     })
 
     typescript = typescript.replaceAll("\u00A0", " ") // replace non-breaking spaces with normal spaces

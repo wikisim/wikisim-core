@@ -79,12 +79,12 @@ describe("upsert_js_component_const", () =>
     {
         const component1 = init_data_component({
             id: "12v3",
-            title: "Some normal title",
+            plain_title: "Some normal title",
             plain_description: "Component 12 description",
         })
         const component2 = init_data_component({
             id: "45v6",
-            title: "some other thing",
+            plain_title: "some other thing",
             plain_description: "Component 45 description",
         })
 
