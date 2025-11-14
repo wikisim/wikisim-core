@@ -205,7 +205,10 @@ function hydrate_scenarios(
     validators: FieldValidators,
 ): Scenario[] | undefined
 {
-    const scenarios = validators.validate_scenarios_from_json(row.scenarios)
+    const known_input_names = new Set<string>()
+    hydrated_function_arguments?.forEach(arg => known_input_names.add(arg.name))
+
+    const scenarios = validators.validate_scenarios_from_json(row.scenarios, known_input_names)
     if (!scenarios || scenarios.length === 0) return undefined
 
     return scenarios.map((args, index) =>

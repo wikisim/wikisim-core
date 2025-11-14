@@ -10,6 +10,7 @@ import {
     DBFunctionArgument,
     DBScenario,
     NewDataComponent,
+    ScenarioValue,
     ValueType
 } from "./interface.ts"
 
@@ -146,12 +147,19 @@ export function make_field_validators(z: any) //typeof import("zod"))
         return parsed.data || undefined
     }
 
-    function validate_scenarios_from_json(value: unknown): DBScenario[] | undefined
+    function validate_scenarios_from_json(value: unknown, known_input_names: Set<string>): DBScenario[] | undefined
     {
         const arrSchema = z.array(DBScenarioSchema).nullable().optional()
         const parsed = arrSchema.safeParse(value)
         if (!parsed.success) throw new Error(parsed.error.message)
-        return parsed.data || undefined
+
+        let data = parsed.data || undefined
+        data = data && data.length === 0 ? undefined : data
+        data = remove_non_existent_scenario_input_values(data, known_input_names)
+        data = remove_empty_scenario_input_values(data)
+        data = remove_scenario_input_falsy_modifiers(data)
+        data = remove_scenario_input_invalid_modifiers(data)
+        return data
     }
 
     function validate_fields_given_value_type<V extends (DataComponent | NewDataComponent)>(data_component: V): V
@@ -170,3 +178,125 @@ export function make_field_validators(z: any) //typeof import("zod"))
 }
 
 export type FieldValidators = ReturnType<typeof make_field_validators>
+
+
+
+function remove_non_existent_scenario_input_values(
+    scenarios: DBScenario[] | undefined,
+    known_input_names: Set<string>,
+): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+
+    return scenarios.map(scenario =>
+    {
+        const new_values: Record<string, ScenarioValue> = {}
+        for (const [input_name, val] of Object.entries(scenario.values))
+        {
+            if (known_input_names.has(input_name))
+            {
+                new_values[input_name] = val
+            }
+        }
+
+        return {
+            ...scenario,
+            values: new_values,
+        }
+    })
+}
+
+
+function remove_empty_scenario_input_values(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+
+    return scenarios.map(scenario =>
+    {
+        const new_values: Record<string, ScenarioValue> = {}
+        for (const [input_name, val] of Object.entries(scenario.values))
+        {
+            val.value = val.value.trim()
+            if (val.value !== "")
+            {
+                new_values[input_name] = val
+            }
+        }
+
+        return {
+            ...scenario,
+            values: new_values,
+        }
+    })
+}
+
+
+function remove_scenario_input_falsy_modifiers(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+
+    return scenarios.map(scenario =>
+    {
+        const new_values: Record<string, ScenarioValue> = {}
+        for (const [input_name, val] of Object.entries(scenario.values))
+        {
+            const new_val: ScenarioValue = { value: val.value }
+            if (val.iterate_over) new_val.iterate_over = val.iterate_over
+            if (val.use_previous_result) new_val.use_previous_result = val.use_previous_result
+            new_values[input_name] = new_val
+        }
+
+        return {
+            ...scenario,
+            values: new_values,
+        }
+    })
+}
+
+function remove_scenario_input_invalid_modifiers(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+
+    return scenarios.map(scenario =>
+    {
+        let scenario_has_iterate_over = false
+        let scenario_has_use_previous_result = false
+
+        const new_values: Record<string, ScenarioValue> = {}
+        for (const [input_name, val] of Object.entries(scenario.values))
+        {
+            const new_val: ScenarioValue = { value: val.value }
+            if (val.iterate_over)
+            {
+                if (!scenario_has_iterate_over)
+                {
+                    new_val.iterate_over = val.iterate_over
+                    scenario_has_iterate_over = true
+                }
+            }
+
+            new_values[input_name] = new_val
+        }
+
+        if (scenario_has_iterate_over)
+        {
+            for (const [input_name, val] of Object.entries(scenario.values))
+            {
+                const new_val = new_values[input_name]!
+                if (val.use_previous_result && !new_val.iterate_over)
+                {
+                    if (!scenario_has_use_previous_result)
+                    {
+                        new_val.use_previous_result = val.use_previous_result
+                        scenario_has_use_previous_result = true
+                    }
+                }
+            }
+        }
+
+        return {
+            ...scenario,
+            values: new_values,
+        }
+    })
+}

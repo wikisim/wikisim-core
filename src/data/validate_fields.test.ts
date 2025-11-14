@@ -79,15 +79,15 @@ describe("validate_scenarios_from_json", () =>
 
         test_cases.forEach(test_case =>
         {
-            const result = validate_scenarios_from_json(test_case)
+            const result = validate_scenarios_from_json(test_case, new Set())
             expect(result).equals(undefined, `Failed for input: ${JSON.stringify(test_case)}`)
         })
     })
 
-    it("should return an empty array", () =>
+    it("should return undefined from an array", () =>
     {
-        const result = validate_scenarios_from_json([])
-        expect(result).deep.equals([])
+        const result = validate_scenarios_from_json([], new Set())
+        expect(result).equals(undefined)
     })
 
     it("should validate and return an array of DBScenario", () =>
@@ -106,16 +106,38 @@ describe("validate_scenarios_from_json", () =>
             },
             {
                 values: {
-                    argA: { value: "valueA", use_previous_result: true },
+                    // Should have `use_previous_result` removed because there
+                    // is not a valid use of `iterate_over`
+                    arg1: { value: "valueA", use_previous_result: true },
+                    // Should be removed because values is empty and only whitespace
+                    arg2: { value: "  ", iterate_over: true },
+                    // Should remove `iterate_over` key because it's false
+                    // Should also trim whitespace from value
+                    arg3: { value: "  123  ", iterate_over: false },
+                    // Should be removed as arg_none is not a valid input argument name
+                    arg_none: { value: "valueB" },
                 },
                 // description, expected_result, expectation_met,
                 // selected_paths, and selected_path_names are optional
             },
             {
                 values: {},
-            }
+            },
+            {
+                values: {
+                    // Should remove the `use_previous_result` option because it
+                    // already has the `iterate_over` option
+                    arg1: { value: "valueC", iterate_over: true, use_previous_result: true },
+                    // Should remove the `iterate_over` option because there is
+                    // already an input value using it.
+                    arg2: { value: "valueD", iterate_over: true, use_previous_result: true },
+                    // Should remove the `iterate_over` and `use_previous_result`
+                    // options because there are already input values using it.
+                    arg3: { value: "valueE", iterate_over: true, use_previous_result: true },
+                },
+            },
         ]
-        const result = validate_scenarios_from_json(input)
+        const result = validate_scenarios_from_json(input, new Set(["arg1", "arg2", "arg3"]))
 
         expect(result).deep.equals([
             {
@@ -131,12 +153,20 @@ describe("validate_scenarios_from_json", () =>
             },
             {
                 values: {
-                    argA: { value: "valueA", use_previous_result: true },
+                    arg1: { value: "valueA" },
+                    arg3: { value: "123" },
                 },
             },
             {
                 values: {},
-            }
+            },
+            {
+                values: {
+                    arg1: { value: "valueC", iterate_over: true },
+                    arg2: { value: "valueD", use_previous_result: true },
+                    arg3: { value: "valueE" },
+                },
+            },
         ])
     })
 
@@ -152,7 +182,7 @@ describe("validate_scenarios_from_json", () =>
 
         test_cases.forEach(test_case =>
         {
-            expect(() => validate_scenarios_from_json(test_case))
+            expect(() => validate_scenarios_from_json(test_case, new Set()))
                 .to.throw(/code": "invalid_type"/)
         })
     })
