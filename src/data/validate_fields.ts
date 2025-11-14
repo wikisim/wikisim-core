@@ -156,9 +156,9 @@ export function make_field_validators(z: any) //typeof import("zod"))
         let data = parsed.data || undefined
         data = data && data.length === 0 ? undefined : data
         data = remove_non_existent_scenario_input_values(data, known_input_names)
-        data = remove_empty_scenario_input_values(data)
         data = remove_scenario_input_falsy_modifiers(data)
         data = remove_scenario_input_invalid_modifiers(data)
+        data = remove_empty_scenario_input_values(data)
         return data
     }
 
@@ -194,30 +194,6 @@ function remove_non_existent_scenario_input_values(
         for (const [input_name, val] of Object.entries(scenario.values))
         {
             if (known_input_names.has(input_name))
-            {
-                new_values[input_name] = val
-            }
-        }
-
-        return {
-            ...scenario,
-            values: new_values,
-        }
-    })
-}
-
-
-function remove_empty_scenario_input_values(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
-{
-    if (!scenarios) return undefined
-
-    return scenarios.map(scenario =>
-    {
-        const new_values: Record<string, ScenarioValue> = {}
-        for (const [input_name, val] of Object.entries(scenario.values))
-        {
-            val.value = val.value.trim()
-            if (val.value !== "")
             {
                 new_values[input_name] = val
             }
@@ -291,6 +267,30 @@ function remove_scenario_input_invalid_modifiers(scenarios: DBScenario[] | undef
                         scenario_has_use_previous_result = true
                     }
                 }
+            }
+        }
+
+        return {
+            ...scenario,
+            values: new_values,
+        }
+    })
+}
+
+
+function remove_empty_scenario_input_values(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+
+    return scenarios.map(scenario =>
+    {
+        const new_values: Record<string, ScenarioValue> = {}
+        for (const [input_name, val] of Object.entries(scenario.values))
+        {
+            val.value = val.value.trim()
+            if (val.value !== "" || val.iterate_over || val.use_previous_result)
+            {
+                new_values[input_name] = val
             }
         }
 

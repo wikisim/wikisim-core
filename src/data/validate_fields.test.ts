@@ -98,6 +98,7 @@ describe("validate_scenarios_from_json", () =>
                 values: {
                     arg1: { value: "value1", iterate_over: true },
                     arg2: { value: "value2" }, // iterate_over is optional
+                    arg3: { value: "", use_previous_result: true },
                 },
                 expected_result: "expected1",
                 expectation_met: true,
@@ -109,8 +110,6 @@ describe("validate_scenarios_from_json", () =>
                     // Should have `use_previous_result` removed because there
                     // is not a valid use of `iterate_over`
                     arg1: { value: "valueA", use_previous_result: true },
-                    // Should be removed because values is empty and only whitespace
-                    arg2: { value: "  ", iterate_over: true },
                     // Should remove `iterate_over` key because it's false
                     // Should also trim whitespace from value
                     arg3: { value: "  123  ", iterate_over: false },
@@ -145,6 +144,7 @@ describe("validate_scenarios_from_json", () =>
                 values: {
                     arg1: { value: "value1", iterate_over: true },
                     arg2: { value: "value2" },
+                    arg3: { value: "", use_previous_result: true },
                 },
                 expected_result: "expected1",
                 expectation_met: true,
