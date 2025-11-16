@@ -44,7 +44,10 @@ export function make_field_validators(z: any) //typeof import("zod"))
                 z.object({ key: z.string() }),
                 z.object({ index: z.union([z.number(), z.literal("*")]) }),
             ]))).optional(),
-            selected_path_names: z.record(z.string(), z.string()).optional(),
+            selected_path_names: z.record(
+                z.string(),
+                z.union([z.string(), z.object({ name: z.string(), use_as_xlabel: z.boolean().optional() })])
+            ).optional(),
         })
 
 
@@ -141,16 +144,16 @@ export function make_field_validators(z: any) //typeof import("zod"))
 
     function validate_function_arguments_from_json(value: unknown): DBFunctionArgument[] | undefined
     {
-        const arrSchema = z.array(DBFunctionArgumentSchema).nullable().optional()
-        const parsed = arrSchema.safeParse(value)
+        const arr_schema = z.array(DBFunctionArgumentSchema).nullable().optional()
+        const parsed = arr_schema.safeParse(value)
         if (!parsed.success) throw new Error(parsed.error.message)
         return parsed.data || undefined
     }
 
     function validate_scenarios_from_json(value: unknown, known_input_names: Set<string>): DBScenario[] | undefined
     {
-        const arrSchema = z.array(DBScenarioSchema).nullable().optional()
-        const parsed = arrSchema.safeParse(value)
+        const arr_schema = z.array(DBScenarioSchema).nullable().optional()
+        const parsed = arr_schema.safeParse(value)
         if (!parsed.success) throw new Error(parsed.error.message)
 
         let data = parsed.data || undefined

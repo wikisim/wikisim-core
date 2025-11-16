@@ -103,7 +103,7 @@ describe("validate_scenarios_from_json", () =>
                 expected_result: "expected1",
                 expectation_met: true,
                 selected_paths: [[{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }]],
-                selected_path_names: { '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"},
+                selected_path_names: {'[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': { name: "Some field name" }},
             },
             {
                 values: {
@@ -149,7 +149,7 @@ describe("validate_scenarios_from_json", () =>
                 expected_result: "expected1",
                 expectation_met: true,
                 selected_paths: [[{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }]],
-                selected_path_names: { '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"},
+                selected_path_names: {'[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': { name: "Some field name" }},
             },
             {
                 values: {
@@ -169,6 +169,28 @@ describe("validate_scenarios_from_json", () =>
             },
         ])
     })
+
+
+    it("should validate DBScenario with V1 of MapSelectedPathToName", () =>
+    {
+        const input = [
+            {
+                values: {},
+                selected_paths: [[{ key: "data" }]],
+                selected_path_names: {'[{"key":"data"}]': "Some field name"},
+            },
+        ]
+        const result = validate_scenarios_from_json(input, new Set(["arg1", "arg2", "arg3"]))
+
+        expect(result).deep.equals([
+            {
+                values: {},
+                selected_paths: [[{ key: "data" }]],
+                selected_path_names: {'[{"key":"data"}]': "Some field name"},
+            },
+        ])
+    })
+
 
     it("should raise an error on invalid DBScenario", () =>
     {

@@ -64,7 +64,7 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
                     [ { key: "data" }, { index: "*" }, { key: "value" }, { index: 0 } ]
                 ],
                 selected_path_names: {
-                    '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"
+                    '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': { name: "Some field name" }
                 },
             }
         ],

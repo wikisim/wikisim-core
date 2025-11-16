@@ -70,7 +70,9 @@ export interface TempScenarioValues
 }
 
 export type JSONPath = ({ key: string } | { index: number | "*" })[]
-export type MapSelectedPathToName = { [path_str: string]: string }
+type MapSelectedPathToNameV1 = { [path_str: string]: string }
+type MapSelectedPathToNameV2 = { [path_str: string]: { name: string, use_as_xlabel?: true } }
+export type MapSelectedPathToName = MapSelectedPathToNameV2
 
 // export type ExpectationType = "auto" | "graphable" | "exact_json_match" | "selected_attributes"
 export interface DBScenario
@@ -87,13 +89,14 @@ export interface DBScenario
     expectation_met?: boolean
 
     selected_paths?: JSONPath[]
-    selected_path_names?: MapSelectedPathToName
+    selected_path_names?: MapSelectedPathToNameV1 | MapSelectedPathToNameV2
 }
 
-export interface Scenario extends Omit<DBScenario, "values">
+export interface Scenario extends Omit<DBScenario, "values" | "selected_path_names">
 {
     values_by_temp_id: TempScenarioValues
     local_temp_id: string // temporary id, not stored to DB
+    selected_path_names?: MapSelectedPathToName
 }
 
 

@@ -149,7 +149,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
                 expectation_met: true,
                 expected_result: "Modified Value",
                 selected_path_names: {
-                  '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"
+                  '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': { name: "Some field name" }
                 },
                 selected_paths: [
                   [{ "key": "data" }, { "index": "*" }, { "key": "value" }, { "index": 0 }]
@@ -168,7 +168,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
                 expectation_met: true,
                 expected_result: "Modified Value",
                 selected_path_names: {
-                  '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"
+                  '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': { name: "Some field name" }
                 },
                 selected_paths: [
                   [{ "key": "data" }, { "index": "*" }, { "key": "value" }, { "index": 0 }]

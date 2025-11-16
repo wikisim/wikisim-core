@@ -5,6 +5,7 @@ import type { Json } from "../supabase/interface.ts"
 import { IdAndVersion, parse_id, TempId } from "./id.ts"
 import {
     is_data_component,
+    MapSelectedPathToName,
     TempScenarioValues,
     type DataComponent,
     type FunctionArgument,
@@ -213,7 +214,7 @@ function hydrate_scenarios(
 
     return scenarios.map((args, index) =>
     {
-        const { values, ...rest } = args
+        const { values, selected_path_names, ...rest } = args
         const values_by_temp_id: TempScenarioValues = {}
         Object.entries(values).forEach(([arg_name, val]) =>
         {
@@ -224,9 +225,18 @@ function hydrate_scenarios(
             else console.error(`hydrate_scenarios: could not find function argument with name ${arg_name}`)
         })
 
+        const selected_path_names_converted: MapSelectedPathToName | undefined = selected_path_names
+            ? Object.fromEntries(Object.entries(selected_path_names).map(([path_str, name_or_obj]) =>
+                typeof name_or_obj === "string"
+                    ? [path_str, { name: name_or_obj }]
+                    : [path_str, name_or_obj]
+            ))
+            : undefined
+
         return {
             local_temp_id: index.toString(),
             values_by_temp_id,
+            selected_path_names: selected_path_names_converted,
             ...rest
         }
     })
