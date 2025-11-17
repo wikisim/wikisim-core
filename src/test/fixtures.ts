@@ -23,7 +23,7 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
         description: "<p>Modified Description</p>",
         label_ids: [-2, -3],
 
-        input_value: "Modified Value",
+        input_value: "<p>Modified Value</p>",
         result_value: "Modified Value",
         recursive_dependency_ids: [ new IdAndVersion(-5, 1), new IdAndVersion(-6, 2) ],
         value_type: "number",

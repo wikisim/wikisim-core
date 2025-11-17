@@ -185,7 +185,7 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
             return aBc + 5
         `)
 
-        it("should convert javascript to tiptap format", function ()
+        it("should convert javascript plain text to tiptap format", function ()
         {
             const new_data_component = init_new_data_component({
                 value_type: "function", input_value
@@ -202,14 +202,20 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
             `))
         })
 
-        it("should not convert javascript to tiptap format when value_type is not function", function ()
+        it("should convert javascript plain text to tiptap format when value_type is not function", function ()
         {
             const new_data_component = init_new_data_component({
                 value_type: "number", input_value
             })
-            const hydrated: NewDataComponent = helper_flatten_to_json_and_hydrate(new_data_component).hydrated
+            const result = helper_flatten_to_json_and_hydrate(new_data_component)
 
-            expect(hydrated.input_value).equals(input_value)
+            expect(result.flattened.input_value).equals(deindent(`
+                <p>return ${tiptap_mention_chip({ title: "aBc", id: "12v3" })} + 5</p>
+            `))
+
+            expect(result.hydrated.input_value).equals(deindent(`
+                <p>return ${tiptap_mention_chip({ title: "aBc", id: "12v3" })} + 5</p>
+            `))
         })
     })
 })

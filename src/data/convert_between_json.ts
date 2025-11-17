@@ -78,9 +78,12 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
 
 function flatten_input_value(data_component: NewDataComponent): string | null
 {
-    let { input_value, value_type } = data_component
+    let { input_value } = data_component
     if (!input_value) return null
-    if (value_type !== "function") return input_value
+    // Not sure why this conditional was present but it has been disabled as
+    // a component with value_type of "number" was not being saved with the
+    // correct tiptap formatting: https://wikisim.org/wiki/1069v2
+    // if (value_type !== "function") return input_value
 
     if (determine_input_value_text_type(input_value) === "typescript")
     {
