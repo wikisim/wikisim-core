@@ -70,13 +70,13 @@ describe("format_data_component_value_to_string", () =>
     {
         const data_component = init_data_component({
             result_value: "169e3",
-            units: "trades_people",
+            units: "trades_people per £_day",
             value_number_sig_figs: 3,
             value_number_display_type: "scaled",
         })
 
         const result = format_data_component_value_to_string(data_component)
-        expect(result).equals("169 thousand trades people")
+        expect(result).equals("169 thousand trades people per £ day")
     })
 
     describe("function value type", () =>
