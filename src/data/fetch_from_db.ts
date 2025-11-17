@@ -40,6 +40,7 @@ export async function request_data_components(
         ids?: IdOnly[]
         owner_id?: string
         __only_test_data?: boolean
+        order_by?: "earliest_created" | "latest_modified"
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
@@ -71,8 +72,18 @@ export async function request_data_components(
         else supa = supa.is("owner_id", null)
     }
 
+    if (options.order_by === "latest_modified")
+    {
+        // Because we're selecting from the data_components table, this will
+        // return most recently created new versions, i.e. latest modified.
+        supa = supa.order("created_at", { ascending: false })
+    }
+    else
+    {
+        supa = supa.order("id", { ascending: true })
+    }
+
     return supa
-        .order("id", { ascending: true })
         .range(from, to)
         .then(({ data, error }) =>
         {
