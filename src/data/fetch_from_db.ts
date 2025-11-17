@@ -187,6 +187,17 @@ export async function search_data_components(
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
+    if (!search_terms.trim())
+    {
+        return request_data_components(get_supabase, {
+            page: options.page,
+            size: options.size,
+            owner_id: options.filter_by_owner_id,
+            // __only_test_data: options.filter_exclude_test_components ? false : undefined,
+            order_by: "latest_modified",
+        })
+    }
+
     const limit_n = clamp_page_size(options.size)
     const page = Math.max(options.page ?? 0, 0)
     const offset_n = page * limit_n
