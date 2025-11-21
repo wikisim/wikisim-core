@@ -66,24 +66,24 @@ export function initial_state(set: SetCoreState, get: GetCoreState, get_supabase
         user_name: undefined,
         session: undefined,
         status: "initializing",
-        logout: () => set(root_state =>
+        logout: () =>
         {
-            transition_status(root_state.user_auth_session, "logged_out")
-            root_state.user_auth_session.session = null
-
-            get_supabase().auth.signOut().then(() =>
+            set(root_state =>
             {
-                console .log("Supabase sign out succeeded")
-            }).catch(error =>
-            {
-                console .error("Supabase sign out error:", error)
-                set(root_state =>
-                {
-                    root_state.user_auth_session.error = error
-                })
+                transition_status(root_state.user_auth_session, "logged_out")
+                root_state.user_auth_session.session = null
             })
 
-        }),
+            // We don't await this to see if async logout errors or not
+            get_supabase().auth.signOut()
+
+            // Also seem to need to manually clear Supabase session from localStorage
+            // otherwise logout does not actually work.
+            const supabase_auth_keys = Object.keys(localStorage).filter(key =>
+                key.startsWith("sb-") && key.includes("-auth-token")
+            )
+            supabase_auth_keys.forEach(key => localStorage.removeItem(key))
+        },
 
         request_OTP_sign_in: (account_email_address: string) =>
         {
