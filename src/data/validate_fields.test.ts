@@ -102,8 +102,20 @@ describe("validate_scenarios_from_json", () =>
                 },
                 expected_result: "expected1",
                 expectation_met: true,
-                selected_paths: [[{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }]],
-                selected_path_names: { '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"},
+                selected_paths: [
+                    [{ key: "months" }],
+                    [{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }],
+                ],
+                selected_path_names: {
+                    '[{"key":"months"}]': "Month",
+                    '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name",
+                },
+                graphs: [
+                    {
+                        x_axis_path: '[{"key":"months"}]',
+                        y_axis_series: ['[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]'],
+                    }
+                ]
             },
             {
                 values: {
@@ -148,8 +160,20 @@ describe("validate_scenarios_from_json", () =>
                 },
                 expected_result: "expected1",
                 expectation_met: true,
-                selected_paths: [[{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }]],
-                selected_path_names: { '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name"},
+                selected_paths: [
+                    [{ key: "months" }],
+                    [{ key: "data" }, { index: "*" }, { key: "value" }, { index: 0 }],
+                ],
+                selected_path_names: {
+                    '[{"key":"months"}]': "Month",
+                    '[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]': "Some field name",
+                },
+                graphs: [
+                    {
+                        x_axis_path: '[{"key":"months"}]',
+                        y_axis_series: ['[{"key":"data"},{"index":"*"},{"key":"value"},{"index":0}]'],
+                    },
+                ],
             },
             {
                 values: {
@@ -185,6 +209,63 @@ describe("validate_scenarios_from_json", () =>
             expect(() => validate_scenarios_from_json(test_case, new Set()))
                 .to.throw(/code": "invalid_type"/)
         })
+    })
+
+    it("should remove invalid path strings from selected_path_names", () =>
+    {
+        const input = [
+            {
+                values: {},
+                selected_paths: [
+                    [{ key: "months" }],
+                ],
+                selected_path_names: {
+                    '[{"key":"months"}]': "Month",
+                    '[{"key":"years"}]': "Year",
+                },
+            },
+        ]
+        const result = validate_scenarios_from_json(input, new Set())
+        expect(result).deep.equals([
+            {
+                values: {},
+                selected_paths: [
+                    [{ key: "months" }],
+                ],
+                selected_path_names: {
+                    '[{"key":"months"}]': "Month",
+                },
+            },
+        ])
+    })
+
+    it("should remove invalid path strings from graphs", () =>
+    {
+        const input = [
+            {
+                values: {},
+                selected_paths: [
+                    [{ key: "months" }],
+                ],
+                graphs: [
+                    {
+                        x_axis_path: '[{"key":"years"}]',
+                        y_axis_series: [
+                            '[{"key":"years"}]',
+                        ],
+                    }
+                ],
+            },
+        ]
+        const result = validate_scenarios_from_json(input, new Set())
+        expect(result).deep.equals([
+            {
+                values: {},
+                selected_paths: [
+                    [{ key: "months" }],
+                ],
+            },
+        ])
     })
 })
 

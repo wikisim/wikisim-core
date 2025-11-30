@@ -45,6 +45,11 @@ export function make_field_validators(z: any) //typeof import("zod"))
                 z.object({ index: z.union([z.number(), z.literal("*")]) }),
             ]))).optional(),
             selected_path_names: z.record(z.string(), z.string()).optional(),
+            graphs: z.array(z.object({
+                // title: z.string().optional(),
+                x_axis_path: z.string().optional(),
+                y_axis_series: z.array(z.string()).optional(),
+            })).optional(),
         })
 
 
@@ -159,6 +164,8 @@ export function make_field_validators(z: any) //typeof import("zod"))
         data = remove_scenario_input_falsy_modifiers(data)
         data = remove_scenario_input_invalid_modifiers(data)
         data = remove_empty_scenario_input_values(data)
+        data = remove_invalid_selected_path_names(data)
+        data = remove_invalid_graph_paths(data)
         return data
     }
 
@@ -298,5 +305,77 @@ function remove_empty_scenario_input_values(scenarios: DBScenario[] | undefined)
             ...scenario,
             values: new_values,
         }
+    })
+}
+
+
+function remove_invalid_selected_path_names(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+
+    return scenarios.map(scenario =>
+    {
+        let new_selected_path_names: DBScenario["selected_path_names"] = scenario.selected_path_names
+        if (!new_selected_path_names) return scenario
+
+        const { selected_paths = [] } = scenario
+        const valid_path_strs = new Set(
+            selected_paths.map(path => JSON.stringify(path))
+        )
+
+        // Check each new_selected_path_names key is in selected_paths
+        Object.keys(new_selected_path_names).forEach(path_str =>
+        {
+            if (!valid_path_strs.has(path_str))
+            {
+                delete new_selected_path_names[path_str]
+            }
+        })
+
+        return scenario
+    })
+}
+
+
+function remove_invalid_graph_paths(scenarios: DBScenario[] | undefined): DBScenario[] | undefined
+{
+    if (!scenarios) return undefined
+    return scenarios.map(scenario =>
+    {
+        let new_graphs: DBScenario["graphs"] = scenario.graphs
+        if (!new_graphs) return scenario
+
+        const { selected_paths = [] } = scenario
+        const valid_path_strs = new Set(
+            selected_paths.map(path => JSON.stringify(path))
+        )
+
+        // Check the x_axis_path and y_axis_series are all in selected_paths
+        new_graphs = new_graphs.filter(graph =>
+        {
+            if (graph.x_axis_path && !valid_path_strs.has(graph.x_axis_path))
+            {
+                delete graph.x_axis_path
+            }
+
+            if (graph.y_axis_series)
+            {
+                graph.y_axis_series = graph.y_axis_series.filter(path_str =>
+                    valid_path_strs.has(path_str)
+                )
+
+                if (graph.y_axis_series.length === 0)
+                {
+                    delete graph.y_axis_series
+                }
+            }
+
+            return Object.keys(graph).length > 0
+        })
+        scenario = { ...scenario, graphs: new_graphs }
+
+        if (scenario.graphs?.length === 0) delete scenario.graphs
+
+        return scenario
     })
 }

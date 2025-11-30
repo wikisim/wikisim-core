@@ -71,6 +71,12 @@ export interface TempScenarioValues
 
 export type JSONPath = ({ key: string } | { index: number | "*" })[]
 export type MapSelectedPathToName = { [path_str: string]: string }
+export interface ScenarioGraph
+{
+    // title?: string
+    x_axis_path?: string
+    y_axis_series?: string[]
+}
 
 // export type ExpectationType = "auto" | "graphable" | "exact_json_match" | "selected_attributes"
 export interface DBScenario
@@ -88,6 +94,7 @@ export interface DBScenario
 
     selected_paths?: JSONPath[]
     selected_path_names?: MapSelectedPathToName
+    graphs?: ScenarioGraph[]
 }
 
 export interface Scenario extends Omit<DBScenario, "values">
