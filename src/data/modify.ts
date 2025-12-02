@@ -70,39 +70,41 @@ export function init_new_data_component(partial: Partial<Omit<DataComponent, "id
 export function changes_made(component_1: DataComponent | NewDataComponent, component_2: DataComponent | NewDataComponent, compare_meta_fields?: boolean): boolean
 {
     const diff = (
-        component_1.owner_id !== component_2.owner_id
+        (component_1.owner_id !== component_2.owner_id ? "owner_id" : false)
 
-        || component_1.title !== component_2.title
-        || component_1.description !== component_2.description
-        || lists_changed(component_1.label_ids, component_2.label_ids)
+        || (component_1.title !== component_2.title ? "title" : false)
+        || (component_1.description !== component_2.description ? "description" : false)
+        || (lists_changed(component_1.label_ids, component_2.label_ids) ? "label_ids" : false)
 
-        || component_1.input_value !== component_2.input_value
-        || component_1.result_value !== component_2.result_value
-        || lists_changed(component_1.recursive_dependency_ids, component_2.recursive_dependency_ids)
-        || component_1.value_type !== component_2.value_type
-        || component_1.value_number_display_type !== component_2.value_number_display_type
-        || component_1.value_number_sig_figs !== component_2.value_number_sig_figs
-        || component_1.datetime_range_start?.getTime() !== component_2.datetime_range_start?.getTime()
-        || component_1.datetime_range_end?.getTime() !== component_2.datetime_range_end?.getTime()
-        || component_1.datetime_repeat_every !== component_2.datetime_repeat_every
-        || component_1.units !== component_2.units
-        || lists_changed(component_1.dimension_ids, component_2.dimension_ids)
-        || function_arguments_changed(component_1.function_arguments, component_2.function_arguments)
-        || scenarios_changed(component_1.scenarios, component_2.scenarios)
+        || (component_1.input_value !== component_2.input_value ? "input_value" : false)
+        || (component_1.result_value !== component_2.result_value ? "result_value" : false)
+        || (lists_changed(component_1.recursive_dependency_ids, component_2.recursive_dependency_ids) ? "recursive_dependency_ids" : false)
+        || (component_1.value_type !== component_2.value_type ? "value_type" : false)
+        || (component_1.value_number_display_type !== component_2.value_number_display_type ? "value_number_display_type" : false)
+        || (component_1.value_number_sig_figs !== component_2.value_number_sig_figs ? "value_number_sig_figs" : false)
+        || (component_1.datetime_range_start?.getTime() !== component_2.datetime_range_start?.getTime() ? "datetime_range_start" : false)
+        || (component_1.datetime_range_end?.getTime() !== component_2.datetime_range_end?.getTime() ? "datetime_range_end" : false)
+        || (component_1.datetime_repeat_every !== component_2.datetime_repeat_every ? "datetime_repeat_every" : false)
+        || (component_1.units !== component_2.units ? "units" : false)
+        || (lists_changed(component_1.dimension_ids, component_2.dimension_ids) ? "dimension_ids" : false)
+        || (function_arguments_changed(component_1.function_arguments, component_2.function_arguments) ? "function_arguments" : false)
+        || (scenarios_changed(component_1.scenarios, component_2.scenarios) ? "scenarios" : false)
     )
 
-    if (diff || !compare_meta_fields) return diff
+    if (diff || !compare_meta_fields) return !!diff
 
-    return component_1.comment !== component_2.comment
-        || component_1.version_type !== component_2.version_type
-        || component_1.version_rolled_back_to !== component_2.version_rolled_back_to
-        || component_1.bytes_changed !== component_2.bytes_changed
+    const diff_in_meta = (component_1.comment !== component_2.comment ? "comment" : false)
+        || (component_1.version_type !== component_2.version_type ? "version_type" : false)
+        || (component_1.version_rolled_back_to !== component_2.version_rolled_back_to ? "version_rolled_back_to" : false)
+        || (component_1.bytes_changed !== component_2.bytes_changed ? "bytes_changed" : false)
         // || component_1.test_run_id !== component_2.test_run_id
         // || component_1.editor_id !== component_2.editor_id
         // || component_1.created_at.getTime() !== component_2.created_at.getTime()
 
         // We do not allow changing owner_id at the moment.
         // || component_1.owner_id !== component_2.owner_id
+
+    return !!diff_in_meta
 }
 
 
