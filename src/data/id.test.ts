@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { extract_ids_from_text, IdAndVersion, IdOnly, parse_id } from "./id"
+import { extract_ids_from_text, IdAndVersion, IdOnly, OrderedUniqueIdAndVersionList, parse_id } from "./id"
 
 
 describe("IdOnly", () =>
@@ -112,6 +112,7 @@ describe("extract_ids_from_text", () =>
 
         const ids = extract_ids_from_text(text)
         expect(ids.map(id => id.to_str())).to.deep.equal([
+            "-9000v9",
             "1003v1",
             "1003v2",
             "1003v3",
@@ -120,7 +121,46 @@ describe("extract_ids_from_text", () =>
             "6008v6",
             "7009v7",
             "8000v8",
-            "-9000v9",
+        ])
+    })
+})
+
+
+describe("OrderedUniqueIdAndVersionList", () =>
+{
+    it("should order ids when using add_multiple", () =>
+    {
+        const ids = new OrderedUniqueIdAndVersionList()
+        ids.add_multiple([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("9v2"),
+            IdAndVersion.from_str("9v1"),
+            IdAndVersion.from_str("9v3"),
+            IdAndVersion.from_str("8v1"),
+        ])
+        expect(ids.get_all()).deep.equals([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("8v1"),
+            IdAndVersion.from_str("9v1"),
+            IdAndVersion.from_str("9v2"),
+            IdAndVersion.from_str("9v3"),
+        ])
+    })
+
+    it("should order ids when using add", () =>
+    {
+        const ids = new OrderedUniqueIdAndVersionList()
+        ids.add("7v1")
+        ids.add("9v2")
+        ids.add("9v1")
+        ids.add("9v3")
+        ids.add("8v1")
+        expect(ids.get_all()).deep.equals([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("8v1"),
+            IdAndVersion.from_str("9v1"),
+            IdAndVersion.from_str("9v2"),
+            IdAndVersion.from_str("9v3"),
         ])
     })
 })

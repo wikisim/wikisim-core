@@ -191,6 +191,15 @@ export class OrderedUniqueIdAndVersionList
 
     get_all(): IdAndVersion[]
     {
-        return this.items
+        return this.items.sort((a, b) =>
+        {
+            return a.id < b.id
+                ? -1
+                : a.id > b.id
+                ? 1
+                : a.version < b.version
+                ? -1
+                : 1
+        })
     }
 }
