@@ -29,8 +29,8 @@ describe("browser_get_referenced_ids_from_tiptap", () =>
 
             const ids = browser_get_referenced_ids_from_tiptap(tiptap_text)
             expect(ids).deep.equals([
-                new IdAndVersion(1003, 1),
                 new IdAndVersion(-2, 1),
+                new IdAndVersion(1003, 1),
             ])
         })
 
