@@ -200,21 +200,49 @@ export function subscriptions (store: CoreStore, get_supabase: GetSupabase)
 }
 
 
-async function load_user_info(store: CoreStore, user_id: string, get_supabase: GetSupabase)
+async function load_user_info(store: CoreStore, user_id: string, get_supabase: GetSupabase, delay_retry = 1000)
 {
     // console .debug("Loading user info for user...", state.user_auth_session.session?.user.id)
     const response = await get_supabase()
         .from("users")
         .select("id, name")
         .eq("id", user_id)
-    const entry = (response.data || [])[0]
+
+    if (response.error)
+    {
+        console.error("Error loading user info from supabase users table:", response.error)
+        store.setState(root_state =>
+        {
+            root_state.user_auth_session.error = response.error
+        })
+
+        // Retry with exponential backoff up to 32 seconds
+        if (delay_retry < 32000)
+        {
+            retry(delay_retry, load_user_info, store, user_id, get_supabase, delay_retry * 2)
+        }
+
+        return
+    }
+
+    const entry = response.data[0]
 
     // console .debug("got user info from supabase users table: ", entry, response)
     let user_name: string | null = entry?.name ?? null
 
     store.setState(root_state =>
     {
+        root_state.user_auth_session.error = undefined
         root_state.user_auth_session.user_name = user_name
         root_state.user_auth_session.user_name_set = user_name !== null
     })
+}
+
+
+function retry<Args extends any[]>(delay_ms: number, fn: (...args: Args) => void, ...args: Args)
+{
+    setTimeout(() =>
+    {
+        fn(...args)
+    }, delay_ms)
 }
