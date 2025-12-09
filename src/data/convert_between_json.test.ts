@@ -177,6 +177,28 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         ], "list of scenarios should flatten and hydrate")
     })
 
+    it("should handle duplicate function argument names", function ()
+    {
+        const data_component = init_data_component({
+            function_arguments: [
+                {
+                    name: "arg1",
+                    local_temp_id: "0",
+                },
+                {
+                    // Whilst this is prevented by the UI, it might still happen
+                    // some how.  However then the component would just be loaded
+                    // in the UI with validation errors shown.
+                    name: "arg1",
+                    local_temp_id: "1",
+                },
+            ]
+        })
+
+        const hydrated: DataComponent = helper_flatten_to_json_and_hydrate(data_component).hydrated
+        expect(hydrated).deep.equals(data_component)
+    })
+
     describe("function input_value typescript conversion to tiptap", function ()
     {
         const input_value = deindent(`
