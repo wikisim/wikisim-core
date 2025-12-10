@@ -17,6 +17,22 @@ import { make_field_validators } from "./validate_fields"
 const field_validators = make_field_validators(z)
 
 
+export type FilterByOwnerId =
+{
+    type: "only_user"
+    owner_id: string
+} | {
+    type: "wiki_and_user"
+    owner_id: string
+} | {
+    type: "include_all"
+    owner_id?: string
+} | {
+    type: "only_wiki"
+    owner_id?: string
+}
+
+
 export type RequestDataComponentsReturn =
 {
     data: DataComponent[]
@@ -38,13 +54,17 @@ export async function request_data_components(
          * Max 1000 IDs
          */
         ids?: IdOnly[]
-        owner_id?: string
+        /**
+         * When not provided then it defaults to only_wiki components being
+         * returned, i.e. components not owned by any user.
+         */
+        filter_by_owner_id?: FilterByOwnerId
         __only_test_data?: boolean
         order_by?: "earliest_created" | "latest_modified"
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
-    const { ids = [], owner_id } = options
+    const { ids = [], filter_by_owner_id } = options
     limit_ids(ids)
     const { from, to } = get_range_from_options(options)
 
@@ -55,8 +75,13 @@ export async function request_data_components(
     // Use this feature for loading latest DataComponents for a page like
     // `/wiki/123`, i.e. loading by IdOnly
     // (Also use in intergration.browser.test.ts)
-    if (ids.length > 0) supa = supa.in("id", ids.map(id => id.id))
+    if (ids.length > 0)
+    {
+        supa = supa.in("id", ids.map(id => id.id))
 
+        if (filter_by_owner_id) console.warn("request_data_components: filter_by_owner_id is ignored when ids are provided.")
+        if (options.__only_test_data) console.warn("request_data_components: __only_test_data is ignored when ids are provided.")
+    }
     // When there are no ids provided this is currently because we are
     // requesting current components for the home page.
     else
@@ -65,10 +90,17 @@ export async function request_data_components(
         if (!options.__only_test_data) supa = supa.gte("id", 1)
         else supa = supa.lte("id", -1)
 
-        // Unless owner_id is specified then for now we filter to exclude where
+        if (filter_by_owner_id && filter_by_owner_id.type !== "only_wiki")
+        {
+            if (filter_by_owner_id.type === "only_user") supa = supa.eq("owner_id", filter_by_owner_id.owner_id)
+            else if (filter_by_owner_id.type === "wiki_and_user")
+            {
+                supa = supa.or(`owner_id.is.null,owner_id.eq.${filter_by_owner_id.owner_id}`)
+            }
+        }
+        // Unless filter_by_owner_id is specified then we filter to exclude where
         // there is an owner_id to ensure no "user owned" data is shown to other
         // users e.g. on the front page
-        if (owner_id) supa = supa.or(`owner_id.is.null,owner_id.eq.${owner_id}`)
         else supa = supa.is("owner_id", null)
     }
 
@@ -183,7 +215,7 @@ export async function search_data_components(
         similarity_threshold?: number
         // Filters
         filter_exclude_test_components?: boolean
-        filter_by_owner_id?: string
+        filter_by_owner_id?: FilterByOwnerId
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
@@ -192,7 +224,7 @@ export async function search_data_components(
         return request_data_components(get_supabase, {
             page: options.page,
             size: options.size,
-            owner_id: options.filter_by_owner_id,
+            filter_by_owner_id: options.filter_by_owner_id,
             // __only_test_data: options.filter_exclude_test_components ? false : undefined,
             order_by: "latest_modified",
         })
@@ -202,6 +234,8 @@ export async function search_data_components(
     const page = Math.max(options.page ?? 0, 0)
     const offset_n = page * limit_n
 
+    const { type, owner_id } = options.filter_by_owner_id || {}
+
     return get_supabase()
         .rpc("search_data_components", {
             query: search_terms,
@@ -209,7 +243,7 @@ export async function search_data_components(
             offset_n,
             limit_n,
             filter_exclude_test_components: options.filter_exclude_test_components ?? true,
-            filter_by_owner_id: options.filter_by_owner_id,
+            filter_by_owner_id: (type === "only_user" && owner_id) || undefined,
         })
         .then(({ data, error }) =>
         {
