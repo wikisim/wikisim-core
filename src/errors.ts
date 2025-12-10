@@ -79,4 +79,5 @@ export const ERRORS =
     ERR46: new TSError("ERR46", "ERR46. wikisim-server encountered unexpected error."),
     ERR47: new TSError("ERR47", "ERR47. ID must be a valid number but got "),
     ERR48: new TSError("ERR48", "ERR48. Version must be a valid number >= 1 but got "),
+    ERR49: new TSError("ERR49", "ERR49. Title must not contain <p> tag but got "),
 }

@@ -1,5 +1,6 @@
 // TODO: rename this file
 
+import { ERRORS } from "../errors.ts"
 import { IdAndVersion, TempId } from "./id.ts"
 import { DataComponent, FunctionArgument, NewDataComponent } from "./interface.ts"
 
@@ -10,6 +11,9 @@ export function init_data_component(partial: Partial<DataComponent> | { id: stri
 
     if (!id) id = new IdAndVersion(-1, 1) // Use a negative ID for test data
     if (typeof id === "string") id = IdAndVersion.from_str(id)
+    // This catches setting up incorrect titles in tests, this was not added due
+    // to a bug in production code.
+    if ("title" in rest && rest.title?.includes("<p>")) throw new Error(ERRORS.ERR49.message + rest.title)
 
     return {
         id,
@@ -55,14 +59,15 @@ export function init_data_component(partial: Partial<DataComponent> | { id: stri
 }
 
 
-export function init_new_data_component(partial: Partial<Omit<DataComponent, "id">> = {}, for_testing = false): NewDataComponent
+export function init_new_data_component(partial: Partial<Omit<DataComponent, "id">> & { temporary_id?: TempId } = {}, for_testing = false): NewDataComponent
 {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...rest } = init_data_component(partial, for_testing)
     return {
-        ...rest,
         // Use a temporary ID for draft components
         temporary_id: new TempId(),
+
+        ...rest,
     }
 }
 

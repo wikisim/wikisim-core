@@ -11,6 +11,7 @@ import {
     type NewDataComponent,
     type Scenario
 } from "./interface.ts"
+import { init_data_component, init_new_data_component } from "./modify.ts"
 import type { FieldValidators } from "./validate_fields.ts"
 
 
@@ -171,19 +172,19 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
 
     if ("temporary_id" in row)
     {
-        return {
+        return init_new_data_component({
             temporary_id: new TempId(row.temporary_id),
             ...core,
             test_run_id: row.test_run_id ?? undefined,
-        }
+        })
     }
     else
     {
-        return {
+        return init_data_component({
             id: new IdAndVersion(row.id, row.version_number),
             ...core,
             test_run_id: row.test_run_id ?? undefined,
-        }
+        })
     }
 }
 

@@ -239,6 +239,18 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
                 <p>return ${tiptap_mention_chip({ title: "aBc", id: "12v3" })} + 5</p>
             `))
         })
+
+        it("should error on <p> in title", function ()
+        {
+            const new_data_component = init_new_data_component()
+            new_data_component.title = "<p>aBc</p>"
+
+            const throw_function = () =>
+            {
+                helper_flatten_to_json_and_hydrate(new_data_component)
+            }
+            expect(throw_function).to.throw("ERR49. Title must not contain <p> tag")
+        })
     })
 })
 

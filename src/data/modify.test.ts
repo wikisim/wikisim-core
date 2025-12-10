@@ -5,7 +5,7 @@ import { DataComponent } from "./interface"
 import { changes_made, init_data_component } from "./modify"
 
 
-describe("can create a new data component", () =>
+describe("can create a new data component", function ()
 {
     it("should create a new data component with default values", () =>
     {
@@ -17,6 +17,15 @@ describe("can create a new data component", () =>
         expect(data_component.description).equals("<p></p>")
         expect(data_component.value_type).equals(undefined)
         expect(data_component.datetime_repeat_every).equals(undefined)
+    })
+
+    it("should error on <p> in title", function ()
+    {
+        const throw_function = () =>
+        {
+            init_data_component({ title: "<p>aBc</p>" })
+        }
+        expect(throw_function).to.throw("ERR49. Title must not contain <p> tag")
     })
 })
 
