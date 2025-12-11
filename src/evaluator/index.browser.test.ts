@@ -32,17 +32,6 @@ describe(`calculate_result_value`, function ()
         clean_up()
     })
 
-
-    const a_number = init_data_component({
-        id: new IdAndVersion(-3, 1),
-        value_type: "number",
-        // input_value: `<p>2</p>`,
-        result_value: `2`,
-    })
-    const data_components_by_id_and_version = {
-        [a_number.id.to_str()]: a_number,
-    }
-
     // TODO remove the `span` tag for tiptap_mention_chip when
     // existing content has been updated to use `a` tags for
     // mention chips
@@ -51,6 +40,16 @@ describe(`calculate_result_value`, function ()
     {
         it(`can calculate a non-function value when tiptap is "${tag}" HTML tag`, async function ()
         {
+            const a_number = init_data_component({
+                id: new IdAndVersion(-3, 1),
+                value_type: "number",
+                // input_value: `<p>2</p>`,
+                result_value: `2`,
+            })
+            const data_components_by_id_and_version = {
+                [a_number.id.to_str()]: a_number,
+            }
+
             const input_value = `<p>42 + ${tiptap_mention_chip(a_number, tag)}</p>`
             const component = init_data_component({
                 value_type: "number",
@@ -58,6 +57,9 @@ describe(`calculate_result_value`, function ()
                 recursive_dependency_ids: [a_number.id],
             })
 
+            // TODO: document why we run this twice, the result is asserted to be
+            // the same both times.  Was there some problem where the first call
+            // would be successful and the second would fail or something?
             let i = 0
             while(i < 2)
             {

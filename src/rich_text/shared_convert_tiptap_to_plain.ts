@@ -1,4 +1,4 @@
-// This file is part of WikiSim Supabase so it uses generic non-node specific
+// This file is part of WikiSim Supabase so it uses generic non-Node specific
 // types which are compatible with the Deno environment.
 import type { GenericDOMParser, GenericNode } from "./generic_interface.ts"
 

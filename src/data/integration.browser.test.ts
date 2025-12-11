@@ -45,7 +45,7 @@ describe("when user logged in", function ()
             // This value should be ignored by postgresql and replaced with that
             // of the authenticated in user
             editor_id: user_id,
-            title: "<p>Test Title</p>",
+            title: "Test Title",
             description: "<p>Test Description</p>",
             label_ids: [-1, -2],
             input_value: "123",
@@ -86,7 +86,7 @@ describe("when user logged in", function ()
             ...data_component_fixture,
             owner_id: user_id, // owner_id should match user logged in
             editor_id: user_id,
-            title: "<p>Test User Owned Component (which is public not private)</p>",
+            title: "Test User Owned Component (which is public not private)",
             description: "<p>Test Description</p>",
             label_ids: [-1, -2],
             input_value: "123",
@@ -197,7 +197,7 @@ describe("when user logged in", function ()
                     ...data_component_fixture,
                     id: new IdAndVersion(-2, 1),
 
-                    title: "<p>Some Title</p>",
+                    title: "Some Title",
                     description: "<p>Some Description</p>",
 
                     value_type: undefined,  // should default to "number",
@@ -285,13 +285,14 @@ describe("when user logged in", function ()
                     // new IdAndVersion(-1, 1), <-- it should not include dependencies of any non-functions it references
                     new IdAndVersion(-2, 1),
                 ], "Edge function should have computed recursive_dependency_ids of mentioned component on insert")
-                expect(data_component_3.result_value).equals("() => 789 + d_2v1", "result_value should be set by edge function for function value_type")
+                expect(data_component_3.result_value).equals("() => {\n    return 789 + d_2v1\n}", "result_value should be set by edge function for function value_type")
 
+                // config.truncateThreshold = 0
                 expect(data_component_4.recursive_dependency_ids).deep.equals([
-                    new IdAndVersion(-2, 1), // <-- it should include dependencies of any functions it references
                     new IdAndVersion(-3, 1),
+                    new IdAndVersion(-2, 1), // <-- it should include dependencies of any functions it references
                 ], "Edge function should have computed recursive_dependency_ids of mentioned component on insert")
-                expect(data_component_4.result_value).equals("() => 101112 + d_3v1()", "result_value should be set by edge function for function value_type")
+                expect(data_component_4.result_value).equals("() => {\n    return 101112 + d_3v1()\n}", "result_value should be set by edge function for function value_type")
             })
         })
 
@@ -426,11 +427,11 @@ describe("when user logged in", function ()
                 version_type: undefined,
                 version_rolled_back_to: undefined,
 
-                title: "<p>Test Title</p>",
+                title: "Test Title",
                 description: "<p>Test Description</p>",
                 label_ids: [-1, -2],
 
-                input_value: "123",
+                input_value: "<p>123</p>",
                 result_value: "123",
                 recursive_dependency_ids: undefined,
                 value_type: "number",
@@ -498,7 +499,7 @@ describe("when user logged in", function ()
 
             const data_component = {
                 ...inserted_data_component,
-                title: "<p>Test Second Title</p>",
+                title: "Test Second Title",
                 plain_title: "",
             }
 
@@ -515,7 +516,7 @@ describe("when user logged in", function ()
                 owner_id: undefined,
 
                 // The title and plain_title should have been updated
-                title: "<p>Test Second Title</p>",
+                title: "Test Second Title",
                 // Should be updated by the server (edge function)
                 plain_title: "Test Second Title",
                 test_run_id: data_component.test_run_id,
@@ -531,7 +532,7 @@ describe("when user logged in", function ()
                 description: "<p>Test Description</p>",
                 label_ids: [-1, -2],
 
-                input_value: "123",
+                input_value: "<p>123</p>",
                 result_value: "123",
                 recursive_dependency_ids: undefined,
                 value_type: "number",
@@ -650,7 +651,7 @@ describe("when user logged in", function ()
 
             const { data_component: inserted_data_component_2 } = (await helper_insert_wiki_data_component(this.test?.title, {
                 id: new IdAndVersion(-2, 1),
-                title: "<p>Test Second Component's Title</p>",
+                title: "Test Second Component's Title",
                 description: "some description",
             }))
 
@@ -737,7 +738,7 @@ describe("when user logged in", function ()
             if (response.error !== null) expect.fail(`Failed to insert data component: ${JSON.stringify(response.error)}`)
             const inserted_data_component = response.data
 
-            expect(inserted_data_component.result_value).equals("(a, b = 1) => a + b", "result_value should be set by edge function to the function expression")
+            expect(inserted_data_component.result_value).equals("(a, b = 1) => {\n    return a + b\n}", "result_value should be set by edge function to the function expression")
             expect(inserted_data_component.function_arguments).to.deep.equal(data_component.function_arguments, "function_arguments should match those inserted")
             expect(inserted_data_component.scenarios).to.deep.equal(data_component.scenarios, "scenarios should match those inserted")
         })
@@ -763,7 +764,7 @@ describe("when user logged in", function ()
             }
             const increment_function_response = await insert_data_component(get_supabase, increment_function)
             if (increment_function_response.error !== null) expect.fail(`Failed to insert increment function data component: ${JSON.stringify(increment_function_response.error)}`)
-            expect(increment_function_response.data.result_value).equals("(x) => x + 1", "result_value of increment function should be set by edge function to the function expression")
+            expect(increment_function_response.data.result_value).equals("(x) => {\n    return x + 1\n}", "result_value of increment function should be set by edge function to the function expression")
 
             const data_point_value: DataComponent = {
                 ...data_component_fixture,
@@ -859,10 +860,10 @@ describe("when user logged in", function ()
                 bytes_changed: 0,
                 version_type: undefined,
                 version_rolled_back_to: undefined,
-                title: "<p>Test User Owned Component (which is public not private)</p>",
+                title: "Test User Owned Component (which is public not private)",
                 description: "<p>Test Description</p>",
                 label_ids: [-1, -2],
-                input_value: "123",
+                input_value: "<p>123</p>",
                 result_value: "123",
                 recursive_dependency_ids: undefined,
                 value_type: "number",
@@ -920,7 +921,7 @@ describe("when user logged in", function ()
 
             const data_component = {
                 ...inserted_user_owned_data_component,
-                title: "<p>Test Updated User Owned Component (which is public not private)</p>",
+                title: "Test Updated User Owned Component (which is public not private)",
                 plain_title: "",
                 test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
             }
@@ -935,7 +936,7 @@ describe("when user logged in", function ()
                 // The version number should have been increased by the DB
                 id: new IdAndVersion(-1, 2),
                 // The title and plain_title should have been updated
-                title: "<p>Test Updated User Owned Component (which is public not private)</p>",
+                title: "Test Updated User Owned Component (which is public not private)",
                 // Should be updated by the server (edge function)
                 plain_title: "Test Updated User Owned Component (which is public not private)",
                 // The test_run_id should remain the same
@@ -951,7 +952,7 @@ describe("when user logged in", function ()
                 version_rolled_back_to: undefined,
                 description: "<p>Test Description</p>",
                 label_ids: [-1, -2],
-                input_value: "123",
+                input_value: "<p>123</p>",
                 result_value: "123",
                 recursive_dependency_ids: undefined,
                 value_type: "number",
@@ -1045,7 +1046,7 @@ describe("when user logged in", function ()
             const data_components_1 = await request_data_components(get_supabase, { __only_test_data: true })
             const ids = [inserted_wiki_data_component.id.as_IdOnly(), inserted_user_owned_data_component.id.as_IdOnly()]
             const historical_data_component_1 = await request_historical_data_components(get_supabase, ids)
-            const data_components_1_with_owner = await request_data_components(get_supabase, { owner_id: user_id, __only_test_data: true })
+            const data_components_1_with_owner = await request_data_components(get_supabase, { filter_by_owner_id: { type: "include_all", owner_id: user_id }, __only_test_data: true })
 
             expect(data_components_1.data, "Expected data to be an array").to.be.an("array")
             deep_equals(
@@ -1100,26 +1101,36 @@ describe("when user logged in", function ()
             })
 
 
-            it(`should search over all data components including a users' own "user owned" (which are public) data components`, async function ()
+            it(`should browse over all data components including a users' own "user owned" (which are public) data components`, async function ()
             {
-                const search_results = await search_data_components(get_supabase, ``, { filter_exclude_test_components: false})
-                if (search_results.error) expect.fail(`Error whilst searching for data components: ${JSON.stringify(search_results.error)}`)
+                let browse_results = await search_data_components(get_supabase, ``, { filter_exclude_test_components: false })
+                if (browse_results.error) expect.fail(`Error whilst searching for data components: ${JSON.stringify(browse_results.error)}`)
 
-                expect(search_results.data, "Expected search results to be an array").to.be.an("array")
+                expect(browse_results.data, "Expected search results to be an array").to.be.an("array")
                 deep_equals(
-                    get_ids_and_versions(search_results.data),
+                    get_ids_and_versions(browse_results.data),
+                    get_ids_and_versions([ inserted_wiki_data_component ]),
+                    `Expected search results to only return wiki data component`
+                )
+
+                browse_results = await search_data_components(get_supabase, ``, { filter_exclude_test_components: false, filter_by_owner_id: { type: "include_all", owner_id: user_id! } })
+                if (browse_results.error) expect.fail(`Error whilst searching for data components: ${JSON.stringify(browse_results.error)}`)
+
+                expect(browse_results.data, "Expected search results to be an array").to.be.an("array")
+                deep_equals(
+                    get_ids_and_versions(browse_results.data),
                     get_ids_and_versions([
-                        inserted_wiki_data_component,
                         inserted_user_owned_data_component,
+                        inserted_wiki_data_component,
                     ]),
-                    `Expected search results to match "user owned" data component`
+                    `Expected search results to return wiki and user data components`
                 )
             })
 
 
             it(`should filter by a user_id`, async function ()
             {
-                const search_results = await search_data_components(get_supabase, `"Component"`, { filter_by_owner_id: user_id, filter_exclude_test_components: false })
+                const search_results = await search_data_components(get_supabase, `"Component"`, { filter_by_owner_id: { type: "only_user", owner_id: user_id }, filter_exclude_test_components: false })
                 if (search_results.error) expect.fail(`Error whilst searching for data components: ${JSON.stringify(search_results.error)}`)
 
                 expect(search_results.data, "Expected search results to be an array").to.be.an("array")

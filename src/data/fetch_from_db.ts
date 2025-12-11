@@ -225,7 +225,7 @@ export async function search_data_components(
             page: options.page,
             size: options.size,
             filter_by_owner_id: options.filter_by_owner_id,
-            // __only_test_data: options.filter_exclude_test_components ? false : undefined,
+            __only_test_data: !(options.filter_exclude_test_components ?? true),
             order_by: "latest_modified",
         })
     }

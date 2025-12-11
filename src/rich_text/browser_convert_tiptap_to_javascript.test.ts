@@ -106,5 +106,16 @@ describe("browser_convert_tiptap_to_javascript", () =>
                 expect(plain_text).equals(`value = 1e7/1e8\nvalue2 = 2\nd1019v3(value, value2)`)
             })
         })
+
+
+        describe("handling tags", () =>
+        {
+            it("should handle other tags in titles of components", () =>
+            {
+                const tiptap_text = `<p>123 + ${tiptap_mention_chip({ title: "<b>Some Title</b>", id: "1020v1" }, tag)}</p>`
+                const plain_text = browser_convert_tiptap_to_javascript(tiptap_text)
+                expect(plain_text).equals(`123 + d1020v1`)
+            })
+        })
     })
 })

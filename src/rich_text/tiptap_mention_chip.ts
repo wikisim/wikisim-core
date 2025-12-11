@@ -1,4 +1,5 @@
 import { IdAndMaybeVersion, parse_id } from "../data/id.ts"
+import { ERRORS } from "../errors.ts"
 
 
 export function tiptap_mention_chip(args: { title: string, id: IdAndMaybeVersion | string } | string, tag: "span" | "a" = "a"): string
@@ -8,6 +9,10 @@ export function tiptap_mention_chip(args: { title: string, id: IdAndMaybeVersion
         : typeof args.id === "string" ? parse_id(args.id)
         : args.id).to_str()
     const title = typeof args === "string" ? `Some title for ${args}` : args.title
+
+    // This catches setting up incorrect titles in tests, this was not added due
+    // to a bug in production code.
+    if (title.includes("<p>")) throw new Error(ERRORS.ERR49.message + title)
 
     if (tag === "a")
     {

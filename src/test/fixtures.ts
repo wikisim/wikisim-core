@@ -19,7 +19,7 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
         version_type: "minor",
         version_rolled_back_to: -10,
 
-        title: "<p>Modified Title</p>",
+        title: "Modified Title",
         description: "<p>Modified Description</p>",
         label_ids: [-2, -3],
 
