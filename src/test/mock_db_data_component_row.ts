@@ -1,3 +1,4 @@
+// TODO merge create_mock_db_data_component_row into fixtures.ts
 import { DBDataComponentRow } from "../supabase"
 
 
@@ -17,7 +18,7 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
         version_type: null,
         version_rolled_back_to: null,
 
-        title: "<p>Mock Data Component</p>",
+        title: "Mock Data Component",
         description: "<p>This is a mock data component for testing purposes.</p>",
         label_ids: null,
 
