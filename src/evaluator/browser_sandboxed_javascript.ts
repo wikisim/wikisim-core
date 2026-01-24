@@ -149,7 +149,21 @@ export function setup_sandboxed_iframe(options: { logging: boolean })
 
     <script>
         // Expose some global functions for easier use
-        window.range = (...args) => math.range(...args).toArray();
+        window.range = (...args) =>
+        {
+            // default step of 1
+            if (args.length === 2) args.push(1);
+            // Default inclusive of end value which is a different behavior to
+            // mathjs and is a backwards incompatibility change to existing
+            // wikisim pages that will need a manual update to fix them.
+            // This is justified as although the default behaviour of
+            // mathjs.range is useful for programming, for general users and in
+            // the context of wikisim pages, having the end value included is
+            // more intuitive --- AJP, 2026-01-24
+            if (args.length === 3) args.push(true);
+
+            return math.range(...args).toArray();
+        }
     </script>
 
     <script>
