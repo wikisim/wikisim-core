@@ -153,9 +153,15 @@ export function setup_sandboxed_iframe(options: { logging: boolean })
         {
             // default step of 1
             if (args.length === 2) args.push(1);
-            // Default inclusive of end value which is a different behavior to
-            // mathjs and is a backwards incompatibility change to existing
-            // wikisim pages that will need a manual update to fix them.
+
+            // Default inclusion of end value. This is a different behaviour to
+            // mathjs and is a backwards incompatible change for existing
+            // wikisim pages that will need a manual update ~~to fix them~~
+            // however the expectations will not currently be marked as broken
+            // as they only assert against the expected_result and ignore any
+            // other values.  For example: https://wikisim.org/wiki/1019v8 has
+            // an expected_result of '{"labels":[-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5],"results":[0,0,0,0,0,0.5,1,1,1,1]}'
+            // which passes even though the labels are now [-2, -1.5, ... 2.5, 3.0]
             // This is justified as although the default behaviour of
             // mathjs.range is useful for programming, for general users and in
             // the context of wikisim pages, having the end value included is
