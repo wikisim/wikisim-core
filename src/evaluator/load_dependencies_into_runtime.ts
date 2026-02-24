@@ -1,7 +1,7 @@
-import type { DataComponent, NewDataComponent } from "../data/interface.ts"
-import { ERRORS } from "../errors.ts"
-import { deep_freeze_str } from "../utils/deep_freeze.ts"
-import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
+import type { DataComponent, NewDataComponent } from "../data/interface.js"
+import { ERRORS } from "../errors.js"
+import { deep_freeze_str } from "../utils/deep_freeze.js"
+import type { EvaluationRequest, EvaluationResponse } from "./interface.js"
 
 
 
@@ -9,16 +9,16 @@ interface LoadDependenciesIntoSandboxArgs
 {
     component: DataComponent | NewDataComponent
     data_components_by_id_and_version: Record<string, DataComponent>
-    evaluate_code_in_sandbox: (request: EvaluationRequest) => Promise<EvaluationResponse>
+    evaluate_code_in_runtime: (request: EvaluationRequest) => Promise<EvaluationResponse>
     no_deep_freeze?: boolean
     debugging?: boolean
 }
-export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandboxArgs): Promise<EvaluationResponse>
+export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandboxArgs): Promise<EvaluationResponse>
 {
     const {
         component,
         data_components_by_id_and_version,
-        evaluate_code_in_sandbox,
+        evaluate_code_in_runtime,
         no_deep_freeze,
     } = args
     const dependency_ids = component.recursive_dependency_ids || []
@@ -50,13 +50,17 @@ export function load_dependencies_into_sandbox(args: LoadDependenciesIntoSandbox
         }
         const dependency_js_value = dep.result_value ?? `undefined`
         // Do not use `const` here so that subsequent calls to `eval` will be
-        // able to access these values
-        js_dependencies += `\n${id.to_javascript_str()} = deep_freeze(${dependency_js_value});`
+        // able to access these values as global variables.
+        // But we use `var` to allow this to run (potentially unsafe code) in
+        // node.  I do not think we can use `let` because if the code is run
+        // multiple times in the same context then the second time it will throw
+        // an error because the variable has already been declared.
+        js_dependencies += `\nvar ${id.to_javascript_str()} = deep_freeze(${dependency_js_value});`
     }
 
     js_dependencies += `\n\n"loaded_dependencies";`
 
-    return evaluate_code_in_sandbox({
+    return evaluate_code_in_runtime({
         js_input_value: js_dependencies,
         requested_at: performance.now(),
         timeout_ms: 10000,

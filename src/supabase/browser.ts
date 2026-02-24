@@ -8,13 +8,21 @@ export type GetSupabase = () => SupabaseClient<Database>
 
 let supabase: SupabaseClient<Database> | undefined = undefined
 
+
+function get_window(): Window | null
+{
+    if (typeof window !== "undefined") return window
+    return null
+}
+
+
 export function get_supabase (): SupabaseClient<Database>
 {
     if (supabase) return supabase
 
     supabase = createClient<Database>(supabase_url, supabase_anon_key, {
         auth: {
-            storage: window.localStorage,
+            storage: get_window()?.localStorage,
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,

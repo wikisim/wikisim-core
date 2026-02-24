@@ -131,6 +131,7 @@ export function flatten_data_component_to_json(data_component: DataComponent): D
 
 
 
+// TODO: change this from `validators: FieldValidators` to `z: ZodInterface`
 export function hydrate_data_component_from_json(row: DataComponentAsJSON, validators: FieldValidators): DataComponent
 export function hydrate_data_component_from_json(row: NewDataComponentAsJSON, validators: FieldValidators): NewDataComponent
 export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent

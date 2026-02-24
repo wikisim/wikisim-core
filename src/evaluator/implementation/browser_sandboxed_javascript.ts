@@ -2,6 +2,8 @@ import { useEffect } from "preact/hooks"
 
 import { get_current_debugging_state } from "../../state/debugging"
 import { EvaluationRequest, EvaluationResponse } from "../interface"
+import { ExtendedEvaluationRequest } from "./interface"
+import { delete_evaluation_request, get_evaluation_request, request_next_evaluation } from "./request_next_evaluation"
 
 
 let next_evaluation_id = 0
@@ -18,15 +20,6 @@ function set_up_new_iframe_loading_promise()
 set_up_new_iframe_loading_promise()
 
 
-interface ExtendedEvaluationRequest extends Omit<EvaluationRequest, "data_component_by_id_and_version">
-{
-    evaluation_id: number
-    requested_at: number
-    start_time: number
-    timeout_id?: ReturnType<typeof setTimeout>
-    promise_result: Promise<EvaluationResponse>
-    resolve: (response: EvaluationResponse) => void
-}
 
 export async function evaluate_code_in_browser_sandbox(basic_request: EvaluationRequest): Promise<EvaluationResponse>
 {
@@ -88,9 +81,9 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
 
     // Timeout if no response
     request.timeout_id = setTimeout(() => {
-        const existing_call_in_progress = requests[request.evaluation_id]
+        const existing_call_in_progress = get_evaluation_request(request.evaluation_id)
         if (!existing_call_in_progress) return
-        delete requests[existing_call_in_progress.evaluation_id]
+        delete_evaluation_request(existing_call_in_progress)
 
         const failure: EvaluationResponse = {
             ...request,
@@ -103,19 +96,6 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
     }, request.timeout_ms)
 
     return promise_result
-}
-
-
-const requests: Record<number, ExtendedEvaluationRequest> = {}
-let previous_request: ExtendedEvaluationRequest | undefined
-async function request_next_evaluation(request: ExtendedEvaluationRequest)
-{
-    requests[request.evaluation_id] = request
-
-    const previous_promise_result = previous_request?.promise_result
-    previous_request = request
-
-    await previous_promise_result
 }
 
 
@@ -225,9 +205,9 @@ export function setup_sandboxed_iframe(options: { logging: boolean })
         // console .log("Received message from sandboxed iframe:", event.data)
         if (event.source === iframe.contentWindow)
         {
-            const existing_call_in_progress = requests[event.data.evaluation_id]
+            const existing_call_in_progress = get_evaluation_request(event.data.evaluation_id)
             if (!existing_call_in_progress) return
-            delete requests[existing_call_in_progress.evaluation_id]
+            delete_evaluation_request(existing_call_in_progress)
 
             clearTimeout(existing_call_in_progress.timeout_id)
 

@@ -5,10 +5,10 @@ import { init_data_component } from "../data/modify"
 import { ERRORS } from "../errors"
 import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
 import { evaluate_code_in_browser_sandbox, setup_sandboxed_iframe } from "./implementation/browser_sandboxed_javascript"
-import { load_dependencies_into_sandbox } from "./load_dependencies_into_runtime"
+import { load_dependencies_into_runtime } from "./load_dependencies_into_runtime"
 
 
-describe("load_dependencies_into_sandbox", () =>
+describe("load_dependencies_into_runtime", () =>
 {
     let clean_up: () => void
     before(() =>
@@ -41,12 +41,12 @@ describe("load_dependencies_into_sandbox", () =>
             recursive_dependency_ids: [component1.id],
         })
 
-        const result = await load_dependencies_into_sandbox({
+        const result = await load_dependencies_into_runtime({
             component: component2,
             data_components_by_id_and_version: {
                 [component1.id.to_str()]: component1,
             },
-            evaluate_code_in_sandbox: evaluate_code_in_browser_sandbox,
+            evaluate_code_in_runtime: evaluate_code_in_browser_sandbox,
         })
 
         expect(result.error).equals(null)
@@ -65,10 +65,10 @@ describe("load_dependencies_into_sandbox", () =>
             recursive_dependency_ids: [parse_id("-1v1", true)],
         })
 
-        const result = await load_dependencies_into_sandbox({
+        const result = await load_dependencies_into_runtime({
             component: component2,
             data_components_by_id_and_version: {},
-            evaluate_code_in_sandbox: evaluate_code_in_browser_sandbox,
+            evaluate_code_in_runtime: evaluate_code_in_browser_sandbox,
         })
 
         expect(result.error).equals(ERRORS.ERR39.message + ` Expected 1 dependencies but got 0`)

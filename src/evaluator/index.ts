@@ -1,7 +1,7 @@
 import { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { format_function_input_value_string } from "./format_function.ts"
 import { EvaluationRequest, EvaluationResponse } from "./interface.ts"
-import { load_dependencies_into_sandbox } from "./load_dependencies_into_runtime.ts"
+import { load_dependencies_into_runtime } from "./load_dependencies_into_runtime.js"
 
 
 interface CalculateResultValueArgs
@@ -13,7 +13,7 @@ interface CalculateResultValueArgs
      * When run on the edge functions we pass undefined here as we can't
      * yet evaluate code in a sandbox on the edge functions.
      */
-    evaluate_code_in_sandbox: undefined | ((request: EvaluationRequest) => Promise<EvaluationResponse>),
+    evaluate_code_in_runtime: undefined | ((request: EvaluationRequest) => Promise<EvaluationResponse>),
     timeout_ms?: number
     debugging?: boolean
 }
@@ -25,12 +25,12 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
 
     if (!input_value) return Promise.resolve(null)
 
-    if (args.evaluate_code_in_sandbox)
+    if (args.evaluate_code_in_runtime)
     {
-        const load_dependencies_response = await load_dependencies_into_sandbox({
+        const load_dependencies_response = await load_dependencies_into_runtime({
             component,
             data_components_by_id_and_version: args.data_components_by_id_and_version,
-            evaluate_code_in_sandbox: args.evaluate_code_in_sandbox,
+            evaluate_code_in_runtime: args.evaluate_code_in_runtime,
             debugging,
         })
         if (load_dependencies_response.error) return load_dependencies_response
@@ -66,10 +66,10 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
     }
 
 
-    // When on edge function `args.evaluate_code_in_sandbox` will be undefined so
+    // When on edge function `args.evaluate_code_in_runtime` will be undefined so
     // we just return the result value as the args.component.result_value that
     // was given by the user.
-    if (!args.evaluate_code_in_sandbox) return Promise.resolve({
+    if (!args.evaluate_code_in_runtime) return Promise.resolve({
         result: args.component.result_value || "",
 
         evaluation_id: 0,
@@ -80,5 +80,5 @@ export async function calculate_result_value(args: CalculateResultValueArgs): Pr
         error: null,
     })
 
-    return await args.evaluate_code_in_sandbox(basic_request)
+    return await args.evaluate_code_in_runtime(basic_request)
 }
