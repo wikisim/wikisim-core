@@ -4,8 +4,8 @@ import { parse_id } from "../data/id"
 import { init_data_component } from "../data/modify"
 import { ERRORS } from "../errors"
 import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
-import { evaluate_code_in_browser_sandbox, setup_sandboxed_iframe } from "./browser_sandboxed_javascript"
-import { load_dependencies_into_sandbox } from "./load_dependencies_into_sandbox"
+import { evaluate_code_in_browser_sandbox, setup_sandboxed_iframe } from "./implementation/browser_sandboxed_javascript"
+import { load_dependencies_into_sandbox } from "./load_dependencies_into_runtime"
 
 
 describe("load_dependencies_into_sandbox", () =>

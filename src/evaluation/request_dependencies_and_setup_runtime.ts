@@ -3,8 +3,8 @@ import {
 } from "../data/fetch_from_db"
 import { IdAndVersion } from "../data/id"
 import { DataComponent } from "../data/interface"
-import { evaluate_code_in_browser_sandbox } from "../evaluator/browser_sandboxed_javascript"
-import { load_dependencies_into_sandbox } from "../evaluator/load_dependencies_into_sandbox"
+import { evaluate_code_in_browser_sandbox } from "../evaluator/implementation/browser_sandboxed_javascript"
+import { load_dependencies_into_sandbox } from "../evaluator/load_dependencies_into_runtime"
 import { GetSupabase } from "../supabase/browser"
 
 

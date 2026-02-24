@@ -9,7 +9,7 @@ import { tiptap_mention_chip } from "../rich_text/tiptap_mention_chip"
 import {
     evaluate_code_in_browser_sandbox,
     setup_sandboxed_iframe,
-} from "./browser_sandboxed_javascript"
+} from "./implementation/browser_sandboxed_javascript"
 import { calculate_result_value } from "./index"
 
 

@@ -1,7 +1,7 @@
 import { useEffect } from "preact/hooks"
 
-import { get_current_debugging_state } from "../state/debugging"
-import { EvaluationRequest, EvaluationResponse } from "./interface"
+import { get_current_debugging_state } from "../../state/debugging"
+import { EvaluationRequest, EvaluationResponse } from "../interface"
 
 
 let next_evaluation_id = 0
