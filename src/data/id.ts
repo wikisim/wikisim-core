@@ -61,6 +61,8 @@ export class IdAndVersion
 
     // The replacing of - with _ is to allow for negative ids in tests
     to_javascript_str(): string { return "d" + this.to_str().replace("-", "_") }
+
+    to_url(): string { return `https://wikisim.org/wiki/${this.to_str()}` }
 }
 
 

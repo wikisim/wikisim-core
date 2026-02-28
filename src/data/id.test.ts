@@ -166,6 +166,34 @@ describe("OrderedUniqueIdAndVersionList", () =>
 })
 
 
+describe("to string methods", () =>
+{
+    it("should convert IdOnly to string", () =>
+    {
+        const id = new IdOnly(123)
+        expect(id.to_str()).equals("123")
+    })
+
+    it("should convert IdAndVersion to string", () =>
+    {
+        const id = new IdAndVersion(123, 2)
+        expect(id.to_str()).equals("123v2")
+    })
+
+    it("should convert IdAndVersion to javascript string", () =>
+    {
+        const id = new IdAndVersion(-123, 2)
+        expect(id.to_javascript_str()).equals("d_123v2")
+    })
+
+    it("should convert IdAndVersion to_url", () =>
+    {
+        const id = new IdAndVersion(123, 2)
+        expect(id.to_url()).equals("https://wikisim.org/wiki/123v2")
+    })
+})
+
+
 // // @ts-expect-error: IdOnly requires only one argument
 // new IdOnly(123, 2)
 
