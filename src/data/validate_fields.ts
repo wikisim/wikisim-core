@@ -315,7 +315,7 @@ function remove_invalid_selected_path_names(scenarios: DBScenario[] | undefined)
 
     return scenarios.map(scenario =>
     {
-        let new_selected_path_names: DBScenario["selected_path_names"] = scenario.selected_path_names
+        const new_selected_path_names: DBScenario["selected_path_names"] = scenario.selected_path_names
         if (!new_selected_path_names) return scenario
 
         const { selected_paths = [] } = scenario

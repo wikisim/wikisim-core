@@ -34,12 +34,13 @@ export function deindent(text: string): string
     }
 
     if (min_indent === null || min_indent === 0) return lines.join("\n")
+    const const_min_indent = min_indent
 
     // Remove minimum indentation
     const deindented_lines = lines.map(line =>
     {
         if (line.trim() === "") return ""
-        return line.slice(min_indent)
+        return line.slice(const_min_indent)
     })
 
     return deindented_lines.join("\n")
