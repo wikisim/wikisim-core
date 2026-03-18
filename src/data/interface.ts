@@ -22,7 +22,6 @@ export interface AsyncDataComponentAndDependencies extends AsyncDataComponent
     to_load: number
     loaded: number
     all_loaded: boolean
-    any_error: Error | undefined
 }
 
 
