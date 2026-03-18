@@ -2,7 +2,11 @@ import { render } from "preact"
 import { useEffect, useRef, useState } from "preact/hooks"
 
 import { request_data_components } from "./data/fetch_from_db"
-import { DataComponent } from "./data/interface"
+import { IdAndVersion } from "./data/id"
+import { AsyncDataComponentAndDependencies, DataComponent } from "./data/interface"
+import { prepare_scenario_javascript } from "./evaluation/prepare_scenario_javascript"
+import { request_dependencies, setup_runtime } from "./evaluation/setup_runtime"
+import { evaluate_code_in_browser_sandbox, Evaluator } from "./evaluator/implementation/browser_sandboxed_javascript"
 import "./monkey_patch"
 import { core_store } from "./state/store"
 import { get_can_request_sign_in_with_OTP } from "./state/user_auth_session/accessor"
@@ -200,7 +204,9 @@ function App()
             <br/>
             {data.map(item =>
                 <div key={item.id.to_str()} style={{ margin: "8px 0" }}>
-                    <Highlight>{item.id.to_str()}</Highlight>:
+                    <a href={item.id.to_url()}>
+                        <Highlight>{item.id.to_str()}</Highlight>
+                    </a>:
                     <br/>
                     <span style={{ marginLeft: "20px" }}>
                         {item.title}
@@ -212,6 +218,12 @@ function App()
                     </span>
                 </div>
             )}
+        </p>
+
+        <p>
+            8. Evaluate a function with dependencies, e.g. component <a href={IdAndVersion.from_str("1011v7").to_url()}>1011v7</a>:
+
+            <EvaluateComponent id="1011v7" />
         </p>
     </div>
 }
@@ -231,4 +243,81 @@ function Highlight(props: { children: any })
     }}>
         {props.children}
     </span>
+}
+
+
+function EvaluateComponent(props: { id: string })
+{
+    const [result, set_result] = useState<string>("Evaluating...")
+    const [components, set_components] = useState<AsyncDataComponentAndDependencies>()
+
+    useEffect(() =>
+    {
+        request_dependencies({
+            get_supabase,
+            id: IdAndVersion.from_str(props.id),
+        })
+        .then(components_response =>
+        {
+            const component_and_dependencies = components_response[0]
+            if (!component_and_dependencies)
+            {
+                set_result("Component not found.")
+                return
+            }
+
+            set_components(component_and_dependencies)
+        })
+    }, [props.id])
+
+
+    useEffect(() =>
+    {
+        if (!components || !components.all_loaded) return
+
+        const component = components.component!
+        const debugging = true
+        const year = "2005"
+
+        setup_runtime({
+            components: components,
+            debugging,
+        })
+        .then(() =>
+        {
+            const javascript = prepare_scenario_javascript({
+                component,
+                scenario: {
+                    values_by_temp_id: {
+                        [component.function_arguments![0]!.local_temp_id]: { value: year },
+                    },
+                    local_temp_id: "",
+                },
+                debugging,
+            })
+
+            return evaluate_code_in_browser_sandbox({
+                js_input_value: javascript,
+                requested_at: performance.now(),
+                debugging: false,
+                logging: true,
+            })
+            // return calculate_result_value({
+            //     component,
+            //     data_components_by_id_and_version,
+            //     convert_tiptap_to_javascript: browser_convert_tiptap_to_javascript,
+            //     evaluate_code_in_runtime: evaluate_code_in_browser_sandbox,
+            // })
+        })
+        .then(evaluation_response =>
+        {
+            set_result(`Result of ${component.plain_title}(${year}) = ${evaluation_response.result} ${component.units}`)
+        })
+    }, [components?.all_loaded])
+
+
+    return <div>
+        <Evaluator />
+        {result}
+    </div>
 }

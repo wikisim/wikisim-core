@@ -44,41 +44,41 @@ interface SetupRuntimeArgs
 }
 
 
-export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeResponse[]>
+export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeResponse>
 {
     const { components, debugging, __dangerously_skip_sandboxing } = args
 
     if (components.status !== "loaded")
     {
-        return Promise.resolve<SetupRuntimeResponse[]>([{
+        return Promise.resolve<SetupRuntimeResponse>({
             error: new Error(`Components not loaded, cannot setup runtime. Status: ${components.status}`),
             component: null
-        }])
+        })
     }
     if (components.error)
     {
-        return Promise.resolve<SetupRuntimeResponse[]>([{
+        return Promise.resolve<SetupRuntimeResponse>({
             error: new Error(`Error in components passed to setup_runtime ${components.error}`),
             component: null
-        }])
+        })
     }
 
     const { component, dependencies: async_dependencies } = components
     if (!component)
     {
-        return Promise.resolve<SetupRuntimeResponse[]>([{
+        return Promise.resolve<SetupRuntimeResponse>({
             error: new Error(`Component not found for id ${components.id.to_str()}`),
             component: null
-        }])
+        })
     }
 
     const dependencies = async_dependencies.filter(d => d.component).map(d => d.component as DataComponent)
     if (dependencies.length !== async_dependencies.length)
     {
-        return Promise.resolve<SetupRuntimeResponse[]>([{
+        return Promise.resolve<SetupRuntimeResponse>({
             error: new Error(`Some dependencies not found for component id ${component.id.to_str()}`),
             component: null
-        }])
+        })
     }
 
 
@@ -102,13 +102,13 @@ export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeRespo
         {
             console.error("Error loading dependencies into sandbox:", sandbox_response.error)
 
-            return Promise.resolve<SetupRuntimeResponse[]>([{
+            return Promise.resolve<SetupRuntimeResponse>({
                 error: new Error(sandbox_response.error),
                 component: null
-            }])
+            })
         }
 
-        return Promise.resolve([{ error: null, component }])
+        return Promise.resolve({ error: null, component })
     })
 }
 
