@@ -10,6 +10,7 @@ interface LoadDependenciesIntoSandboxArgs
     component: DataComponent | NewDataComponent
     data_components_by_id_and_version: Record<string, DataComponent>
     evaluate_code_in_runtime: (request: EvaluationRequest) => Promise<EvaluationResponse>
+    is_node?: boolean
     no_deep_freeze?: boolean
     debugging?: boolean
 }
@@ -19,6 +20,7 @@ export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandbox
         component,
         data_components_by_id_and_version,
         evaluate_code_in_runtime,
+        is_node = false,
         no_deep_freeze,
     } = args
     const dependency_ids = component.recursive_dependency_ids || []
@@ -55,7 +57,7 @@ export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandbox
         // node.  I do not think we can use `let` because if the code is run
         // multiple times in the same context then the second time it will throw
         // an error because the variable has already been declared.
-        js_dependencies += `\nvar ${id.to_javascript_str()} = deep_freeze(${dependency_js_value});`
+        js_dependencies += `\n${is_node ? "var " : ""}${id.to_javascript_str()} = deep_freeze(${dependency_js_value});`
     }
 
     js_dependencies += `\n\n"loaded_dependencies";`
