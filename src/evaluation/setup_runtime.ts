@@ -1,15 +1,10 @@
-import {
-    request_versioned_data_component_and_dependencies
-} from "../data/fetch_from_db"
-import { IdAndVersion } from "../data/id"
-import { DataComponent } from "../data/interface"
+import { AsyncDataComponentAndDependencies, DataComponent } from "../data/interface"
 import { __dangerously_evaluate_code_without_sandbox } from "../evaluator/implementation/__dangerously_evaluate_code_without_sandbox"
 import { evaluate_code_in_browser_sandbox } from "../evaluator/implementation/browser_sandboxed_javascript"
 import { load_dependencies_into_runtime } from "../evaluator/load_dependencies_into_runtime"
-import { GetSupabase } from "../supabase/browser"
 
 
-export type RequestDependenciesAndSetupSandboxResponse =
+export type SetupRuntimeResponse =
 {
     error: Error
     component: null
@@ -20,9 +15,9 @@ export type RequestDependenciesAndSetupSandboxResponse =
 }
 
 
-interface RequestDependenciesAndSetupRuntimeParams
+interface SetupRuntimeParams
 {
-    get_supabase: GetSupabase
+    components: AsyncDataComponentAndDependencies
     debugging?: boolean
     /**
      * SECURITY WARNING:
@@ -45,73 +40,71 @@ interface RequestDependenciesAndSetupRuntimeParams
     __dangerously_skip_sandboxing?: boolean
 }
 
-type id_or_ids = ({
-    id: IdAndVersion
-    ids?: never
-} | {
-    ids: IdAndVersion[]
-    id?: never
-})
 
-export function request_dependencies_and_setup_runtime(args: RequestDependenciesAndSetupRuntimeParams & id_or_ids): Promise<RequestDependenciesAndSetupSandboxResponse[]>
+export function setup_runtime(args: SetupRuntimeParams): Promise<SetupRuntimeResponse[]>
 {
-    const ids = args.ids ?? [args.id]
+    const { components, debugging, __dangerously_skip_sandboxing } = args
 
-    return Promise.all(ids.map(id => _request_dependencies_and_setup_runtime(id, args)))
-}
-
-
-function _request_dependencies_and_setup_runtime(id: IdAndVersion, args: RequestDependenciesAndSetupRuntimeParams): Promise<RequestDependenciesAndSetupSandboxResponse>
-{
-    const { get_supabase, debugging = false, __dangerously_skip_sandboxing = false } = args
-
-    let component: DataComponent
-
-    return request_versioned_data_component_and_dependencies(get_supabase, id)
-    .then(components_response =>
+    if (components.status !== "loaded")
     {
-        if (components_response.error)
-        {
-            return Promise.resolve({ error: components_response.error, component: null })
-        }
+        return Promise.resolve<SetupRuntimeResponse[]>([{
+            error: new Error(`Components not loaded, cannot setup runtime. Status: ${components.status}`),
+            component: null
+        }])
+    }
+    if (components.error)
+    {
+        return Promise.resolve<SetupRuntimeResponse[]>([{
+            error: new Error(`Error in components passed to setup_runtime ${components.error}`),
+            component: null
+        }])
+    }
 
-        const maybe_component = components_response.data[0]
-        if (!maybe_component)
+    const { component, dependencies: async_dependencies } = components
+    if (!component)
+    {
+        return Promise.resolve<SetupRuntimeResponse[]>([{
+            error: new Error(`Component not found for id ${components.id.to_str()}`),
+            component: null
+        }])
+    }
+
+    const dependencies = async_dependencies.filter(d => d.component).map(d => d.component as DataComponent)
+    if (dependencies.length !== async_dependencies.length)
+    {
+        return Promise.resolve<SetupRuntimeResponse[]>([{
+            error: new Error(`Some dependencies not found for component id ${component.id.to_str()}`),
+            component: null
+        }])
+    }
+
+
+    const data_components_by_id_and_version: Record<string, DataComponent> = {}
+    for (const dc of dependencies)
+    {
+        data_components_by_id_and_version[dc.id.to_str()] = dc
+    }
+
+    return load_dependencies_into_runtime({
+        component,
+        data_components_by_id_and_version,
+        evaluate_code_in_runtime: __dangerously_skip_sandboxing
+            ? __dangerously_evaluate_code_without_sandbox
+            : evaluate_code_in_browser_sandbox,
+        debugging,
+    })
+    .then(sandbox_response =>
+    {
+        if (sandbox_response.error)
         {
-            return Promise.resolve<RequestDependenciesAndSetupSandboxResponse>({
-                error: new Error(`Component not found for id ${id.to_str()}`),
+            console.error("Error loading dependencies into sandbox:", sandbox_response.error)
+
+            return Promise.resolve<SetupRuntimeResponse[]>([{
+                error: new Error(sandbox_response.error),
                 component: null
-            })
-        }
-        component = maybe_component
-
-        const data_components_by_id_and_version: Record<string, DataComponent> = {}
-        for (const dc of components_response.data.slice(1))
-        {
-            data_components_by_id_and_version[dc.id.to_str()] = dc
+            }])
         }
 
-        return load_dependencies_into_runtime({
-            component,
-            data_components_by_id_and_version,
-            evaluate_code_in_runtime: __dangerously_skip_sandboxing
-                ? __dangerously_evaluate_code_without_sandbox
-                : evaluate_code_in_browser_sandbox,
-            debugging,
-        })
-        .then(sandbox_response =>
-        {
-            if (sandbox_response.error)
-            {
-                console.error("Error loading dependencies into sandbox:", sandbox_response.error)
-
-                return Promise.resolve<RequestDependenciesAndSetupSandboxResponse>({
-                    error: new Error(sandbox_response.error),
-                    component: null
-                })
-            }
-
-            return Promise.resolve({ error: null, component })
-        })
+        return Promise.resolve([{ error: null, component }])
     })
 }
