@@ -196,11 +196,11 @@ function App()
         </p>
 
         <p>
-            8. List all data items:
+            7. List all data items:
             <br/>
             {data.map(item =>
-                <div key={item.id} style={{ margin: "8px 0" }}>
-                    <Highlight>{item.id}</Highlight>:
+                <div key={item.id.to_str()} style={{ margin: "8px 0" }}>
+                    <Highlight>{item.id.to_str()}</Highlight>:
                     <br/>
                     <span style={{ marginLeft: "20px" }}>
                         {item.title}
