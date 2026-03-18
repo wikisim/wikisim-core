@@ -1,5 +1,36 @@
 import { Constants, Database } from "../supabase/interface.ts"
-import { IdAndVersion, TempId } from "./id.ts"
+import { IdAndMaybeVersion, IdAndVersion, TempId } from "./id.ts"
+
+
+
+export type BasicLoadingStatus = "loading" | "error" | "loaded"
+type LoadingStatus = BasicLoadingStatus | "not_found"
+export type SavingStatus = "saving" | "error" | "loaded"
+
+export type AsyncDataComponentStatus = LoadingStatus | SavingStatus
+export interface AsyncDataComponent
+{
+    id: IdAndMaybeVersion
+    component: DataComponent | null
+    status: AsyncDataComponentStatus
+    error?: Error
+}
+
+export interface AsyncDataComponentAndDependencies extends AsyncDataComponent
+{
+    dependencies: AsyncDataComponent[]
+    to_load: number
+    loaded: number
+    all_loaded: boolean
+    any_error: Error | undefined
+}
+
+
+export interface DbPaginationOptions
+{
+    page?: number
+    size?: number
+}
 
 
 type DBEnums = Database["public"]["Enums"]
