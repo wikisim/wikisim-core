@@ -248,6 +248,11 @@ export async function search_data_components(
 }
 
 
+/**
+ *
+ * Left for other consumers but @deprecated for WikiSim frontend use and replaced
+ * by get_async_data_component_and_dependencies
+ */
 export async function request_versioned_data_component_and_dependencies(
     get_supabase: GetSupabase,
     id: IdAndVersion,
@@ -270,9 +275,16 @@ export async function request_versioned_data_component_and_dependencies(
         }
 
         // Fetch dependencies
-        return request_historical_data_components(get_supabase, [
-            ...(component.recursive_dependency_ids || [])
-        ])
+        const { recursive_dependency_ids = [] } = component
+        return request_historical_data_components(
+            get_supabase,
+            recursive_dependency_ids,
+            // PERFORMANCE
+            // This will error when recursive_dependency_ids.length > 1000
+            // and likely not a good idea to request 1000 rows at once but
+            // we'll use this simpler approach for now.
+            { page: 0, size: recursive_dependency_ids.length }
+        )
     })
     .then(response =>
     {
