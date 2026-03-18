@@ -10,7 +10,7 @@ import {
     make_or_clause_for_ids,
 } from "./fetch_from_db_utils"
 import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
-import type { DataComponent } from "./interface"
+import type { DataComponent, DbPaginationOptions } from "./interface"
 import { make_field_validators } from "./validate_fields"
 
 
@@ -47,9 +47,7 @@ export async function request_data_components(
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
      * Size is the number of items per page. Default is 20, min is 1, max is 101.
      */
-    options: {
-        page?: number
-        size?: number
+    options: DbPaginationOptions & {
         /**
          * Max 1000 IDs
          */
@@ -139,10 +137,7 @@ export async function request_historical_data_components(
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
      * Size is the number of items per page. Default is 20, min is 1, max is 101.
      */
-    options: {
-        page?: number
-        size?: number
-    } = {},
+    options: DbPaginationOptions = {},
 ): Promise<RequestDataComponentsReturn>
 {
     if (ids.length === 0) return Promise.resolve({ data: [], error: null })
@@ -209,9 +204,7 @@ export async function search_data_components(
      * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
      * Size is the number of items per page. Default is 20, min is 1, max is 101.
      */
-    options: {
-        page?: number
-        size?: number
+    options: DbPaginationOptions & {
         similarity_threshold?: number
         // Filters
         filter_exclude_test_components?: boolean
