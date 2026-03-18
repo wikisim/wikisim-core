@@ -15,7 +15,7 @@ export function limit_ids(ids: IdAndMaybeVersion[], min: number = 0, max: number
 }
 
 
-export function get_range_from_options(options: { page?: number, size?: number } = {}): { from: number, to: number }
+export function get_range_from_options(options: { page?: number, size?: number } = {}): { from: number, to: number, size: number }
 {
     let { page, size } = options
     page = Math.max(page ?? 0, 0)
@@ -24,7 +24,8 @@ export function get_range_from_options(options: { page?: number, size?: number }
     const offset = page * limit
     const from = offset
     const to = offset + limit - 1
-    return { from, to }
+    // Also return size for use in constructing correct SQL queries.
+    return { from, to, size }
 }
 
 
