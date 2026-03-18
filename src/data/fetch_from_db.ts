@@ -62,10 +62,9 @@ export async function request_data_components(
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
-    const { from, to, size } = get_range_from_options(options)
-
     const { ids = [], filter_by_owner_id } = options
-    limit_ids(ids, 0, size)
+    limit_ids(ids)
+    const { from, to } = get_range_from_options(options)
 
     let supa = get_supabase()
         .from("data_components")
@@ -143,8 +142,8 @@ export async function request_historical_data_components(
 {
     if (ids.length === 0) return Promise.resolve({ data: [], error: null })
 
-    const { from, to, size } = get_range_from_options(options)
-    limit_ids(ids, 1, size)
+    limit_ids(ids, 1)
+    const { from, to } = get_range_from_options(options)
 
     const or_clause = make_or_clause_for_ids(ids)
 
