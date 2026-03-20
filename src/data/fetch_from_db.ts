@@ -163,6 +163,57 @@ export async function request_historical_data_components(
 }
 
 
+export async function request_latest_and_historical_data_components(
+    get_supabase: GetSupabase,
+    /**
+     * Provide 0 or more IdAndVersion and or IdOnly. Max 1000 IDs.
+     * When no IDs are provided then an empty array is returned immediately,
+     * this is useful for simplifying code to load
+     * `data_component.recursive_dependency_ids` when this list is empty.
+     */
+    ids: IdAndMaybeVersion[],
+    /**
+     * Page is 0-indexed, i.e. page 0 is the first page. Default is 0.
+     * Size is the number of items per page. Default is 20, min is 1, max is 101.
+     */
+    options: DbPaginationOptions = {},
+): Promise<RequestDataComponentsReturn>
+{
+    if (ids.length === 0) return Promise.resolve({ data: [], error: null })
+
+    // First fetch the latest version numbers for all the provided IDs, then
+    // fetch the historical versions for any IDs where the version number is
+    // different from the latest version number. This ensures we get the correct
+    // version for any IDAndVersion provided, and also ensures we get the latest
+    // version.
+
+    const response = await request_data_components(get_supabase, {
+        ids: ids.map(id => new IdOnly(id.id)),
+        size: ids.length,
+    })
+    if (response.error) return { data: null, error: response.error }
+
+    // Find which IDs have a different version number than the latest version number
+    const ids_fetched: Set<string> = new Set()
+    response.data.forEach(component =>
+    {
+        ids_fetched.add(component.id.to_str())
+    })
+    const ids_to_fetch_historical_version_of = ids.filter(id =>
+    {
+        const id_str = id.to_str()
+        return !ids_fetched.has(id_str)
+    })
+
+    const response_historical = await request_historical_data_components(get_supabase, ids_to_fetch_historical_version_of, options)
+
+    if (response_historical.error) return { data: null, error: response_historical.error }
+
+    const all_data = [ ...response.data, ...response_historical.data ]
+    return { data: all_data, error: null }
+}
+
+
 export type RequestLatestDataComponentVersionReturn =
 {
     data: IdAndVersion
