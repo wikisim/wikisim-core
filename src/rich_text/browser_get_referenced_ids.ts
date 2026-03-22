@@ -4,7 +4,7 @@ import { browser_get_referenced_ids_from_tiptap } from "./browser_get_referenced
 import { determine_input_value_text_type } from "./determine_text_type"
 
 
-export function browser_get_referenced_ids (data_component: DataComponent | NewDataComponent): IdAndVersion[]
+export function browser_get_referenced_ids (data_component: Pick<DataComponent | NewDataComponent, "input_value">): IdAndVersion[]
 {
     const { input_value = "" } = data_component
     const text_type = determine_input_value_text_type(input_value)
