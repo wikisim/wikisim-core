@@ -32,7 +32,7 @@ export function update_references(
                     {
                         const new_id_and_version_str = new_component.id.to_str()
                         ;(node as Element).setAttribute("data-id", new_id_and_version_str)
-                        node.textContent = new_component.title
+                        node.textContent = new_component.plain_title
                     }
                 }
             }
