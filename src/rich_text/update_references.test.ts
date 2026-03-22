@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import { IdAndVersion } from "../data/id"
 import { tiptap_mention_chip } from "./tiptap_mention_chip"
-import { update_referenced_ids } from "./update_referenced_ids"
+import { update_referenced_ids } from "./update_references"
 
 
 describe("update_referenced_ids", () =>
