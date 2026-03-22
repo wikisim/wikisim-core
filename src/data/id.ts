@@ -204,4 +204,9 @@ export class OrderedUniqueIdAndVersionList
                 : 1
         })
     }
+
+    to_str(): string
+    {
+        return this.get_all().map(id => id.to_str()).join(",")
+    }
 }
