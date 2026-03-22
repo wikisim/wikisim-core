@@ -1,33 +1,49 @@
-import { extract_ids_from_text, IdAndVersion } from "../data/id"
+import { IdAndVersion } from "../data/id"
+import { DataComponent } from "../data/interface"
 import { convert_text_type } from "./convert_text_type"
 import { determine_input_value_text_type } from "./determine_text_type"
+import { GenericNode } from "./generic_interface"
 
 
-export function update_referenced_ids (
+export function update_references(
     input_value: string,
-    map_id_and_version_to_new_id_and_version: (id: IdAndVersion) => IdAndVersion | undefined
+    map_id_and_version_to_new_component: (id: IdAndVersion) => DataComponent | undefined
 ): string
 {
     const text_type = determine_input_value_text_type(input_value)
-    const typescript = convert_text_type(input_value, "typescript")
-    const ids = get_referenced_ids_from_typescript(typescript)
+    const tiptap_text = convert_text_type(input_value, "tiptap")
 
-    let updated_typescript = typescript
-    ids.forEach(id =>
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(tiptap_text, "text/html")
+
+    function modify_references(node: GenericNode)
     {
-        const new_id_and_version = map_id_and_version_to_new_id_and_version(id)
-        if (!new_id_and_version) return
+        if (node.nodeType === 1) //Node.ELEMENT_NODE)
+        {
+            const tag = (node as Element).tagName
+            if ((tag === "SPAN" || tag === "A") && (node as Element).classList.contains("mention-chip"))
+            {
+                const data_id_and_version = (node as Element).getAttribute("data-id")
+                if (data_id_and_version)
+                {
+                    const id_and_version = IdAndVersion.from_str(data_id_and_version)
+                    const new_component = map_id_and_version_to_new_component(id_and_version)
+                    if (new_component)
+                    {
+                        const new_id_and_version_str = new_component.id.to_str()
+                        ;(node as Element).setAttribute("data-id", new_id_and_version_str)
+                        node.textContent = new_component.title
+                    }
+                }
+            }
 
-        const id_str_with_version = id.to_str()
-        const new_id_str = new_id_and_version.to_str()
-        updated_typescript = updated_typescript.replaceAll(id_str_with_version, new_id_str)
-    })
+            Array.from(node.childNodes).map(modify_references)
+        }
+    }
 
-    return convert_text_type(updated_typescript, text_type)
-}
+    modify_references(doc.body)
 
+    const updated_tiptap_text = doc.body.innerHTML
 
-function get_referenced_ids_from_typescript(input_value: string): IdAndVersion[]
-{
-    return extract_ids_from_text(input_value)
+    return convert_text_type(updated_tiptap_text, text_type)
 }
