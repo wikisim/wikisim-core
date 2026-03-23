@@ -9,5 +9,6 @@
         "editor.suggest.showWords": false
     },
     "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.format.semicolons": "remove",
     "deno.enable": false
 }

@@ -1,7 +1,7 @@
 import { DataComponent, NewDataComponent } from "../data/interface.ts"
 import { format_function_input_value_string } from "./format_function.ts"
 import { EvaluationRequest, EvaluationResponse } from "./interface.ts"
-import { load_dependencies_into_runtime } from "./load_dependencies_into_runtime.js"
+import { load_dependencies_into_runtime } from "./load_dependencies_into_runtime.ts"
 
 
 interface CalculateResultValueArgs
