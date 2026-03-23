@@ -36,6 +36,9 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
         function_arguments: null,
         scenarios: null,
 
+        subject_id: null,
+        according_to_id: null,
+
         plain_title: "Mock Data Component",
         plain_description: "This is a mock data component for testing purposes.",
         // search_vector tsvector,
