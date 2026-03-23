@@ -468,6 +468,7 @@ export type Database = {
           similarity_threshold?: number
         }
         Returns: {
+          according_to_id: number
           bytes_changed: number
           comment: string
           created_at: string
@@ -489,6 +490,7 @@ export type Database = {
           result_value: string
           scenarios: Json
           score: number
+          subject_id: number
           test_run_id: string
           title: string
           units: string
@@ -605,6 +607,7 @@ export type Database = {
         p_label_ids: number[] | null
         p_input_value: string | null
         p_result_value: string | null
+        p_recursive_dependency_ids: string[] | null
         p_value_type:
           | Database["public"]["Enums"]["data_component_value_type"]
           | null
@@ -621,9 +624,10 @@ export type Database = {
         p_dimension_ids: string[] | null
         p_function_arguments: Json | null
         p_scenarios: Json | null
+        p_subject_id: number | null
+        p_according_to_id: number | null
         p_test_run_id: string | null
         p_id: number | null
-        p_recursive_dependency_ids: string[] | null
       }
       data_component_update_params: {
         p_id: number //| null
@@ -641,6 +645,7 @@ export type Database = {
         p_label_ids: number[] | null
         p_input_value: string | null
         p_result_value: string | null
+        p_recursive_dependency_ids: string[] | null
         p_value_type:
           | Database["public"]["Enums"]["data_component_value_type"]
           | null
@@ -657,7 +662,8 @@ export type Database = {
         p_dimension_ids: string[] | null
         p_function_arguments: Json | null
         p_scenarios: Json | null
-        p_recursive_dependency_ids: string[] | null
+        p_subject_id: number | null
+        p_according_to_id: number | null
       }
     }
   }
