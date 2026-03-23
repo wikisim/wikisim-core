@@ -1,10 +1,10 @@
-// TODO merge create_mock_db_data_component_row into fixtures.ts
-import { DBDataComponentRow } from "../supabase"
+// TODO merge this into fixtures.ts
+import { DataComponentAsJSON, DBDataComponentRow } from "../supabase/index.ts"
 
 
-export function create_mock_db_data_component_row(overrides: Partial<DBDataComponentRow> = {}): DBDataComponentRow
+export function create_mock_json_data_component_row(overrides: Partial<DataComponentAsJSON> = {}): DataComponentAsJSON
 {
-    const default_row: DBDataComponentRow = {
+    const default_row: DataComponentAsJSON = {
         id: -1,
 
         owner_id: null, // A Wiki component
@@ -46,4 +46,14 @@ export function create_mock_db_data_component_row(overrides: Partial<DBDataCompo
     }
 
     return { ...default_row, ...overrides }
+}
+
+
+export function create_mock_db_data_component_row(overrides: Partial<DBDataComponentRow> = {}): DBDataComponentRow
+{
+    const json_row = create_mock_json_data_component_row(overrides)
+    return {
+        ...json_row,
+        search_vector: null, // This field is not included in the JSON representation
+    }
 }
