@@ -48,6 +48,37 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         expect(hydrated).deep.equals(new_data_component)
     })
 
+    it("should raise an error on an unknown property", function ()
+    {
+        const data_component = init_data_component()
+
+        const flattened_as_json = flatten_new_or_data_component_to_json(data_component)
+        // @ts-expect-error
+        flattened_as_json.some_unknown_field = "with a value"
+
+        try
+        {
+            hydrate_data_component_from_json(flattened_as_json, field_validators)
+        }
+        catch (e)
+        {
+            const error_message = (e as Error).message
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const error_data = JSON.parse(error_message)
+            expect(error_data).deep.equals([
+                {
+                    code: "unrecognized_keys",
+                    keys: [ "some_unknown_field" ],
+                    path: [],
+                    message: "Unrecognized key: \"some_unknown_field\""
+                }
+            ])
+            return
+        }
+        expect.fail("Expected an error to be thrown due to unknown property, but no error was thrown")
+    })
+
+
     it("should raise an error on invalid function_arguments", function ()
     {
         const data_component = init_data_component({

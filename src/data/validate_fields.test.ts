@@ -448,3 +448,50 @@ describe("validate_fields_given_value_type", () =>
         })
     })
 })
+
+
+describe("validate_json", () =>
+{
+    const { validate_json } = make_field_validators(z)
+
+    it("should validate correct JSON without throwing an error", () =>
+    {
+        const data_component_json = {
+            id: 1,
+            title: "Test Component",
+            value_type: "number",
+            input_value: 42,
+        }
+
+        expect(() => validate_json(data_component_json)).to.not.throw()
+    })
+
+    it("should throw an error on invalid JSON", () =>
+    {
+        const invalid_data_component_json = {
+            id: 1,
+            some_field: "unexpected", // field not defined in schema
+        }
+
+        try
+        {
+            validate_json(invalid_data_component_json)
+        }
+        catch (e)
+        {
+            const error_message = (e as Error).message
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const error_data = JSON.parse(error_message)
+            expect(error_data).deep.equals([
+                {
+                    code: "unrecognized_keys",
+                    keys: [ "some_field" ],
+                    path: [],
+                    message: "Unrecognized key: \"some_field\""
+                }
+            ])
+            return
+        }
+        expect.fail("Expected validate_json to throw an error for invalid JSON, but it did not throw")
+    })
+})

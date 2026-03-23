@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Json } from "../supabase/interface.ts"
 import { valid_value_type } from "./field_values_with_defaults.ts"
 import {
     DataComponent,
@@ -11,13 +12,14 @@ import {
     DBScenario,
     NewDataComponent,
     ScenarioValue,
-    ValueType
 } from "./interface.ts"
 
-
-// To avoid making a GenericZod type, just use any here, but when developing
+// To avoid making a GenericZod type, just use `any` here, but when developing
 // use typeof import("zod") to check types.
-export function make_field_validators(z: any) //typeof import("zod"))
+// type Zod = typeof import("zod")
+type Zod = any
+
+export function make_field_validators(z: Zod)
 {
     function zod_schemas()
     {
@@ -71,79 +73,137 @@ export function make_field_validators(z: any) //typeof import("zod"))
 
         const ids_schema = id_schema.or(temporary_id_schema).refine(
             (data: IdOrTempId) => {
-                const hasId = data.id !== undefined
-                const hasTempId = data.temporary_id !== undefined
-                return hasId !== hasTempId // XOR: exactly one must be true
+                const has_id = data.id !== undefined
+                const has_temp_id = data.temporary_id !== undefined
+                return has_id !== has_temp_id // XOR: exactly one must be true
             },
             { message: "Must have either id or temporary_id, but not both" }
         )
 
-        const base_schema = ids_schema.and(z.object({
-            owner_id: z.any(),
-            editor_id: z.any(),
-            created_at: z.any(),
-            comment: z.any(),
-            bytes_changed: z.any(),
-            version_type: z.any(),
-            version_rolled_back_to: z.any(),
-            title: z.any(),
-            description: z.any(),
-            label_ids: z.any(),
-            value_type: z.string().optional(),
-            subject_id: z.number().optional(),
-            according_to_id: z.number().optional(),
-            plain_title: z.any(),
-            plain_description: z.any(),
-            test_run_id: z.any(),
-        }))
+        function base_fields(optionals_as_nullable: boolean) {
+            // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents, @typescript-eslint/no-duplicate-type-constituents
+            function optional(a: InstanceType<Zod["ZodString"]> | InstanceType<Zod["ZodNumber"]>)
+            {
+                return optionals_as_nullable
+                    ? a.nullable().optional()
+                    : a.optional()
+            }
+
+            return {
+                owner_id: z.any(),
+                editor_id: z.any(),
+                created_at: z.any(),
+                comment: z.any(),
+                bytes_changed: z.any(),
+                version_type: z.any(),
+                version_rolled_back_to: z.any(),
+                title: z.any(),
+                description: z.any(),
+                label_ids: z.any(),
+                value_type: optional(z.string()),
+                subject_id: optional(z.number()),
+                according_to_id: optional(z.number()),
+                plain_title: z.any(),
+                plain_description: z.any(),
+                test_run_id: z.any(),
+            }
+        }
+
+
+        const input_value = { input_value: z.any() }
+        const result_value = { result_value: z.any() }
+        const recursive_dependency_ids = { recursive_dependency_ids: z.any() }
+        const value_number_display_type = { value_number_display_type: z.any() }
+        const value_number_sig_figs = { value_number_sig_figs: z.any() }
+        const units = { units: z.any() }
+        const datetime_range_start = { datetime_range_start: z.any() }
+        const datetime_range_end = { datetime_range_end: z.any() }
+        const datetime_repeat_every = { datetime_repeat_every: z.any() }
+        const dimension_ids = { dimension_ids: z.any() }
+        const function_arguments = { function_arguments: z.any() }
+        const scenarios = { scenarios: z.any() }
+
+        const all_type_specific_fields = {
+            ...input_value,
+            ...result_value,
+            ...recursive_dependency_ids,
+            ...value_number_display_type,
+            ...value_number_sig_figs,
+            ...units,
+            ...datetime_range_start,
+            ...datetime_range_end,
+            ...datetime_repeat_every,
+            ...dimension_ids,
+            ...function_arguments,
+            ...scenarios,
+        }
+
+
+        const base_schema = ids_schema.and(z.object(base_fields(false)))
 
         // Extend for each value_type
-        const schemas_by_value_type: Record<ValueType, any> = {
+        // const schemas_by_value_type: Record<ValueType, any> = {
+        const schemas_by_value_type = {
             number: base_schema.and(z.object({
-                input_value: z.any(),
-                result_value: z.any(),
-                recursive_dependency_ids: z.any(),
-                value_number_display_type: z.any(),
-                value_number_sig_figs: z.any(),
-                units: z.any(),
+                ...input_value,
+                ...result_value,
+                ...recursive_dependency_ids,
+                ...value_number_display_type,
+                ...value_number_sig_figs,
+                ...units,
             })),
             datetime_range: base_schema.and(z.object({
-                datetime_range_start: z.any(),
-                datetime_range_end: z.any(),
-                datetime_repeat_every: z.any(),
+                ...datetime_range_start,
+                ...datetime_range_end,
+                ...datetime_repeat_every,
             })),
             number_array: base_schema.and(z.object({
-                input_value: z.any(),
-                result_value: z.any(),
-                recursive_dependency_ids: z.any(),
-                value_number_display_type: z.any(),
-                value_number_sig_figs: z.any(),
-                units: z.any(),
-                dimension_ids: z.any(),
+                ...input_value,
+                ...result_value,
+                ...recursive_dependency_ids,
+                ...value_number_display_type,
+                ...value_number_sig_figs,
+                ...units,
+                ...dimension_ids,
             })),
             function: base_schema.and(z.object({
-                input_value: z.any(),
-                result_value: z.any(),
-                recursive_dependency_ids: z.any(),
-                units: z.any(),
-                function_arguments: z.any(),
-                scenarios: z.any(),
+                ...input_value,
+                ...result_value,
+                ...recursive_dependency_ids,
+                ...units,
+                ...function_arguments,
+                ...scenarios,
             })),
             interactable: base_schema.and(z.object({
-                result_value: z.any(),
+                ...result_value,
             })),
         }
+
+
+        const json_union_schema = z.object({
+            temporary_id: z.any(),
+            id: z.any(),
+            version_number: z.any(),
+            ...base_fields(true),
+            ...all_type_specific_fields,
+        })
 
 
         return {
             DBFunctionArgumentSchema,
             DBScenarioSchema,
             schemas_by_value_type,
+            json_union_schema,
         }
     }
 
 
-    const { DBFunctionArgumentSchema, DBScenarioSchema, schemas_by_value_type } = zod_schemas()
+    const {
+        DBFunctionArgumentSchema,
+        DBScenarioSchema,
+        schemas_by_value_type,
+        json_union_schema,
+    } = zod_schemas()
 
 
     function validate_function_arguments_from_json(value: unknown): DBFunctionArgument[] | undefined
@@ -175,14 +235,25 @@ export function make_field_validators(z: any) //typeof import("zod"))
     {
         const value_type = valid_value_type(data_component.value_type)
         const schema: any = schemas_by_value_type[value_type]
-        // Use .parse to strip unknown fields
+        // Use .parse to strip unsupported fields for specific value_type.
         return schema.parse(data_component) as V
+    }
+
+    function validate_json<V extends Json>(data_component: V): V
+    {
+        // Check it matches the union of all schemas first.  This helps detect
+        // fields which an older server or client does not support and gives better
+        // error messages to help identify the issue.
+        json_union_schema.strict().parse(data_component)
+
+        return data_component
     }
 
     return {
         validate_function_arguments_from_json,
         validate_scenarios_from_json,
         validate_fields_given_value_type,
+        validate_json,
     }
 }
 

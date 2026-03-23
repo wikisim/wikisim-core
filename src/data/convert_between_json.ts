@@ -140,6 +140,12 @@ export function hydrate_data_component_from_json(row: NewDataComponentAsJSON, va
 export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
 export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
 {
+    // Validate the JSON and throw an error if it's invalid. This should never
+    // happen if the data was correctly validated on (the client and) the server
+    // before saving but it can help in narrowing down issues if something does
+    // go wrong with the data or how it's being handled.
+    validators.validate_json(row)
+
     const hydrated_function_arguments = hydrate_function_arguments(row, validators)
 
     const core = {
