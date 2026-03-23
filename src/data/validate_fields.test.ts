@@ -279,102 +279,102 @@ describe("validate_fields_given_value_type", () =>
         // Whether a field should be kept or removed given a specific value_type
         // true or undefined means the field should be kept, false means it
         // should be removed
-        const fields_keep_or_remove: {[k in keyof (DataComponent & NewDataComponent)]: true | {[v in ValueType]?: true}} = {
-            "temporary_id": true,
-            "id": true,
+        const fields_keep_or_remove: {[k in keyof (DataComponent & NewDataComponent)]-?: true | {[v in ValueType]?: true}} = {
+            temporary_id: true,
+            id: true,
 
-            "owner_id": true,
+            owner_id: true,
 
-            "editor_id": true,
-            "created_at": true,
-            "comment": true,
-            "bytes_changed": true,
-            "version_type": true,
-            "version_rolled_back_to": true,
+            editor_id: true,
+            created_at: true,
+            comment: true,
+            bytes_changed: true,
+            version_type: true,
+            version_rolled_back_to: true,
 
-            "title": true,
-            "description": true,
-            "label_ids": true,
+            title: true,
+            description: true,
+            label_ids: true,
 
-            "input_value": {
+            input_value: {
                 number: true,
                 // datetime_range: false,
                 number_array: true,
                 function: true,
                 // interactable: false, // interactable should only have result_value
             },
-            "result_value": {
+            result_value: {
                 number: true,
                 // datetime_range: false,
                 number_array: true,
                 function: true,
                 interactable: true,
             },
-            "recursive_dependency_ids": {
+            recursive_dependency_ids: {
                 number: true,
                 // datetime_range: false,
                 number_array: true,
                 function: true,
                 // interactable: false, // for now interactable should not store this
             },
-            "value_type": true,
-            "value_number_display_type": {
+            value_type: true,
+            value_number_display_type: {
                 number: true,
                 // datetime_range: false,
                 number_array: true,
                 // function: false,
                 // interactable: false,
             },
-            "value_number_sig_figs": {
+            value_number_sig_figs: {
                 number: true,
                 // datetime_range: false,
                 number_array: true,
                 // function: false,
                 // interactable: false,
             },
-            "datetime_range_start": {
+            datetime_range_start: {
                 // number: false,
                 datetime_range: true,
                 // number_array: false,
                 // function: false,
                 // interactable: false,
             },
-            "datetime_range_end": {
+            datetime_range_end: {
                 // number: false,
                 datetime_range: true,
                 // number_array: false,
                 // function: false,
                 // interactable: false,
             },
-            "datetime_repeat_every": {
+            datetime_repeat_every: {
                 // number: false,
                 datetime_range: true,
                 // number_array: false,
                 // function: false,
                 // interactable: false,
             },
-            "units": {
+            units: {
                 number: true,
                 // datetime_range: false,
                 number_array: true,
                 function: true,
                 // interactable: false,
             },
-            "dimension_ids": {
+            dimension_ids: {
                 // number: false,
                 // datetime_range: false,
                 number_array: true,
                 // function: false,
                 // interactable: false,
             },
-            "function_arguments": {
+            function_arguments: {
                 // number: false,
                 // datetime_range: false,
                 // number_array: false,
                 function: true,
                 // interactable: false,
             },
-            "scenarios": {
+            scenarios: {
                 // number: false,
                 // datetime_range: false,
                 // number_array: false,
@@ -382,10 +382,13 @@ describe("validate_fields_given_value_type", () =>
                 // interactable: false,
             },
 
-            "plain_title": true,
-            "plain_description": true,
+            subject_id: true,
+            according_to_id: true,
 
-            "test_run_id": true,
+            plain_title: true,
+            plain_description: true,
+
+            test_run_id: true,
         }
 
         VALUE_TYPES.forEach(value_type =>

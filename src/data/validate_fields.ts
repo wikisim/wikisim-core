@@ -90,6 +90,8 @@ export function make_field_validators(z: any) //typeof import("zod"))
             description: z.any(),
             label_ids: z.any(),
             value_type: z.string().optional(),
+            subject_id: z.number().optional(),
+            according_to_id: z.number().optional(),
             plain_title: z.any(),
             plain_description: z.any(),
             test_run_id: z.any(),
