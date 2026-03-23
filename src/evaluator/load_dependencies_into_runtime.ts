@@ -1,7 +1,7 @@
-import type { DataComponent, NewDataComponent } from "../data/interface.js"
-import { ERRORS } from "../errors.js"
-import { deep_freeze_str } from "../utils/deep_freeze.js"
-import type { EvaluationRequest, EvaluationResponse } from "./interface.js"
+import type { DataComponent, NewDataComponent } from "../data/interface.ts"
+import { ERRORS } from "../errors.ts"
+import { deep_freeze_str } from "../utils/deep_freeze.ts"
+import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 
 
 
