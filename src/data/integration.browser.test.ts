@@ -61,6 +61,8 @@ describe("when user logged in", function ()
             dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
             plain_title: "",
             plain_description: "",
+            subject_id: -2,
+            according_to_id: -3,
             test_run_id: data_component_fixture.test_run_id + ` - ${test_title}`,
             ...override,
         }
@@ -104,6 +106,8 @@ describe("when user logged in", function ()
             scenarios: undefined,
             plain_title: "",
             plain_description: "",
+            subject_id: -2,
+            according_to_id: -3,
             test_run_id: data_component_fixture.test_run_id + ` - ${test_title}`,
             ...override,
         }
@@ -156,7 +160,7 @@ describe("when user logged in", function ()
                 expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
             }
             // expect(response.error).equals("ERR03. Must be authenticated")
-            expect(response.error).equals("Invalid JWT")
+            expect(response.error).equals("Invalid Token or Protected Header formatting")
         })
 
 
@@ -238,6 +242,9 @@ describe("when user logged in", function ()
                     input_value: `101112 + ${tiptap_mention_chip(data_component_3_to_insert)}()`,
                     // Should be ignored and set to [id-2v1, id-3v1] by edge function
                     recursive_dependency_ids: [new IdAndVersion(-9, 1), new IdAndVersion(-10, 1)],
+
+                    subject_id: -2,
+                    according_to_id: -3,
 
                     test_run_id: data_component_fixture.test_run_id + ` - ${this.test?.title}`,
                 }
@@ -335,6 +342,8 @@ describe("when user logged in", function ()
                 dimension_ids: undefined,
                 function_arguments: undefined,
                 scenarios: undefined,
+                subject_id: undefined,
+                according_to_id: undefined,
                 plain_title: "Test title",
             })
         })
@@ -411,6 +420,9 @@ describe("when user logged in", function ()
         })
 
 
+        // TODO: do we still need this test because there is the "set up data for tests"
+        // test which is run, so perhaps let's just check the result of that test
+        // instead of inserting more data again here?
         it("should write the data component to the database", async function ()
         {
             const { data_component, response } = await helper_insert_wiki_data_component(this.test?.title)
@@ -446,6 +458,8 @@ describe("when user logged in", function ()
                 plain_title: "Test Title",
                 // Should be set by the server (edge function)
                 plain_description: "Test Description",
+                subject_id: -2,
+                according_to_id: -3,
                 test_run_id: data_component.test_run_id,
                 function_arguments: undefined,
                 scenarios: undefined,
@@ -474,7 +488,7 @@ describe("when user logged in", function ()
             const response = await update_data_component(__testing__.get_supabase_not_signed_in, data_component)
             if (response.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
             // expect(response.error).equals("ERR07. Must be authenticated")
-            expect(response.error).equals("Invalid JWT")
+            expect(response.error).equals("Invalid Token or Protected Header formatting")
         })
 
 
@@ -501,6 +515,8 @@ describe("when user logged in", function ()
                 ...inserted_data_component,
                 title: "Test Second Title",
                 plain_title: "",
+                subject_id: -3,
+                according_to_id: -2,
             }
 
             const response = await update_data_component(get_supabase, data_component)
@@ -545,6 +561,8 @@ describe("when user logged in", function ()
                 dimension_ids: [new IdAndVersion(1, 2), new IdAndVersion(3, 4)],
                 function_arguments: undefined,
                 scenarios: undefined,
+                subject_id: -2,
+                according_to_id: -3,
 
                 plain_description: "Test Description",
             }
@@ -880,6 +898,8 @@ describe("when user logged in", function ()
                 plain_title: "Test User Owned Component (which is public not private)",
                 // Should be set by the server (edge function)
                 plain_description: "Test Description",
+                subject_id: -123,
+                according_to_id: -456,
                 test_run_id: data_component.test_run_id,
             }
 
@@ -966,6 +986,8 @@ describe("when user logged in", function ()
                 plain_description: "Test Description",
                 function_arguments: undefined,
                 scenarios: undefined,
+                subject_id: -123,
+                according_to_id: -456,
             }
 
             compare_data_components(response.data, expected_response)
