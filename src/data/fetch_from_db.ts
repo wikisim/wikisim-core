@@ -57,12 +57,16 @@ export async function request_data_components(
          * returned, i.e. components not owned by any user.
          */
         filter_by_owner_id?: FilterByOwnerId
+        /**
+         * Filter by `subject_id` to find alternative components
+         */
+        subject_id?: number
         __only_test_data?: boolean
         order_by?: "earliest_created" | "latest_modified"
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
-    const { ids = [], filter_by_owner_id } = options
+    const { ids = [], filter_by_owner_id, subject_id } = options
     limit_ids(ids)
     const { from, to } = get_range_from_options(options)
 
@@ -100,6 +104,11 @@ export async function request_data_components(
         // there is an owner_id to ensure no "user owned" data is shown to other
         // users e.g. on the front page
         else supa = supa.is("owner_id", null)
+    }
+
+    if (subject_id !== undefined)
+    {
+        supa = supa.eq("subject_id", subject_id)
     }
 
     if (options.order_by === "latest_modified")
