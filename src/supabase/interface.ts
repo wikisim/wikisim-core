@@ -39,12 +39,11 @@ export type Database = {
           label_ids: number[] | null
           owner_id: string | null
           plain_description: string
-          // plain_search_text: string | null
           plain_title: string
           recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
-          // search_vector: unknown | null
+          search_vector: unknown
           subject_id: number | null
           test_run_id: string | null
           title: string
@@ -81,12 +80,11 @@ export type Database = {
           label_ids?: number[] | null
           owner_id?: string | null
           plain_description: string
-          // plain_search_text?: string | null
           plain_title: string
           recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
-          // search_vector?: unknown | null
+          search_vector?: unknown
           subject_id?: number | null
           test_run_id?: string | null
           title: string
@@ -123,12 +121,11 @@ export type Database = {
           label_ids?: number[] | null
           owner_id?: string | null
           plain_description?: string
-          // plain_search_text?: string | null
           plain_title?: string
           recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
-          // search_vector?: unknown | null
+          search_vector?: unknown
           subject_id?: number | null
           test_run_id?: string | null
           title?: string
@@ -370,12 +367,11 @@ export type Database = {
           label_ids: number[] | null
           owner_id: string | null
           plain_description: string
-          // plain_search_text: string | null
           plain_title: string
           recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
-          // search_vector: unknown | null
+          search_vector: unknown
           subject_id: number | null
           test_run_id: string | null
           title: string
@@ -424,7 +420,6 @@ export type Database = {
           label_ids: number[] | null
           owner_id: string | null
           plain_description: string
-          // plain_search_text: string | null
           plain_title: string
           recursive_dependency_ids: string[] | null
           result_value: string | null
@@ -530,12 +525,11 @@ export type Database = {
           label_ids: number[] | null
           owner_id: string | null
           plain_description: string
-          // plain_search_text: string | null
           plain_title: string
           recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
-          // search_vector: unknown | null
+          search_vector: unknown
           subject_id: number | null
           test_run_id: string | null
           title: string
