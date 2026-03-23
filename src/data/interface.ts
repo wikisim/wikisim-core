@@ -175,6 +175,9 @@ export interface DataComponentFields
     function_arguments?: FunctionArgument[]
     scenarios?: Scenario[]
 
+    subject_id?: number
+    according_to_id?: number
+
     // // Not implementing yet until we get more use cases to check it against.
     // // For now we'll add these to the bottom of the description and when it's
     // // clearer what format of display, functionality (queries to make regarding

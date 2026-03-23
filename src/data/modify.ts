@@ -48,6 +48,9 @@ export function init_data_component(partial: Partial<DataComponent> | { id: stri
         function_arguments: undefined,
         scenarios: undefined,
 
+        subject_id: undefined,
+        according_to_id: undefined,
+
         plain_title: "",
         plain_description: "",
 

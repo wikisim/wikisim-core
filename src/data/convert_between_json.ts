@@ -68,6 +68,9 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
             : null,
         scenarios: flatten_scenarios(data_component),
 
+        subject_id: data_component.subject_id ?? null,
+        according_to_id: data_component.according_to_id ?? null,
+
         // Will be set by the server-side (edge function)
         plain_title: "",
         plain_description: "",
@@ -166,6 +169,9 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
         dimension_ids: hydrate_list_of_ids(row.dimension_ids),
         function_arguments: hydrated_function_arguments,
         scenarios: hydrate_scenarios(row, hydrated_function_arguments, validators),
+
+        subject_id: row.subject_id ?? undefined,
+        according_to_id: row.according_to_id ?? undefined,
 
         plain_title: row.plain_title,
         plain_description: row.plain_description,

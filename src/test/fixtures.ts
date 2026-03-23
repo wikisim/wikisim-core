@@ -69,6 +69,9 @@ export function new_data_component_all_fields_set(overrides: Partial<NewDataComp
             }
         ],
 
+        subject_id: -30,
+        according_to_id: -20,
+
         plain_title: "Modified Title",
         plain_description: "Modified Description",
 

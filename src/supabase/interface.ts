@@ -21,6 +21,7 @@ export type Database = {
     Tables: {
       data_components: {
         Row: {
+          according_to_id: number | null
           bytes_changed: number
           comment: string | null
           created_at: string
@@ -44,6 +45,7 @@ export type Database = {
           result_value: string | null
           scenarios: Json | null
           // search_vector: unknown | null
+          subject_id: number | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -61,6 +63,7 @@ export type Database = {
             | null
         }
         Insert: {
+          according_to_id?: number | null
           bytes_changed: number
           comment?: string | null
           created_at?: string
@@ -84,6 +87,7 @@ export type Database = {
           result_value?: string | null
           scenarios?: Json | null
           // search_vector?: unknown | null
+          subject_id?: number | null
           test_run_id?: string | null
           title: string
           units?: string | null
@@ -101,6 +105,7 @@ export type Database = {
             | null
         }
         Update: {
+          according_to_id?: number | null
           bytes_changed?: number
           comment?: string | null
           created_at?: string
@@ -124,6 +129,7 @@ export type Database = {
           result_value?: string | null
           scenarios?: Json | null
           // search_vector?: unknown | null
+          subject_id?: number | null
           test_run_id?: string | null
           title?: string
           units?: string | null
@@ -140,10 +146,26 @@ export type Database = {
             | Database["public"]["Enums"]["data_component_version_type"]
             | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "data_components_according_to_id_fkey"
+            columns: ["according_to_id"]
+            isOneToOne: false
+            referencedRelation: "data_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_components_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "data_components"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       data_components_history: {
         Row: {
+          according_to_id: number | null
           bytes_changed: number
           comment: string | null
           created_at: string
@@ -165,6 +187,7 @@ export type Database = {
           recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
+          subject_id: number | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -182,6 +205,7 @@ export type Database = {
             | null
         }
         Insert: {
+          according_to_id?: number | null
           bytes_changed: number
           comment?: string | null
           created_at?: string
@@ -203,6 +227,7 @@ export type Database = {
           recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
+          subject_id?: number | null
           test_run_id?: string | null
           title: string
           units?: string | null
@@ -220,6 +245,7 @@ export type Database = {
             | null
         }
         Update: {
+          according_to_id?: number | null
           bytes_changed?: number
           comment?: string | null
           created_at?: string
@@ -241,6 +267,7 @@ export type Database = {
           recursive_dependency_ids?: string[] | null
           result_value?: string | null
           scenarios?: Json | null
+          subject_id?: number | null
           test_run_id?: string | null
           title?: string
           units?: string | null
@@ -259,8 +286,22 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "data_components_history_according_to_id_fkey"
+            columns: ["according_to_id"]
+            isOneToOne: false
+            referencedRelation: "data_components"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "data_components_history_id_fkey"
             columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "data_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_components_history_subject_id_fkey"
+            columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "data_components"
             referencedColumns: ["id"]
@@ -311,6 +352,7 @@ export type Database = {
       __testing_insert_test_data_component: {
         Args: { p_id: number; p_test_run_id: string }
         Returns: {
+          according_to_id: number | null
           bytes_changed: number
           comment: string | null
           created_at: string
@@ -334,6 +376,7 @@ export type Database = {
           result_value: string | null
           scenarios: Json | null
           // search_vector: unknown | null
+          subject_id: number | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -350,6 +393,12 @@ export type Database = {
             | Database["public"]["Enums"]["data_component_version_type"]
             | null
         }
+        SetofOptions: {
+          from: "*"
+          to: "data_components"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       insert_data_component_v2: {
         Args: {
@@ -357,6 +406,7 @@ export type Database = {
           server_secret: string
         }
         Returns: {
+          according_to_id: number | null
           bytes_changed: number
           comment: string | null
           created_at: string
@@ -379,7 +429,8 @@ export type Database = {
           recursive_dependency_ids: string[] | null
           result_value: string | null
           scenarios: Json | null
-          // search_vector: unknown | null
+          search_vector: unknown
+          subject_id: number | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -396,6 +447,12 @@ export type Database = {
             | Database["public"]["Enums"]["data_component_version_type"]
             | null
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "data_components"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       search_data_components: {
         Args: {
@@ -453,6 +510,7 @@ export type Database = {
           server_secret: string
         }
         Returns: {
+          according_to_id: number | null
           bytes_changed: number
           comment: string | null
           created_at: string
@@ -476,6 +534,7 @@ export type Database = {
           result_value: string | null
           scenarios: Json | null
           // search_vector: unknown | null
+          subject_id: number | null
           test_run_id: string | null
           title: string
           units: string | null
@@ -492,6 +551,12 @@ export type Database = {
             | Database["public"]["Enums"]["data_component_version_type"]
             | null
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "data_components"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {
