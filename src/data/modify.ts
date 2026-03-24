@@ -97,6 +97,8 @@ export function changes_made(component_1: DataComponent | NewDataComponent, comp
         || (lists_changed(component_1.dimension_ids, component_2.dimension_ids) ? "dimension_ids" : false)
         || (function_arguments_changed(component_1.function_arguments, component_2.function_arguments) ? "function_arguments" : false)
         || (scenarios_changed(component_1.scenarios, component_2.scenarios) ? "scenarios" : false)
+        || (component_1.subject_id !== component_2.subject_id ? "subject_id" : false)
+        || (component_1.according_to_id !== component_2.according_to_id ? "according_to_id" : false)
     )
 
     if (diff || !compare_meta_fields) return !!diff

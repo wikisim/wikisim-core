@@ -64,6 +64,9 @@ describe("changes_made function", () =>
         "dimension_ids",
         "function_arguments",
         "scenarios",
+
+        "subject_id",
+        "according_to_id",
     ]
 
     const meta_fields: (keyof DataComponent)[] = [
