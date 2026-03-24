@@ -1,6 +1,7 @@
 import type { PostgrestError } from "@supabase/supabase-js"
 import { z } from "zod"
 
+import { DATA_COMPONENT_SELECT_STRING } from "../supabase"
 import type { GetSupabase } from "../supabase/browser"
 import { hydrate_data_component_from_json } from "./convert_between_json"
 import {
@@ -72,7 +73,7 @@ export async function request_data_components(
 
     let supa = get_supabase()
         .from("data_components")
-        .select("*")
+        .select(DATA_COMPONENT_SELECT_STRING as "*")
 
     // Use this feature for loading latest DataComponents for a page like
     // `/wiki/123`, i.e. loading by IdOnly
@@ -158,7 +159,7 @@ export async function request_historical_data_components(
 
     return get_supabase()
         .from("data_components_history")
-        .select("*")
+        .select(DATA_COMPONENT_SELECT_STRING as "*")
         .or(or_clause)
         .order("version_number", { ascending: false })
         .order("id", { ascending: true })

@@ -186,6 +186,9 @@ export function make_field_validators(z: Zod)
             version_number: z.any(),
             ...base_fields(true),
             ...all_type_specific_fields,
+            // Also add attributes from rpc search_data_components
+            score: z.number().optional(),
+            method: z.number().optional(),
         })
 
 
