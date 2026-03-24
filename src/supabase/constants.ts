@@ -1,5 +1,8 @@
 
-
+// // Used by wikisim-front when pointing at local wikisim-supabase
+// export const supabase_url = "http://127.0.0.1:54321"
+// export const supabase_anon_key = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"
+// Production
 export const supabase_url = "https://sfkgqscbwofiphfxhnxg.supabase.co"
 export const supabase_anon_key = "sb_publishable_XWsGRSpmju8qjodw4gIU8A_O_mHUR1H"
 export const INTERACTABLES_FILES_BUCKET = "interactables_files"
