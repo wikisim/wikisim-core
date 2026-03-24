@@ -8,7 +8,9 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json | undefined }
+  // We add unknown here to cover the type of `search_vector` but perhaps there
+  // is a better solution?
+  | { [key: string]: unknown }
   | Json[]
 
 export type Database = {
