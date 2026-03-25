@@ -1,5 +1,5 @@
 import { request_versioned_data_component_and_dependencies } from "../data/fetch_from_db"
-import { IdAndVersion } from "../data/id"
+import { IdAndMaybeVersion } from "../data/id"
 import { AsyncDataComponent, AsyncDataComponentAndDependencies, DataComponent } from "../data/interface"
 import { __dangerously_evaluate_code_without_sandbox } from "../evaluator/implementation/__dangerously_evaluate_code_without_sandbox"
 import { evaluate_code_in_browser_sandbox } from "../evaluator/implementation/browser_sandboxed_javascript"
@@ -57,7 +57,7 @@ export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeRespo
     if (components.status !== "loaded")
     {
         return Promise.resolve<SetupRuntimeResponse>({
-            error: new Error(`Components not loaded, cannot setup runtime. Status: ${components.status}`),
+            error: new Error(`Components not loaded, cannot setup runtime. Status: ${components.error}`),
             component: null
         })
     }
@@ -136,10 +136,10 @@ interface RequestDependenciesArgs
 }
 
 type id_or_ids = ({
-    id: IdAndVersion
+    id: IdAndMaybeVersion
     ids?: never
 } | {
-    ids: IdAndVersion[]
+    ids: IdAndMaybeVersion[]
     id?: never
 })
 
@@ -151,7 +151,7 @@ export function request_dependencies(args: RequestDependenciesArgs & id_or_ids):
 }
 
 
-function _request_dependencies(id: IdAndVersion, args: RequestDependenciesArgs): Promise<AsyncDataComponentAndDependencies>
+function _request_dependencies(id: IdAndMaybeVersion, args: RequestDependenciesArgs): Promise<AsyncDataComponentAndDependencies>
 {
     const { get_supabase } = args
 
@@ -188,6 +188,7 @@ function _request_dependencies(id: IdAndVersion, args: RequestDependenciesArgs):
 
         const dependencies = components_response.data.slice(1)
         const { recursive_dependency_ids = [] } = component
+        // console .log(`Requested component ${id.to_str()} with ${recursive_dependency_ids.length} dependencies, got ${dependencies.length} dependencies back from the database.`)
         if (dependencies.length !== recursive_dependency_ids.length)
         {
             const error = new Error(`Expected ${recursive_dependency_ids.length } dependencies but got ${dependencies.length}.`)

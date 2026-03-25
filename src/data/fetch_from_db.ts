@@ -10,7 +10,7 @@ import {
     limit_ids,
     make_or_clause_for_ids,
 } from "./fetch_from_db_utils"
-import { IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
+import { factory_partition_ids, IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
 import type { DataComponent, DbPaginationOptions } from "./interface"
 import { make_field_validators } from "./validate_fields"
 
@@ -195,6 +195,52 @@ export async function request_historical_data_components(
 }
 
 
+async function request_latest_or_versioned_data_components(
+    get_supabase: GetSupabase,
+    ids: IdAndMaybeVersion[],
+): Promise<RequestDataComponentsReturn>
+{
+    // Request from supabase
+    const partitioned = factory_partition_ids(ids)
+    const ids_only = partitioned.get_ids_only()
+    const id_and_versions = partitioned.get_id_and_versions()
+
+    const response_ids_only = ids_only.length > 0
+        // PERFORMANCE
+        // This will error when ids.length > 1000
+        // and likely not a good idea to request 1000 rows at once but
+        // we'll use this simpler approach for now.
+        ? await request_data_components(get_supabase, { ids: ids_only, size: ids_only.length })
+        : undefined
+
+    const response_id_and_versions = id_and_versions.length > 0
+        // PERFORMANCE
+        // This will error when ids.length > 1000
+        // and likely not a good idea to request 1000 rows at once but
+        // we'll use this simpler approach for now.
+        ? await request_historical_data_components(get_supabase, id_and_versions, { size: id_and_versions.length })
+        : undefined
+
+    let combined_response: RequestDataComponentsReturn | undefined = undefined
+    if (response_ids_only)
+    {
+        combined_response = response_ids_only
+        if (response_id_and_versions)
+        {
+            const data = [ ...response_ids_only.data || [], ...response_id_and_versions.data || [] ]
+            const error = response_ids_only.error || response_id_and_versions.error
+
+            if (error) combined_response = { data: null, error }
+            else combined_response = { data, error: null }
+        }
+    }
+    else if (response_id_and_versions) combined_response = response_id_and_versions
+    else throw new Error("request_latest_or_versioned_data_components: No IDs provided.")
+
+    return combined_response
+}
+
+
 export async function request_latest_and_historical_data_components(
     get_supabase: GetSupabase,
     /**
@@ -337,12 +383,12 @@ export async function search_data_components(
  */
 export async function request_versioned_data_component_and_dependencies(
     get_supabase: GetSupabase,
-    id: IdAndVersion,
+    id: IdAndMaybeVersion,
 ): Promise<RequestDataComponentsReturn>
 {
     let component: DataComponent | undefined = undefined
 
-    return request_historical_data_components(get_supabase, [id])
+    return request_latest_or_versioned_data_components(get_supabase, [id])
     .then(response =>
     {
         if (response.error) return response
