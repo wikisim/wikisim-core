@@ -71,9 +71,11 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
         subject_id: data_component.subject_id ?? null,
         according_to_id: data_component.according_to_id ?? null,
 
-        // Will be set by the server-side (edge function)
-        plain_title: "",
-        plain_description: "",
+        // Will be set by the server-side (edge function) but we return here
+        // because this is a general function that can be used in other contexts.
+        // TODO: add a test for these being present
+        plain_title: data_component.plain_title,
+        plain_description: data_component.plain_description,
 
         test_run_id: data_component.test_run_id ?? null,
     }
