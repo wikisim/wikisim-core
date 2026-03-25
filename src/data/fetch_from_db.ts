@@ -120,14 +120,16 @@ export async function request_data_components(
     if (references_of_id !== undefined)
     {
         // PERFORMANCE: will need to add an index / redesign in the future
-        const search_term_1 = `like.%"${references_of_id}"%`
-        const search_term_2 = `like.%"${references_of_id}v%`
+        const search_general_id = `like.%"${references_of_id}"%`
+        const search_specific_version = `like.%"${references_of_id}v%`
         supa = supa.or(
             [
-                `input_value.${search_term_1}`,
-                `input_value.${search_term_2}`,
-                `description.${search_term_1}`,
-                `description.${search_term_2}`
+                `input_value.${search_general_id}`,   // will disable in future
+                `input_value.${search_specific_version}`,
+                `title.${search_general_id}`,
+                `title.${search_specific_version}`,   // will disable in future
+                `description.${search_general_id}`,
+                `description.${search_specific_version}`   // will disable in future
             ].join(",")
         )
     }
