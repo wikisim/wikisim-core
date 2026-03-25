@@ -135,16 +135,24 @@ export function flatten_data_component_to_json(data_component: DataComponent): D
 
 
 // TODO: change this from `validators: FieldValidators` to `z: ZodInterface`
-export function hydrate_data_component_from_json(row: DataComponentAsJSON, validators: FieldValidators): DataComponent
-export function hydrate_data_component_from_json(row: NewDataComponentAsJSON, validators: FieldValidators): NewDataComponent
-export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
-export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators): DataComponent | NewDataComponent
+export function hydrate_data_component_from_json(row: DataComponentAsJSON, validators: FieldValidators, should_throw?: boolean): DataComponent
+export function hydrate_data_component_from_json(row: NewDataComponentAsJSON, validators: FieldValidators, should_throw?: boolean): NewDataComponent
+export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators, should_throw?: boolean): DataComponent | NewDataComponent
+/**
+ *
+ * @param row
+ * @param validators
+ * @param should_throw - defaults to `false` to prevent adding a new optional database
+ *                       field immediately borking the edge functions and clients
+ * @returns
+ */
+export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewDataComponentAsJSON, validators: FieldValidators, should_throw = false): DataComponent | NewDataComponent
 {
     // Validate the JSON and throw an error if it's invalid. This should never
     // happen if the data was correctly validated on (the client and) the server
     // before saving but it can help in narrowing down issues if something does
     // go wrong with the data or how it's being handled.
-    validators.validate_json(row)
+    validators.validate_json(row, should_throw)
 
     const hydrated_function_arguments = hydrate_function_arguments(row, validators)
 

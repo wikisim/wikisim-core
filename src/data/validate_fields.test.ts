@@ -463,7 +463,7 @@ describe("validate_json", () =>
             input_value: 42,
         }
 
-        expect(() => validate_json(data_component_json)).to.not.throw()
+        expect(() => validate_json(data_component_json, true)).to.not.throw()
     })
 
     it("should throw an error on invalid JSON", () =>
@@ -475,7 +475,7 @@ describe("validate_json", () =>
 
         try
         {
-            validate_json(invalid_data_component_json)
+            validate_json(invalid_data_component_json, true)
         }
         catch (e)
         {

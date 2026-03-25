@@ -242,12 +242,20 @@ export function make_field_validators(z: Zod)
         return schema.parse(data_component) as V
     }
 
-    function validate_json<V extends Json>(data_component: V): V
+    function validate_json<V extends Json>(data_component: V, should_throw: boolean): V
     {
-        // Check it matches the union of all schemas first.  This helps detect
-        // fields which an older server or client does not support and gives better
-        // error messages to help identify the issue.
-        json_union_schema.strict().parse(data_component)
+        try
+        {
+            // Check it matches the union of all schemas first.  This helps detect
+            // fields which an older server or client does not support and gives better
+            // error messages to help identify the issue.
+            json_union_schema.strict().parse(data_component)
+        }
+        catch (e)
+        {
+            if (should_throw) throw e
+            console.error("JSON validation error:", e)
+        }
 
         return data_component
     }

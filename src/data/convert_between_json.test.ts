@@ -56,9 +56,12 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
         // @ts-expect-error
         flattened_as_json.some_unknown_field = "with a value"
 
+        // Expect no error when we don't check for unrecognized keys
+        hydrate_data_component_from_json(flattened_as_json, field_validators)
+
         try
         {
-            hydrate_data_component_from_json(flattened_as_json, field_validators)
+            hydrate_data_component_from_json(flattened_as_json, field_validators, true)
         }
         catch (e)
         {
