@@ -20,6 +20,8 @@ export class IdOnly
 
     add_version(v: number): IdAndVersion { return new IdAndVersion(this.id, v) }
 
+    to_url(): string { return `https://wikisim.org/wiki/${this.to_str()}` }
+
     // This is used to differentiate between IdOnly and IdAndVersion
     _type_discriminator: string = "IdOnly"
 }
@@ -131,6 +133,36 @@ export function all_are_id_only(ids: IdAndMaybeVersion[]): ids is IdOnly[]
 export function all_are_id_and_version(ids: IdAndMaybeVersion[]): ids is IdAndVersion[]
 {
     return ids.every(is_id_and_version)
+}
+
+
+export function factory_partition_ids(ids: IdAndMaybeVersion[] = [])
+{
+    const ids_only: IdOnly[] = []
+    const id_and_versions: IdAndVersion[] = []
+    function add_id(id: IdAndMaybeVersion)
+    {
+        if (id instanceof IdOnly)
+        {
+            ids_only.push(id)
+        }
+        else if (id instanceof IdAndVersion)
+        {
+            id_and_versions.push(id)
+        }
+        else
+        {
+            throw new Error(`Unknown ID type: ${id}`)
+        }
+    }
+
+    ids.forEach(add_id)
+
+    return {
+        add_id,
+        get_ids_only: () => ids_only,
+        get_id_and_versions: () => id_and_versions,
+    }
 }
 
 
