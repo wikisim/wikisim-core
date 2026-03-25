@@ -62,12 +62,17 @@ export async function request_data_components(
          * Filter by `subject_id` to find alternative components
          */
         subject_id?: number
+        /**
+         * Filter by `references` to find components that reference the provided
+         * component ID, i.e. back references.
+         */
+        references_of_id?: number
         __only_test_data?: boolean
         order_by?: "earliest_created" | "latest_modified"
     } = {},
 ): Promise<RequestDataComponentsReturn>
 {
-    const { ids = [], filter_by_owner_id, subject_id } = options
+    const { ids = [], filter_by_owner_id, subject_id, references_of_id } = options
     limit_ids(ids)
     const { from, to } = get_range_from_options(options)
 
@@ -110,6 +115,21 @@ export async function request_data_components(
     if (subject_id !== undefined)
     {
         supa = supa.eq("subject_id", subject_id)
+    }
+
+    if (references_of_id !== undefined)
+    {
+        // PERFORMANCE: will need to add an index / redesign in the future
+        const search_term_1 = `like.%"${references_of_id}"%`
+        const search_term_2 = `like.%"${references_of_id}v%`
+        supa = supa.or(
+            [
+                `input_value.${search_term_1}`,
+                `input_value.${search_term_2}`,
+                `description.${search_term_1}`,
+                `description.${search_term_2}`
+            ].join(",")
+        )
     }
 
     if (options.order_by === "latest_modified")
