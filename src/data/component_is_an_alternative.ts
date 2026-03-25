@@ -4,7 +4,7 @@ import { DataComponent, NewDataComponent } from "./interface"
 /**
  * This does not guarantee that it is valid
  */
-export function component_is_an_alternative(component: DataComponent | NewDataComponent): component is ((DataComponent | NewDataComponent) & { subject_id: number, according_to_id: number })
+export function component_is_an_alternative(component: DataComponent | NewDataComponent | undefined | null): component is ((DataComponent | NewDataComponent) & { subject_id: number, according_to_id: number })
 {
-    return !!(component.subject_id && component.according_to_id)
+    return component?.subject_id !== undefined && component.according_to_id !== undefined
 }
