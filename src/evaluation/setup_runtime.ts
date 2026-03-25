@@ -41,12 +41,18 @@ interface SetupRuntimeArgs
      * computer from potentially malicious code.
      */
     __dangerously_skip_sandboxing?: boolean
+    is_node?: boolean
 }
 
 
 export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeResponse>
 {
-    const { components, debugging, __dangerously_skip_sandboxing } = args
+    const { components, debugging, __dangerously_skip_sandboxing, is_node } = args
+
+    if (__dangerously_skip_sandboxing !== is_node)
+    {
+        console.warn(`Warning: __dangerously_skip_sandboxing is ${__dangerously_skip_sandboxing}, but is_node is ${is_node}. This seems like a mistake?  If you're in a browser then it's easy to use the sandbox.  If you're running locally then you should is_node=true.`)
+    }
 
     if (components.status !== "loaded")
     {
@@ -95,6 +101,7 @@ export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeRespo
             ? __dangerously_evaluate_code_without_sandbox
             : evaluate_code_in_browser_sandbox,
         debugging,
+        is_node,
     })
     .then(sandbox_response =>
     {
