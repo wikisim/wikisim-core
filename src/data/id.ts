@@ -14,6 +14,11 @@ export class IdOnly
         this.id = parsed_id
     }
 
+    has_version(): this is IdAndVersion
+    {
+        return false
+    }
+
     to_str(): string { return `${this.id}` }
 
     to_str_without_version(): string { return `${this.id}` }
@@ -50,6 +55,11 @@ export class IdAndVersion
         }
         this.id = parsed_id
         this.version = parsed_version
+    }
+
+    has_version(): this is IdAndVersion
+    {
+        return true
     }
 
     as_IdOnly(): IdOnly
