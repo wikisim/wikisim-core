@@ -207,6 +207,12 @@ export class OrderedUniqueIdAndVersionList
         this.custom_error_message_when_id_only = custom_error_message_when_id_only || null
     }
 
+    has(id: IdAndVersion | string): boolean
+    {
+        const key = typeof id === "string" ? id : id.to_str()
+        return this.id_set.has(key)
+    }
+
     add(item: IdAndVersion | string): boolean
     {
         const key = typeof item === "string" ? item : item.to_str()

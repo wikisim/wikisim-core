@@ -201,6 +201,17 @@ describe("OrderedUniqueIdAndVersionList", () =>
             IdAndVersion.from_str("9v1"),
         ])
     })
+
+    it("should implement has method", () =>
+    {
+        const ids = new OrderedUniqueIdAndVersionList()
+        ids.add("7v1")
+        ids.add("8v1")
+
+        expect(ids.has("7v1")).equals(true)
+        expect(ids.has("8v1")).equals(true)
+        expect(ids.has("9v1")).equals(false)
+    })
 })
 
 
