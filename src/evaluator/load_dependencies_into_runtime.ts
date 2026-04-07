@@ -27,10 +27,13 @@ export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandbox
     } = args
     const dependency_ids = component.recursive_dependency_ids || []
 
-    if (dependency_ids.length !== Object.keys(data_components_by_id_and_version).length)
-    {
-        return errored(ERRORS.ERR39.message + ` Expected ${dependency_ids.length} dependencies but got ${Object.keys(data_components_by_id_and_version).length}`)
-    }
+    // Disabled this check because then we can pass any map of components and if
+    // any are missing this will be raised lower down with a more specific `ERRORS.ERR40`
+    // error message.
+    // if (dependency_ids.length !== Object.keys(data_components_by_id_and_version).length)
+    // {
+    //     return errored(ERRORS.ERR39.message + ` Expected ${dependency_ids.length} dependencies but got ${Object.keys(data_components_by_id_and_version).length}`)
+    // }
 
     let js_dependencies = (
         (args.debugging ? "debugger;\n\n" : "") +
