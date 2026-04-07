@@ -1,6 +1,7 @@
 import type { PostgrestError } from "@supabase/supabase-js"
 import { z } from "zod"
 
+import { shared_get_referenced_ids_from_tiptap } from "../rich_text/shared_get_referenced_ids_from_tiptap"
 import { DATA_COMPONENT_SELECT_STRING } from "../supabase"
 import type { GetSupabase } from "../supabase/browser"
 import { hydrate_data_component_from_json } from "./convert_between_json"
@@ -10,7 +11,7 @@ import {
     limit_ids,
     make_or_clause_for_ids,
 } from "./fetch_from_db_utils"
-import { factory_partition_ids, IdAndMaybeVersion, IdAndVersion, IdOnly } from "./id"
+import { factory_partition_ids, IdAndMaybeVersion, IdAndVersion, IdOnly, OrderedUniqueIdAndVersionList } from "./id"
 import type { DataComponent, DbPaginationOptions } from "./interface"
 import { make_field_validators } from "./validate_fields"
 
@@ -382,56 +383,89 @@ export async function search_data_components(
 
 /**
  *
- * Left for other consumers but @deprecated for WikiSim frontend use and replaced
- * by get_async_data_component_and_dependencies
+ * Left for other clients.
+ * For WikiSim frontend use `get_async_data_component_and_dependencies` instead.
  */
-export async function request_versioned_data_component_and_dependencies(
+export async function request_versioned_data_component_and_dependencies(args: {
     get_supabase: GetSupabase,
-    id: IdAndMaybeVersion,
-): Promise<RequestDataComponentsReturn>
+    ids: IdAndMaybeVersion[],
+    fetch_full_dependency_tree?: boolean,
+}): Promise<RequestDataComponentsReturn>
 {
-    let component: DataComponent | undefined = undefined
+    const { get_supabase, ids, fetch_full_dependency_tree = false } = args
 
-    return request_latest_or_versioned_data_components(get_supabase, [id])
-    .then(response =>
+    if (ids.length === 0) return { data: [], error: null }
+
+
+    const ids_fetched = new OrderedUniqueIdAndVersionList()
+    const components: DataComponent[] = []
+    const ids_to_fetch = new OrderedUniqueIdAndVersionList()
+
+    function maybe_add_id_to_fetch(id: IdAndVersion)
     {
-        if (response.error) return response
+        if (ids_fetched.has(id)) return
+        ids_to_fetch.add(id)
+    }
 
-        component = response.data[0]
-        if (!component || response.data.length !== 1)
-        {
-            return {
-                data: null,
-                error: new Error(`Expected one data component but got ${response.data.length}.`)
-            }
-        }
+    const parser = new DOMParser()
+    function add_component(component: DataComponent)
+    {
+        ids_to_fetch.remove(component.id)
+        if (!ids_fetched.add(component.id)) return
+        components.push(component)
 
-        // Fetch dependencies
         const { recursive_dependency_ids = [] } = component
-        return request_historical_data_components(
+        recursive_dependency_ids.forEach(maybe_add_id_to_fetch)
+
+        if (fetch_full_dependency_tree)
+        {
+            const ids_mentioned_in_text = shared_get_referenced_ids_from_tiptap(parser, component.input_value || "")
+            ids_mentioned_in_text.forEach(maybe_add_id_to_fetch)
+        }
+    }
+
+
+    const response = await request_latest_or_versioned_data_components(get_supabase, ids)
+    if (response.error) return response
+
+    if (response.data.length === 0)
+    {
+        return {
+            data: null,
+            error: new Error(`Expected one or more data component but got ${response.data.length}.`)
+        }
+    }
+
+    response.data.forEach(add_component)
+    let ids_to_fetch_array = ids_to_fetch.get_all()
+
+    while(ids_to_fetch_array.length > 0)
+    {
+        console.info(`Fetching ${ids_to_fetch_array.length} dependencies... ${ids_to_fetch_array.map(id => id.to_str()).join(", ")}`)
+
+        const response2 = await request_historical_data_components(
             get_supabase,
-            recursive_dependency_ids,
+            ids_to_fetch_array,
             // PERFORMANCE
-            // This will error when recursive_dependency_ids.length > 1000
+            // This will error when ids_to_fetch_array.length > 1000
             // and likely not a good idea to request 1000 rows at once but
             // we'll use this simpler approach for now.
-            { page: 0, size: recursive_dependency_ids.length }
+            { page: 0, size: ids_to_fetch_array.length }
         )
-    })
-    .then(response =>
-    {
-        if (response.error) return response
 
-        const dependencies = response.data
-        if (dependencies.length !== (component!.recursive_dependency_ids || []).length)
+        if (response2.error) return response2
+
+        const dependencies = response2.data
+        if (dependencies.length !== ids_to_fetch_array.length)
         {
             return {
                 data: null,
-                error: new Error(`Expected ${ (component!.recursive_dependency_ids || []).length } dependencies but got ${dependencies.length}.`)
+                error: new Error(`Expected ${ids_to_fetch_array.length} dependencies but got ${dependencies.length}.`)
             }
         }
+        dependencies.forEach(add_component)
+        ids_to_fetch_array = ids_to_fetch.get_all()
+    }
 
-        const all_data = [component!, ...dependencies]
-        return { data: all_data, error: null }
-    })
+    return { data: components, error: null }
 }

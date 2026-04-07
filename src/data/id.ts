@@ -213,6 +213,9 @@ export class OrderedUniqueIdAndVersionList
         return this.id_set.has(key)
     }
 
+    /**
+     * Returns true if the item was added, false if it was already present.
+     */
     add(item: IdAndVersion | string): boolean
     {
         const key = typeof item === "string" ? item : item.to_str()

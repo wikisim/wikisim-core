@@ -153,7 +153,7 @@ export function request_dependencies(args: RequestDependenciesArgs & id_or_ids):
 }
 
 
-function _request_dependencies(id: IdAndMaybeVersion, args: RequestDependenciesArgs): Promise<AsyncDataComponentAndDependencies>
+async function _request_dependencies(id: IdAndMaybeVersion, args: RequestDependenciesArgs): Promise<AsyncDataComponentAndDependencies>
 {
     const { get_supabase } = args
 
@@ -167,55 +167,52 @@ function _request_dependencies(id: IdAndMaybeVersion, args: RequestDependenciesA
         all_loaded: false,
     }
 
-    return request_versioned_data_component_and_dependencies(get_supabase, id)
-    .then(components_response =>
+    const components_response = await request_versioned_data_component_and_dependencies({ get_supabase, ids: [id] })
+    if (components_response.error)
     {
-        if (components_response.error)
-        {
-            return Promise.resolve<AsyncDataComponentAndDependencies>({
-                ...response,
-                status: "error",
-                error: components_response.error,
-            })
-        }
-
-        const component = components_response.data[0]
-        if (!component)
-        {
-            return Promise.resolve<AsyncDataComponentAndDependencies>({
-                ...response,
-                status: "not_found",
-            })
-        }
-
-        const dependencies = components_response.data.slice(1)
-        const { recursive_dependency_ids = [] } = component
-        // console .log(`Requested component ${id.to_str()} with ${recursive_dependency_ids.length} dependencies, got ${dependencies.length} dependencies back from the database.`)
-        if (dependencies.length !== recursive_dependency_ids.length)
-        {
-            const error = new Error(`Expected ${recursive_dependency_ids.length } dependencies but got ${dependencies.length}.`)
-            return Promise.resolve<AsyncDataComponentAndDependencies>({
-                ...response,
-                status: "error",
-                error,
-            })
-        }
-
-        // Just wrap the dependencies for now
-        const async_dependencies: AsyncDataComponent[] = dependencies.map(d => ({
-            id: d.id,
-            component: d,
-            status: "loaded",
-        }))
-
-        return Promise.resolve<AsyncDataComponentAndDependencies>({
+        return {
             ...response,
-            status: "loaded",
-            component,
-            dependencies: async_dependencies,
-            to_load: 1 + dependencies.length,
-            loaded: 1 + dependencies.length,
-            all_loaded: true,
-        })
-    })
+            status: "error",
+            error: components_response.error,
+        }
+    }
+
+    const component = components_response.data[0]
+    if (!component)
+    {
+        return {
+            ...response,
+            status: "not_found",
+        }
+    }
+
+    const dependencies = components_response.data.slice(1)
+    const { recursive_dependency_ids = [] } = component
+    // console .log(`Requested component ${id.to_str()} with ${recursive_dependency_ids.length} dependencies, got ${dependencies.length} dependencies back from the database.`)
+    if (dependencies.length !== recursive_dependency_ids.length)
+    {
+        const error = new Error(`Expected ${recursive_dependency_ids.length } dependencies but got ${dependencies.length}.`)
+        return {
+            ...response,
+            status: "error",
+            error,
+        }
+    }
+
+    // Just wrap the dependencies for now
+    const async_dependencies: AsyncDataComponent[] = dependencies.map(d => ({
+        id: d.id,
+        component: d,
+        status: "loaded",
+    }))
+
+    return {
+        ...response,
+        status: "loaded",
+        component,
+        dependencies: async_dependencies,
+        to_load: 1 + dependencies.length,
+        loaded: 1 + dependencies.length,
+        all_loaded: true,
+    }
 }
