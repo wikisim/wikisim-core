@@ -1,6 +1,6 @@
 import { expect } from "chai"
 
-import { DataComponentsById, FunctionArgument } from "../data/interface"
+import { DataComponentsByIdv, FunctionArgument } from "../data/interface"
 import { init_data_component } from "../data/modify"
 import { deindent } from "../utils/deindent"
 import {
@@ -13,7 +13,7 @@ describe("get_global_js_lines", () =>
 {
     it("generates correct JS lines for components and function arguments", () =>
     {
-        const components: DataComponentsById = {
+        const components: DataComponentsByIdv = {
             "12v3": init_data_component({
                 id: "12v3",
                 title: "Some normal title",

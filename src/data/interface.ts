@@ -232,4 +232,5 @@ export function is_new_data_component(data_component?: DataComponent | NewDataCo
 }
 
 
-export type DataComponentsById = Record<string, DataComponent>
+export type DataComponentsByIdv = Record<string, DataComponent>
+export type DataComponentsByIdo = Record<number, DataComponent>
