@@ -24,6 +24,8 @@ describe("graph", () =>
 
         init_data_component({ id: IdAndVersion.from_str("1v2"), title: "A value (newer version)" }),
         init_data_component({ id: IdAndVersion.from_str("2v2"), title: "A top plan (newer version)", input_value: `${tiptap_mention_chip("1v2")} + 2` }),
+
+        init_data_component({ id: IdAndVersion.from_str("6v1"), title: "Something that references two different versions", input_value: `${tiptap_mention_chip("1v2")} + ${tiptap_mention_chip("1v1")}` }),
     ].map(flatten_data_component_to_json)
     const field_validators = make_field_validators(z)
     const components = data.map(d => hydrate_data_component_from_json(d, field_validators))
@@ -242,6 +244,40 @@ describe("graph", () =>
             })
         })
     })
+
+    describe("handles different versions of same component", () =>
+    {
+        it("should report different versions of the same component in one graph", () =>
+        {
+            expect(data_map["6v1"]!.input_value).equals(`<p>${tiptap_mention_chip("1v2")} + ${tiptap_mention_chip("1v1")}</p>`, "Ids have newer version first to test that order doesn't affect the result")
+
+            const graph = make_graph(parser, data_map, { idv_of_interest: parse_id("6v1", true) })
+
+            const minimised = minimise_graph(graph)
+
+            expect(minimised.map_concept_ids).deep.equals({
+                1: "1v2",
+                6: "6v1",
+            })
+
+            expect(minimised.nodes).deep.equals({
+                "1v1": {
+                    title: "A value",
+                    children: [],
+                    multiple_versions: { latest_version: 2 },
+                },
+                "1v2": {
+                    title: "A value (newer version)",
+                    children: [],
+                    multiple_versions: { latest_version: 2 },
+                },
+                "6v1": {
+                    title: "Something that references two different versions",
+                    children: ["1v1", "1v2"],
+                },
+            })
+        })
+    })
 })
 
 
@@ -250,6 +286,7 @@ interface MinimisedNode
     title: string
     children: string[]
     alternatives?: string[]
+    multiple_versions?: { latest_version: number }
 }
 function minimise_graph(graph: Graph)
 {
@@ -261,6 +298,7 @@ function minimise_graph(graph: Graph)
             children: node.children.map(c => c.to_str()),
         }
         if (node.alternatives) minimised[id].alternatives = node.alternatives.map(a => a.to_str())
+        if (node.multiple_versions) minimised[id].multiple_versions = node.multiple_versions
     }
 
     return {

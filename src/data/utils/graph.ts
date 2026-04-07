@@ -44,6 +44,7 @@ export interface GraphNode<NodeType = DataComponent>
     component: NodeType
     children: IdAndVersion[]
     alternatives?: IdAndVersion[]
+    multiple_versions?: { latest_version: number }
 }
 
 
@@ -117,6 +118,8 @@ function make_graph_inner<C extends DataComponent>(parser: GenericDOMParser, dat
     make_graph_recursive(apex_component)
 
     make_ids_unique(graph)
+
+    flag_multiple_versions(graph)
 
     return graph
 }
@@ -224,6 +227,33 @@ function unique_ids(ids: IdAndVersion[]): IdAndVersion[]
     const idv_strings = ids.map(id => id.to_str())
     const unique_idv_strings = Array.from(new Set(idv_strings))
     return unique_idv_strings.map(id_str => parse_id(id_str, true))
+}
+
+
+function flag_multiple_versions(graph: Graph): void
+{
+    const count_by_id: Record<number, { count: number, latest: number }> = {}
+
+    Object.values(graph.nodes).forEach(node =>
+    {
+        const id = node.component.id.id
+        const count = count_by_id[id] || { count: 0, latest: node.component.id.version }
+        if (node.component.id.version > count.latest)
+        {
+            count.latest = node.component.id.version
+        }
+        count.count += 1
+        count_by_id[id] = count
+    })
+
+    Object.values(graph.nodes).forEach(node =>
+    {
+        const id = node.component.id.id
+        if (count_by_id[id]!.count > 1)
+        {
+            node.multiple_versions = { latest_version: count_by_id[id]!.latest }
+        }
+    })
 }
 
 
