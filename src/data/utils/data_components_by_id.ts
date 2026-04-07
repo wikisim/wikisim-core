@@ -1,9 +1,9 @@
 import type { DataComponent, DataComponentsByIdo, DataComponentsByIdv } from "../interface"
 
 
-export function data_components_by_idv(components: DataComponent[] = []): DataComponentsByIdv
+export function data_components_by_idv<C extends DataComponent>(components: C[] = []): DataComponentsByIdv<C>
 {
-    const map: Record<string, DataComponent> = {}
+    const map: Record<string, C> = {}
     for (const component of components)
     {
         map[component.id.to_str()] = component
@@ -13,9 +13,9 @@ export function data_components_by_idv(components: DataComponent[] = []): DataCo
 }
 
 
-export function data_components_by_ido(components: DataComponent[] = []): DataComponentsByIdo
+export function data_components_by_ido<C extends DataComponent>(components: C[] = []): DataComponentsByIdo<C>
 {
-    const map: Record<number, DataComponent> = {}
+    const map: Record<number, C> = {}
     for (const component of components)
     {
         const existing = map[component.id.id]

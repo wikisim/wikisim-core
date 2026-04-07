@@ -32,22 +32,22 @@ export interface KnowledgeGraphIds
     idv_of_comparison?: IdAndVersion
 }
 
-export interface Graph
+export interface Graph<NodeType = DataComponent>
 {
     apex_id: IdAndVersion
     map_concept_ido_to_idv_of_interest: Record<number, string>
-    nodes: { [idv: string]: GraphNode }
+    nodes: { [idv: string]: GraphNode<NodeType> }
 }
 
-export interface GraphNode
+export interface GraphNode<NodeType = DataComponent>
 {
-    component: DataComponent
+    component: NodeType
     children: IdAndVersion[]
     alternatives?: IdAndVersion[]
 }
 
 
-export function make_graph(parser: GenericDOMParser, data_map: DataComponentsByIdv, ids: KnowledgeGraphIds): Graph
+export function make_graph<C extends DataComponent>(parser: GenericDOMParser, data_map: DataComponentsByIdv<C>, ids: KnowledgeGraphIds): Graph<C>
 {
     const { idv_of_interest, idv_of_concepts = idv_of_interest, idv_of_comparison } = ids
 
@@ -76,18 +76,18 @@ export function make_graph(parser: GenericDOMParser, data_map: DataComponentsByI
 }
 
 
-function make_graph_inner(parser: GenericDOMParser, data_map: DataComponentsByIdv, apex_id: IdAndVersion): Graph
+function make_graph_inner<C extends DataComponent>(parser: GenericDOMParser, data_map: DataComponentsByIdv<C>, apex_id: IdAndVersion): Graph<C>
 {
     const apex_component = data_map[apex_id.to_str()]
     if (!apex_component) throw new Error(`Apex (top level) component with id ${apex_id.to_str()} not found`)
 
-    const graph: Graph = {
+    const graph: Graph<C> = {
         map_concept_ido_to_idv_of_interest: {},
         apex_id,
         nodes: {},
     }
 
-    function make_graph_recursive(component: DataComponent): IdAndVersion
+    function make_graph_recursive(component: C): IdAndVersion
     {
         if (graph.nodes[component.id.to_str()]) return component.id
 
@@ -100,7 +100,7 @@ function make_graph_inner(parser: GenericDOMParser, data_map: DataComponentsById
                 // if (!c) throw new Error(`Component with id ${id.to_str()} not found in data_map while processing component with id ${component.id.to_str()}`)
                 return c
             })
-            .filter((c): c is DataComponent =>
+            .filter((c): c is C =>
             {
                 return !!c
             })
@@ -122,7 +122,7 @@ function make_graph_inner(parser: GenericDOMParser, data_map: DataComponentsById
 }
 
 
-function mutate_graph_of_interest_with_mapping_from_concept_to_node_ids(args: { graph_of_interest: Graph, concept_graph: Graph }): undefined
+function mutate_graph_of_interest_with_mapping_from_concept_to_node_ids<C extends DataComponent>(args: { graph_of_interest: Graph<C>, concept_graph: Graph<C> }): undefined
 {
     const { graph_of_interest, concept_graph } = args
 
