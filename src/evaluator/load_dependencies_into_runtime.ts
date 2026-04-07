@@ -13,6 +13,7 @@ interface LoadDependenciesIntoSandboxArgs
     is_node?: boolean
     no_deep_freeze?: boolean
     debugging?: boolean
+    timeout_ms?: number
 }
 export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandboxArgs): Promise<EvaluationResponse>
 {
@@ -22,6 +23,7 @@ export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandbox
         evaluate_code_in_runtime,
         is_node = false,
         no_deep_freeze,
+        timeout_ms,
     } = args
     const dependency_ids = component.recursive_dependency_ids || []
 
@@ -65,7 +67,7 @@ export function load_dependencies_into_runtime(args: LoadDependenciesIntoSandbox
     return evaluate_code_in_runtime({
         js_input_value: js_dependencies,
         requested_at: performance.now(),
-        timeout_ms: 10000,
+        timeout_ms,
     })
 }
 
