@@ -207,10 +207,10 @@ export class OrderedUniqueIdAndVersionList
         this.custom_error_message_when_id_only = custom_error_message_when_id_only || null
     }
 
-    add(item: IdAndVersion | string)
+    add(item: IdAndVersion | string): boolean
     {
         const key = typeof item === "string" ? item : item.to_str()
-        if (this.id_set.has(key)) return
+        if (this.id_set.has(key)) return false
 
         const item_as_id = typeof item === "string" ? parse_id(item, false) : item
         if (item_as_id instanceof IdOnly)
@@ -223,6 +223,8 @@ export class OrderedUniqueIdAndVersionList
         }
         this.items.push(item_as_id)
         this.id_set.add(key)
+
+        return true
     }
 
     add_multiple(items: IdAndVersion[])
@@ -250,5 +252,15 @@ export class OrderedUniqueIdAndVersionList
     to_str(): string
     {
         return this.get_all().map(id => id.to_str()).join(",")
+    }
+
+    remove(id: IdAndVersion | string): boolean
+    {
+        const key = typeof id === "string" ? id : id.to_str()
+        if (!this.id_set.has(key)) return false
+
+        this.id_set.delete(key)
+        this.items = this.items.filter(item => item.to_str() !== key)
+        return true
     }
 }

@@ -163,6 +163,44 @@ describe("OrderedUniqueIdAndVersionList", () =>
             IdAndVersion.from_str("9v3"),
         ])
     })
+
+    it("should return true when id added first time and false otherwise", () =>
+    {
+        const ids = new OrderedUniqueIdAndVersionList()
+        expect(ids.add("7v1")).equals(true)
+        expect(ids.add("7v1")).equals(false)
+        expect(ids.add("8v1")).equals(true)
+        expect(ids.add("8v1")).equals(false)
+        expect(ids.get_all()).deep.equals([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("8v1"),
+        ])
+    })
+
+    it("should remove an id", () =>
+    {
+        const ids = new OrderedUniqueIdAndVersionList()
+        ids.add("7v1")
+        ids.add("8v1")
+        ids.add("9v1")
+        expect(ids.get_all()).deep.equals([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("8v1"),
+            IdAndVersion.from_str("9v1"),
+        ])
+
+        expect(ids.remove("8v1")).equals(true)
+        expect(ids.get_all()).deep.equals([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("9v1"),
+        ])
+
+        expect(ids.remove("8v1")).equals(false)
+        expect(ids.get_all()).deep.equals([
+            IdAndVersion.from_str("7v1"),
+            IdAndVersion.from_str("9v1"),
+        ])
+    })
 })
 
 
