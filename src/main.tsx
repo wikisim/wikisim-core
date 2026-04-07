@@ -16,7 +16,7 @@ import { get_supabase } from "./supabase/browser"
 
 function App()
 {
-    const state = core_store()
+    const state = core_store().getState()
 
     const can_request_registration = get_can_request_sign_in_with_OTP(state)
     if (can_request_registration.allowed && document.location.hostname === "localhost" && document.location.port !== "5173")
