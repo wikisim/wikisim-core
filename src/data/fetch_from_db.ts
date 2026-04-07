@@ -195,6 +195,10 @@ export async function request_historical_data_components(
 }
 
 
+/**
+ * Splits the list of ids into IdOnly and IdAndVersion, requests the latest version
+ * for IdOnly and the historical version for IdAndVersion, then combines the results.
+ */
 async function request_latest_or_versioned_data_components(
     get_supabase: GetSupabase,
     ids: IdAndMaybeVersion[],
