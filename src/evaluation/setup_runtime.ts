@@ -42,12 +42,13 @@ interface SetupRuntimeArgs
      */
     __dangerously_skip_sandboxing?: boolean
     is_node?: boolean
+    timeout_ms?: number
 }
 
 
 export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeResponse>
 {
-    const { components, debugging, __dangerously_skip_sandboxing, is_node } = args
+    const { components, debugging, __dangerously_skip_sandboxing, is_node, timeout_ms } = args
 
     if (__dangerously_skip_sandboxing !== is_node)
     {
@@ -102,6 +103,7 @@ export function setup_runtime(args: SetupRuntimeArgs): Promise<SetupRuntimeRespo
             : evaluate_code_in_browser_sandbox,
         debugging,
         is_node,
+        timeout_ms,
     })
     .then(sandbox_response =>
     {
