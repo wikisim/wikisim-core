@@ -1,4 +1,4 @@
-import { useEffect } from "preact/hooks"
+import { useEffect } from "react"
 
 import { get_current_debugging_state } from "../../state/debugging"
 import { EvaluationRequest, EvaluationResponse } from "../interface"
