@@ -64,8 +64,20 @@ export interface IDatetimeRange
 {
     start: Date
     end: Date
-    repeat_every: DatetimeRangeRepeatEvery
+    repeat_every: DatetimeRangeRepeatEvery | undefined
+
+    size(): number;
+    get_time_stamps(): number[];
+    get_entries(): Date[];
+    get_index_of(datetime_ms: number): number;
 }
+// export interface IAveragedDatetimeRange extends IDatetimeRange
+// {
+//     start: Date
+//     end: Date
+//     averaged_over: DatetimeRangeRepeatEvery
+//     repeat_every: DatetimeRangeRepeatEvery
+// }
 
 
 export interface DBFunctionArgument

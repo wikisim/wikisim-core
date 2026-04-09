@@ -1,12 +1,12 @@
+import { IDatetimeRange } from "../interface"
 import { IIndexManager } from "./DataSeries"
-import { DatetimeRange } from "./DatetimeRange"
 import { ILatLon, LatLonDataSeries } from "./LatLon"
 
 
 export type DatetimeRangeLatLonKey = { datetime_ms: number, lat_lon: ILatLon }
 export type DatetimeRangeLatLonMultipleKeys = { datetime_ms: number, lat_lon?: undefined } | { datetime_ms?: undefined, lat_lon: ILatLon }
 
-export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range: DatetimeRange, lat_lon_series: LatLonDataSeries, lat_lon_first: boolean = true): IIndexManager<DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>
+export function factory_IndexManager_for_datetime_range_lat_lon (datetime_range: IDatetimeRange, lat_lon_series: LatLonDataSeries, lat_lon_first: boolean = true): IIndexManager<DatetimeRangeLatLonKey, DatetimeRangeLatLonMultipleKeys>
 {
     const validate = (data_count: number) =>
     {
