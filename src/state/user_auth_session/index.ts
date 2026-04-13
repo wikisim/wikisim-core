@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import type { AuthError, Session } from "@supabase/supabase-js"
 
+import { error_to_string } from "../../errors"
 import { GetSupabase } from "../../supabase/browser"
 import { StateMachine } from "../../utils/state_machine"
 import { GetCoreState, SetCoreState } from "../interface"
@@ -165,11 +166,17 @@ function supabase_set_user_name(set: SetCoreState, get: GetCoreState, user_name:
         const entry = (data || [])[0]
         set(root_state =>
         {
-            if (!entry || error)
+            const error_message = `Supabase supabase_set_user_name for user_id "${user_id}", user_name: "${user_name}", `
+            if (error)
             {
-                console.error("Supabase supabase_set_user_name error:", error)
+                console.error(error_message + ` error: ${error_to_string(error)}`)
 
-                root_state.user_auth_session.error_setting_user_name = error?.message || "Unknown error setting user name"
+                root_state.user_auth_session.error_setting_user_name = error.message
+            }
+            else if (!entry)
+            {
+                console.error(error_message + " no entry")
+                root_state.user_auth_session.error_setting_user_name = "Unknown error setting user name"
             }
             else
             {
