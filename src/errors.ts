@@ -88,14 +88,16 @@ export const ERRORS =
 export function error_to_string(value: unknown): string
 {
     if (typeof value === "string") return value
-    if (value instanceof Error) return "Message: " + value.message + ", Stack: " + value.stack
     if (value instanceof PostgrestError) return `PostgrestError ${value.code} - ${value.name}, message: ${value.message}, details: ${value.details}, hint: ${value.hint}, stack: ${value.stack}`
+
     try
     {
         return JSON.stringify(value)
     }
     catch
     {
+        if (value instanceof Error) return "Message: " + value.message + ", Stack: " + value.stack
+
         return String(value)
     }
 }
