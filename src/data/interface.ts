@@ -244,5 +244,10 @@ export function is_new_data_component(data_component?: DataComponent | NewDataCo
 }
 
 
+// Currently these types are only used for helping document what is expected
+// but they do not enforce any type safety, perhaps something like:
+//      type DataComponentsByIdv<C = DataComponent> = { type: "versioned", map: Record<string, C> }
+//      type DataComponentsByIdo<C = DataComponent> = { type: "id_only", map: Record<number, C> }
+// could be used instead.
 export type DataComponentsByIdv<C = DataComponent> = Record<string, C>
 export type DataComponentsByIdo<C = DataComponent> = Record<number, C>
