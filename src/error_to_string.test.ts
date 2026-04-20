@@ -1,7 +1,7 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import { config, expect } from "chai"
 
-import { error_to_string } from "./errors"
+import { error_to_string } from "./error_to_string"
 
 
 describe("error_to_string", function ()

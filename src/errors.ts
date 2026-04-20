@@ -1,4 +1,3 @@
-import { PostgrestError } from "@supabase/supabase-js"
 
 class PostgreSQLError
 {
@@ -81,26 +80,4 @@ export const ERRORS =
     ERR47: new TSError("ERR47", "ERR47. ID must be a valid number but got "),
     ERR48: new TSError("ERR48", "ERR48. Version must be a valid number >= 1 but got "),
     ERR49: new TSError("ERR49", "ERR49. Title must not contain <p> tag but got "),
-}
-
-
-
-export function error_to_string(value: unknown): string
-{
-    if (typeof value === "string") return value
-    if (value instanceof PostgrestError) return `PostgrestError ${value.code} - ${value.name}, message: ${value.message}, details: ${value.details}, hint: ${value.hint}, stack: ${value.stack}`
-
-    let json_string = ""
-    try
-    {
-        json_string = JSON.stringify(value)
-        json_string = json_string === "{}" ? "" : (", JSON: " + json_string)
-    }
-    catch {
-        // pass
-    }
-
-    if (value instanceof Error) return "Message: " + value.message + json_string + ", Stack: " + value.stack
-
-    return String(value) + json_string
 }
