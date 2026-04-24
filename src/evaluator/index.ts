@@ -1,4 +1,4 @@
-import { DataComponent, NewDataComponent } from "../data/interface.ts"
+import { DataComponent, DataComponentsByIdv, NewDataComponent } from "../data/interface.ts"
 import { format_function_input_value_string } from "./format_function.ts"
 import { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 import { load_dependencies_into_runtime } from "./load_dependencies_into_runtime.ts"
@@ -7,7 +7,7 @@ import { load_dependencies_into_runtime } from "./load_dependencies_into_runtime
 interface CalculateResultValueArgs
 {
     component: DataComponent | NewDataComponent
-    data_components_by_id_and_version: Record<string, DataComponent>
+    data_components_by_id_and_version: DataComponentsByIdv
     convert_tiptap_to_javascript: (tiptap_text: string) => string,
     /**
      * When run on the edge functions we pass undefined here as we can't

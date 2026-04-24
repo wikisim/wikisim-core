@@ -1,4 +1,4 @@
-import type { DataComponent, NewDataComponent } from "../data/interface.ts"
+import type { DataComponent, DataComponentsByIdv, NewDataComponent } from "../data/interface.ts"
 import { ERRORS } from "../errors.ts"
 import { deep_freeze_str } from "../utils/deep_freeze.ts"
 import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
@@ -8,7 +8,7 @@ import type { EvaluationRequest, EvaluationResponse } from "./interface.ts"
 interface LoadDependenciesIntoSandboxArgs
 {
     component: DataComponent | NewDataComponent
-    data_components_by_id_and_version: Record<string, DataComponent>
+    data_components_by_id_and_version: DataComponentsByIdv
     evaluate_code_in_runtime: (request: EvaluationRequest) => Promise<EvaluationResponse>
     is_node?: boolean
     no_deep_freeze?: boolean
