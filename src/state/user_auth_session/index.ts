@@ -116,7 +116,7 @@ function supabase_OTP_sign_in(set: SetCoreState, account_email_address: string, 
 
     const OTP_sign_in_request_errored = (error: AuthError | any) => set(root_state =>
     {
-        console .log("Supabase OTP_sign_in request (signInWithOtp) error:", error)
+        console .log("Supabase OTP_sign_in request (signInWithOtp) error:", error_to_string(error))
         transition_status(root_state.user_auth_session, "logged_out__OTP_sign_in_request_errored")
         root_state.user_auth_session.error = error
     })
@@ -217,7 +217,7 @@ async function load_user_info(store: CoreStore, user_id: string, get_supabase: G
 
     if (response.error)
     {
-        console.error("Error loading user info from supabase users table:", response.error)
+        console.error("Error loading user info from supabase users table:", error_to_string(response.error))
         store.setState(root_state =>
         {
             root_state.user_auth_session.error = response.error
