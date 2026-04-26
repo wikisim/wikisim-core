@@ -286,6 +286,29 @@ describe("flatten_data_component_to_json and hydrate_data_component_from_json", 
             expect(throw_function).to.throw("ERR49. Title must not contain <p> tag")
         })
     })
+
+
+    describe(`ensure that result_value of "undefined" (i.e. typeof string) returns as undefined (i.e. typeof undefined)`, function ()
+    {
+        it("should work for flattening a data component", () =>
+        {
+            const new_data_component = new_data_component_all_fields_set()
+            new_data_component.result_value = "undefined"
+
+            const flattened = flatten_new_or_data_component_to_json(new_data_component)
+            expect(flattened.result_value).equals(null, `result_value of "undefined" should flatten to null`)
+        })
+
+        it("should work for hydrating a data component", () =>
+        {
+            const new_data_component = new_data_component_all_fields_set()
+            const flattened = flatten_new_or_data_component_to_json(new_data_component)
+            flattened.result_value = "undefined"
+
+            const hydrated = hydrate_data_component_from_json(flattened, field_validators)
+            expect(hydrated.result_value).equals(undefined, `result_value of "undefined" should hydrate to undefined`)
+        })
+    })
 })
 
 

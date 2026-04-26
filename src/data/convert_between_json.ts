@@ -45,7 +45,7 @@ export function flatten_new_data_component_to_json(data_component: NewDataCompon
         label_ids: data_component.label_ids ?? null,
 
         input_value: flatten_input_value(data_component),
-        result_value: data_component.result_value ?? null,
+        result_value: undefined_string_as_undefined(data_component.result_value) ?? null,
         recursive_dependency_ids: data_component.recursive_dependency_ids
             ? data_component.recursive_dependency_ids.map(d => d.to_str())
             : null,
@@ -173,7 +173,7 @@ export function hydrate_data_component_from_json(row: DataComponentAsJSON | NewD
         label_ids: row.label_ids && row.label_ids.length ? row.label_ids : undefined,
 
         input_value: row.input_value ?? undefined,
-        result_value: row.result_value ?? undefined,
+        result_value: undefined_string_as_undefined(row.result_value) ?? undefined,
         recursive_dependency_ids: hydrate_list_of_ids(row.recursive_dependency_ids),
         value_type: row.value_type ?? undefined,
         value_number_display_type: row.value_number_display_type ?? undefined,
@@ -263,4 +263,9 @@ function hydrate_scenarios(
 function convert_datetime (datetime: string | null): Date | undefined
 {
     return datetime ? new Date(datetime) : undefined
+}
+
+function undefined_string_as_undefined(value: string | undefined | null): string | undefined | null
+{
+    return value === "undefined" ? undefined : value
 }
