@@ -71,7 +71,8 @@ describe("load_dependencies_into_runtime", () =>
             evaluate_code_in_runtime: evaluate_code_in_browser_sandbox,
         })
 
-        expect(result.error).equals(ERRORS.ERR39.message + ` Expected 1 dependencies but got 0`)
+        // expect(result.error).equals(ERRORS.ERR39.message + ` Expected 1 dependencies but got 0`)
+        expect(result.error).equals(ERRORS.ERR40.message + ` Missing dependency with id -1v1`)
         expect(result.result).equals(null)
     })
 })

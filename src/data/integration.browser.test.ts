@@ -160,7 +160,11 @@ describe("when user logged in", function ()
                 expect.fail(`Should have failed to insert data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
             }
             // expect(response.error).equals("ERR03. Must be authenticated")
-            expect(response.error).equals("Invalid Token or Protected Header formatting")
+
+            // Supabase has changed between these two types of error message in the
+            // last month so leaving both here for now.
+            // expect(response.error).equals("Invalid Token or Protected Header formatting")
+            expect(response.error).equals("Invalid JWT")
         })
 
 
@@ -496,7 +500,11 @@ describe("when user logged in", function ()
             const response = await update_data_component(__testing__.get_supabase_not_signed_in, data_component)
             if (response.data) expect.fail(`Should have failed to update data component with editor_id who is not logged in, but got response: ${JSON.stringify(response)}`)
             // expect(response.error).equals("ERR07. Must be authenticated")
-            expect(response.error).equals("Invalid Token or Protected Header formatting")
+
+            // Supabase has changed between these two types of error message in the
+            // last month so leaving both here for now.
+            // expect(response.error).equals("Invalid Token or Protected Header formatting")
+            expect(response.error).equals("Invalid JWT")
         })
 
 
