@@ -79,4 +79,23 @@ describe(`calculate_result_value`, function ()
             }
         })
     })
+
+    it(`results a result value of undefined as undefined instead of "undefined"`, async function ()
+    {
+        const component = init_data_component({
+            value_type: "number",
+            input_value: `<p></p>`,
+        })
+
+        const response = await calculate_result_value({
+            component,
+            data_components_by_id_and_version: {},
+            convert_tiptap_to_javascript: browser_convert_tiptap_to_javascript,
+            evaluate_code_in_runtime: evaluate_code_in_browser_sandbox,
+            timeout_ms: timeout / 2,
+            debugging: false,
+        })
+
+        expect(response?.result).equals(undefined, `Should calculate undefined when input_value is empty`)
+    })
 })

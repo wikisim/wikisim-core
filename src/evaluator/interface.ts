@@ -17,7 +17,7 @@ export type MinimalEvaluationResponse =
     evaluation_id: number
 } & (
     {
-        result: string
+        result: string | undefined
         error: null
     } | {
         result: null

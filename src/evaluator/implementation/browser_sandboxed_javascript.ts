@@ -237,8 +237,8 @@ export function setup_sandboxed_iframe(options: { logging: boolean })
             {
                 response = {
                     ...response,
-                    // Ensure result is a string if it's not null
-                    result: `${event.data.result}`,
+                    // Ensure result is a string or undefined if it's not null
+                    result: event.data.result === undefined ? undefined : `${event.data.result}`,
                     error: null,
                 }
             }
