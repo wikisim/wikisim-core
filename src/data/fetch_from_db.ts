@@ -441,7 +441,7 @@ export async function request_versioned_data_component_and_dependencies(args: {
 
     while(ids_to_fetch_array.length > 0)
     {
-        console.info(`Fetching ${ids_to_fetch_array.length} dependencies... ${ids_to_fetch_array.map(id => id.to_str()).join(", ")}`)
+        console.log(`Fetching ${ids_to_fetch_array.length} dependencies... ${ids_to_fetch_array.map(id => id.to_str()).join(", ")}`)
 
         const response2 = await request_historical_data_components(
             get_supabase,
