@@ -1,12 +1,3 @@
-// This was changed from "preact/hooks" to "react" to fix bug ...? TODO: insert description...
-// but using `import { useEffect } from "react"` results in the integration tests
-// (when running pnpm run dev and visiting http://localhost:5173/test/) failing with
-// Uncaught (in promise) TypeError: error loading dynamically imported module: http://localhost:5173/node_modules/.vite/deps/preact_compat.js?t=1777223123107&v=8ce63fb1
-// Changing back to "preact/hooks" for now but when the problem emerges again then
-// we will document it and see if we can find a solution that meets both of these requirements
-import { useEffect } from "preact/hooks"
-// import { useEffect } from "react"
-
 import { get_current_debugging_state } from "../../state/debugging"
 import { EvaluationRequest, EvaluationResponse } from "../interface"
 import { ExtendedEvaluationRequest } from "./interface"
@@ -103,17 +94,6 @@ export async function evaluate_code_in_browser_sandbox(basic_request: Evaluation
     }, request.timeout_ms)
 
     return promise_result
-}
-
-
-export function Evaluator()
-{
-    useEffect(() => {
-        const { clean_up } = setup_sandboxed_iframe({ logging: false })
-        return clean_up
-    }, [])
-
-    return null
 }
 
 
