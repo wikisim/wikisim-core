@@ -56,5 +56,12 @@ describe("calculate_if_expectation_met", () =>
             )
             expect(result).equals(false)
         })
+
+        it("can handle a plain result string", () =>
+        {
+            const result = "123"
+            expect(calculate_if_expectation_met(result, "123")).equals(true)
+            expect(calculate_if_expectation_met(result, "456")).equals(false)
+        })
     })
 })

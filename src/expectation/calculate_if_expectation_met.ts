@@ -4,19 +4,20 @@ import { compare_results_to_expectations } from "./compare_results_to_expectatio
 
 
 
-export function calculate_if_expectation_met(result: EvaluationResponse | undefined, expected_result: string): boolean | undefined
+export function calculate_if_expectation_met(result: EvaluationResponse | string | undefined, expected_result: string): boolean | undefined
 {
     if (result === undefined) return undefined
-    if (result.result === null) return false
+    const result_str = typeof result === "string" ? result : result.result
+    if (result_str === null) return false
 
-    const graphable_data = result_string_to_graphable(result.result)
+    const graphable_data = result_string_to_graphable(result_str)
     const graphable_expected_data = result_string_to_graphable(expected_result)
 
     let match: boolean | undefined
     if (!graphable_data)
     {
         match = expected_result
-            ? result.result === expected_result
+            ? result_str === expected_result
             : undefined
     }
     else
