@@ -14,7 +14,8 @@ describe("deep_copy", () =>
     it("prevent self recursion", () =>
     {
         const a = { val: 1 }
-        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         a.self = a
 
         const b = deep_copy(a)
