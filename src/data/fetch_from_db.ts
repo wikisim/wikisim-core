@@ -381,6 +381,27 @@ export async function search_data_components(
 }
 
 
+const TEMP_ALL_FETCHED_IDS: Record<string, IdAndVersion> = {}
+function temp_print_out_fetched_ids(ids_to_fetch: IdAndVersion[])
+{
+    // Temporarily print out all fetched IDS to streamlining caching the right
+    // IDs in different clients
+    ids_to_fetch.forEach(id => TEMP_ALL_FETCHED_IDS[id.to_str()] = id)
+    console.log(`Fetching ${ids_to_fetch.length} new dependencies.`)
+
+    let log_strs: string[] = []
+    const seen_ids: Set<number> = new Set()
+    Object.values(TEMP_ALL_FETCHED_IDS)
+    .sort((id1, id2) => id2.id - id1.id || id2.version - id1.version)
+    .forEach(id =>
+    {
+        const seen = seen_ids.has(id.id)
+        seen_ids.add(id.id)
+        log_strs.push(`"${id.to_str()}", ` + (seen ? " // repeated " : "") + "\n")
+    })
+    console.log(log_strs.reverse().join(""))
+}
+
 /**
  *
  * Left for other clients.
@@ -441,7 +462,7 @@ export async function request_versioned_data_component_and_dependencies(args: {
 
     while(ids_to_fetch_array.length > 0)
     {
-        console.log(`Fetching ${ids_to_fetch_array.length} dependencies... ${ids_to_fetch_array.map(id => id.to_str()).join(", ")}`)
+        temp_print_out_fetched_ids(ids_to_fetch_array)
 
         const response2 = await request_historical_data_components(
             get_supabase,
