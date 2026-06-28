@@ -101,37 +101,43 @@ export function deep_copy<T>(obj: T, visited: WeakMap<object, any> = new WeakMap
     // Handle plain objects and class instances
     if (typeof obj === "object")
     {
-        // For class instances, just return them as is
+        const proto = Object.getPrototypeOf(obj) as object | null
+        const copy = proto === Object.prototype || proto === null
+            ? {} as T
+            : Object.create(proto) as T
 
-        // const proto = Object.getPrototypeOf(obj)
-        // const copy = proto === Object.prototype
-        //     ?
-        // {} as T
-        //     : Object.create(proto) as T
+        visited.set(obj as object, copy)
 
-        // visited.set(obj as object, copy)
+        // Copy all enumerable and non-enumerable own properties
+        const descriptors = Object.getOwnPropertyDescriptors(obj as object)
 
-        // // Copy all enumerable and non-enumerable own properties
-        // const descriptors = Object.getOwnPropertyDescriptors(obj)
+        for (const [key, descriptor] of Object.entries(descriptors))
+        {
+            if (Object.prototype.hasOwnProperty.call(descriptor, "value"))
+            {
+                // For data properties, deep copy the value.
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const new_value = deep_copy(descriptor.value, visited)
+                const new_descriptor: PropertyDescriptor = {
+                    ...descriptor,
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    value: new_value
+                }
 
-        // for (const [key, descriptor] of Object.entries(descriptors))
-        // {
-        //     if (descriptor.value !== undefined)
-        //     {
-        //         // For data properties, deep copy the value
-        //         Object.defineProperty(copy, key,
-        //         {
-        //             ...descriptor,
-        //             value: deep_copy(descriptor.value, visited)
-        //         })
-        //     } else
-        //     {
-        //         // For accessor properties, copy as-is (getters/setters)
-        //         Object.defineProperty(copy, key, descriptor)
-        //     }
-        // }
+                if (new_descriptor.writable === false)
+                {
+                    new_descriptor.writable = true
+                }
 
-        return obj
+                Object.defineProperty(copy as object, key, new_descriptor)
+            } else
+            {
+                // For accessor properties, copy as-is (getters/setters)
+                Object.defineProperty(copy as object, key, descriptor)
+            }
+        }
+
+        return copy
     }
 
     // Fallback for any other cases
