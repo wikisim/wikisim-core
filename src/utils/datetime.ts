@@ -24,6 +24,25 @@ export function factory_change_date(repeat_every: DatetimeRangeRepeatEvery, chan
 }
 
 
+export function datetime_to_string(date: Date, format: string = "YYYY-MM-DD HH:mm"): string
+{
+    const year = date.getUTCFullYear()
+    const month = date.getUTCMonth() + 1
+    const day = date.getUTCDate()
+    const hour = date.getUTCHours()
+    const minute = date.getUTCMinutes()
+    const second = date.getUTCSeconds()
+
+    return format
+        .replace("YYYY", year.toString().padStart(4, "0"))
+        .replace("MM", month.toString().padStart(2, "0"))
+        .replace("DD", day.toString().padStart(2, "0"))
+        .replace("HH", hour.toString().padStart(2, "0"))
+        .replace("mm", minute.toString().padStart(2, "0"))
+        .replace("ss", second.toString().padStart(2, "0"))
+}
+
+
 // Commenting out these functions as they are not working correctly yet and I'm
 // going to take the simpler approach for now of not using `AveragedDatetimeRange`
 // and instead just taking whatever datetimes are present in the CSV / data as they

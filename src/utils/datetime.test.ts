@@ -1,4 +1,24 @@
-// import { expect } from "chai"
+import { expect } from "chai"
+import { datetime_to_string } from "./datetime"
+
+
+describe("datetime_to_string", () =>
+{
+    it("should return correct string representation of date", () =>
+    {
+        const date = new Date("2023-01-01T12:34:56Z")
+        const format = "YYYY-MM-DD HH:mm:ss"
+        const result = datetime_to_string(date, format)
+        expect(result).equals("2023-01-01 12:34:56")
+    })
+
+    it("should return correct string representation of date with default format", () =>
+    {
+        const date = new Date("2023-01-01T12:34:56Z")
+        const result = datetime_to_string(date)
+        expect(result).equals("2023-01-01 12:34")
+    })
+})
 
 // import { DatetimeRange } from "../data/values/DatetimeRange"
 // import { datetime_delta, modulus_date_change } from "./datetime"
