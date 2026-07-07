@@ -14,7 +14,7 @@ export function deep_approximate<T>(actual: T, expected: T, tolerance: number = 
         if (actual.length === expected.length)
         for (let i = 0; i < actual.length; i++)
         {
-            deep_approximate(actual[i], expected[i], tolerance)
+            deep_approximate(actual[i], expected[i], tolerance, `${path}[${i}]`)
         }
     }
     else if (typeof actual === "object" && typeof expected === "object" && actual !== null && expected !== null)
@@ -30,7 +30,7 @@ export function deep_approximate<T>(actual: T, expected: T, tolerance: number = 
             {
                 expect(key in expected).equals(true, `Key "${key}"${at_path(path)} is present in actual but not in expected`)
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                deep_approximate((actual as any)[key], (expected as any)[key], tolerance)
+                deep_approximate((actual as any)[key], (expected as any)[key], tolerance, `${path}.${key}`)
             }
         }
     }
